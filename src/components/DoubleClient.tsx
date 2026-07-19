@@ -106,6 +106,7 @@ export function DoubleClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [seed, setSeed] = useState(0); // reshuffle trigger
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -120,7 +121,7 @@ export function DoubleClient() {
     return () => {
       cancelled = true;
     };
-  }, [source, allowRewatches]);
+  }, [source, allowRewatches, retryTick]);
 
   // Shuffle deterministically per seed so "Reshuffle" gives new pairings.
   const shuffled = [...pool];
@@ -183,7 +184,17 @@ export function DoubleClient() {
           </label>
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+{error && (
+          <p className="mt-4 text-sm text-red-400">
+            {error}{" "}
+            <button
+              className="ml-1 font-semibold underline hover:text-white"
+              onClick={() => setRetryTick((t) => t + 1)}
+            >
+              Retry
+            </button>
+          </p>
+        )}
 
         {loading ? (
           <p className="mt-10 text-center text-sm text-night-400">Pairing your films…</p>

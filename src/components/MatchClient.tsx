@@ -6,6 +6,7 @@ import { AppNav } from "@/components/AppNav";
 import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
+import { buzz } from "@/lib/haptics";
 import { usePosters } from "@/lib/usePosters";
 import { letterboxdUrl } from "@/lib/types";
 
@@ -30,6 +31,10 @@ export function MatchClient() {
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [exiting, setExiting] = useState<"left" | "right" | "up" | null>(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
+  const [history, setHistory] = useState<{ item: MatchItem; verdict: "no" | "maybe" | "yes" }[]>(
+    []
+  );
   const dragStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
@@ -52,7 +57,7 @@ export function MatchClient() {
     return () => {
       cancelled = true;
     };
-  }, [source, allowRewatches]);
+  }, [source, allowRewatches, retryTick]);
 
   const top = deck[0] ?? null;
   const posters = usePosters([...deck.slice(0, 10), ...saved.slice(0, 20)]);
@@ -67,6 +72,7 @@ export function MatchClient() {
 
   function decide(verdict: "no" | "maybe" | "yes") {
     if (!top || exiting) return;
+    buzz(verdict === "yes" ? [15, 30, 15] : 12);
     setExiting(verdict === "no" ? "left" : verdict === "yes" ? "right" : "up");
     window.setTimeout(() => {
       if (verdict === "yes" && !saved.some((s) => s.slug === top.slug)) {
@@ -78,9 +84,26 @@ export function MatchClient() {
       } else {
         setDeck((d) => d.slice(1));
       }
+      setHistory((h) => [...h.slice(-9), { item: top, verdict }]);
       setExiting(null);
       setDrag(null);
     }, 250);
+  }
+
+  function undo() {
+    const last = history[history.length - 1];
+    if (!last || exiting) return;
+    buzz(10);
+    if (last.verdict === "maybe") {
+      // The card was moved to the back — bring it home to the front.
+      setDeck((d) => [last.item, ...d.filter((f) => f.slug !== last.item.slug)]);
+    } else {
+      setDeck((d) => [last.item, ...d]);
+    }
+    if (last.verdict === "yes") {
+      persistSaved(saved.filter((s) => s.slug !== last.item.slug));
+    }
+    setHistory((h) => h.slice(0, -1));
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -151,7 +174,17 @@ export function MatchClient() {
           </label>
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+{error && (
+          <p className="mt-4 text-sm text-red-400">
+            {error}{" "}
+            <button
+              className="ml-1 font-semibold underline hover:text-white"
+              onClick={() => setRetryTick((t) => t + 1)}
+            >
+              Retry
+            </button>
+          </p>
+        )}
 
         {/* Card stack */}
         <div className="relative mt-6 h-[440px] select-none sm:h-[500px]">
@@ -264,6 +297,14 @@ export function MatchClient() {
               Yes
             </button>
           </div>
+        )}
+        {history.length > 0 && !loading && (
+          <button
+            className="mx-auto mt-3 block text-xs font-semibold text-night-400 transition-colors hover:text-accent"
+            onClick={undo}
+          >
+            Undo last swipe
+          </button>
         )}
 
         {/* Saved list */}

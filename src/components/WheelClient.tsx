@@ -8,6 +8,7 @@ import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
 import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
+import { buzz } from "@/lib/haptics";
 import { usePosters } from "@/lib/usePosters";
 import { letterboxdUrl } from "@/lib/types";
 
@@ -35,6 +36,7 @@ export function WheelClient() {
   const [offset, setOffset] = useState(0);
   const [duration, setDuration] = useState(0);
   const [cardW, setCardW] = useState(130);
+  const [retryTick, setRetryTick] = useState(0);
   const reelRef = useRef<HTMLDivElement>(null);
 
   const posters = usePosters(pool);
@@ -63,7 +65,7 @@ export function WheelClient() {
     return () => {
       cancelled = true;
     };
-  }, [source, allowRewatches]);
+  }, [source, allowRewatches, retryTick]);
 
   function spin() {
     if (pool.length < 2 || spinning) return;
@@ -89,6 +91,7 @@ export function WheelClient() {
         window.setTimeout(() => {
           setSpinning(false);
           setWinner(pool[winnerIndex]);
+          buzz([20, 40, 30]);
           window.setTimeout(() => setShowWinner(true), 350);
         }, spinDuration * 1000 + 100);
       });
@@ -138,7 +141,17 @@ export function WheelClient() {
           </label>
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+{error && (
+          <p className="mt-4 text-sm text-red-400">
+            {error}{" "}
+            <button
+              className="ml-1 font-semibold underline hover:text-white"
+              onClick={() => setRetryTick((t) => t + 1)}
+            >
+              Retry
+            </button>
+          </p>
+        )}
 
         {loading ? (
           <div className="mt-10 text-center text-sm text-night-400">Loading your films…</div>

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { PickCard } from "@/components/PickCard";
+import { PickSkeleton } from "@/components/PickSkeleton";
 import { warmCandidates } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
 import {
@@ -127,6 +128,40 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale, memories }:
   useEffect(() => {
     warmCandidates();
   }, []);
+
+  // Remember tonight's filters between visits.
+  const filtersLoaded = useRef(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("lbnight-filters") ?? "null");
+      if (saved) {
+        if (MOODS.some((m) => m.value === saved.mood)) setMood(saved.mood);
+        if (INTENSITIES.some((i) => i.value === saved.intensity)) setIntensity(saved.intensity);
+        if (RUNTIMES.some((r) => r.value === saved.runtimeCap)) setRuntimeCap(saved.runtimeCap);
+        if (LANGUAGES.some((l) => l.value === saved.language)) setLanguage(saved.language);
+        if (ERAS.some((e) => e.value === saved.era)) setEra(saved.era);
+        if (typeof saved.allowRewatches === "boolean") setAllowRewatches(saved.allowRewatches);
+      }
+    } catch {}
+    filtersLoaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (!filtersLoaded.current) return;
+    try {
+      localStorage.setItem(
+        "lbnight-filters",
+        JSON.stringify({ mood, intensity, runtimeCap, language, era, allowRewatches })
+      );
+    } catch {}
+  }, [mood, intensity, runtimeCap, language, era, allowRewatches]);
+
+  // Bring fresh picks into view — especially helpful on phones.
+  const resultsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (picks !== null) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [picks]);
 
   // Keep the library fresh silently — users never think about updates.
   const autoSynced = useRef(false);
@@ -448,7 +483,10 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale, memories }:
         )}
 
         {/* Picks */}
-        {picks === null && snapshot.totalFilms === 0 && snapshot.watchlistCount === 0 ? (
+        <div ref={resultsRef} className="scroll-mt-16" />
+        {busy === "recommend" || busy === "surprise" || busy === "chat" ? (
+          <PickSkeleton count={busy === "surprise" ? 1 : 8} />
+        ) : picks === null && snapshot.totalFilms === 0 && snapshot.watchlistCount === 0 ? (
           <div className="card text-center">
             <p className="font-semibold text-white">Your library is empty</p>
             <p className="mt-1 text-sm text-night-400">

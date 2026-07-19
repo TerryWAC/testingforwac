@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { PickSkeleton } from "@/components/PickSkeleton";
 import { Confetti } from "@/components/Confetti";
 import { PickCard } from "@/components/PickCard";
+import { buzz } from "@/lib/haptics";
 import { usePosters } from "@/lib/usePosters";
 import type { Era, Mood, Pick, RecommendResponse, RuntimeCap } from "@/lib/types";
 
@@ -106,6 +108,7 @@ export function SlotsClient() {
       const t = window.setTimeout(() => {
         lockedRef.current[i] = true;
         setLocked([...lockedRef.current]);
+        buzz(12);
         setIndices((prev) => {
           const next = [...prev];
           next[i] = finals[i];
@@ -143,6 +146,7 @@ export function SlotsClient() {
       if (!res.ok) throw new Error(json.error ?? "Could not deal picks");
       setPicks(json.picks);
       setPickSource(json.source);
+      if (json.picks.length > 0) buzz([15, 30, 20]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -207,6 +211,12 @@ export function SlotsClient() {
           <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">
             {error}
           </p>
+        )}
+
+        {fetching && (
+          <div className="mt-6">
+            <PickSkeleton count={4} />
+          </div>
         )}
 
         {picks !== null && (

@@ -8,6 +8,7 @@ import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
 import { fetchCandidates, type CandidateItem, type CandidateSource } from "@/lib/candidatesCache";
+import { buzz } from "@/lib/haptics";
 import { usePosters } from "@/lib/usePosters";
 import { letterboxdUrl } from "@/lib/types";
 
@@ -29,6 +30,7 @@ export function FaceOffClient() {
   const [champion, setChampion] = useState<CandidateItem | null>(null);
   const [matchKey, setMatchKey] = useState(0); // remount animation per match
   const [showInfo, setShowInfo] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
 
   const posters = usePosters(pool);
 
@@ -58,9 +60,10 @@ export function FaceOffClient() {
     return () => {
       cancelled = true;
     };
-  }, [source, allowRewatches, startBracket]);
+  }, [source, allowRewatches, startBracket, retryTick]);
 
   function choose(winner: CandidateItem) {
+    buzz(12);
     const nextSurvivors = [...survivors, winner];
     const nextPair = pairIndex + 1;
 
@@ -68,6 +71,7 @@ export function FaceOffClient() {
       // Round complete.
       if (nextSurvivors.length === 1) {
         setChampion(nextSurvivors[0]);
+        buzz([20, 40, 30]);
         return;
       }
       setContenders(nextSurvivors);
@@ -131,7 +135,17 @@ export function FaceOffClient() {
           )}
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+{error && (
+          <p className="mt-4 text-sm text-red-400">
+            {error}{" "}
+            <button
+              className="ml-1 font-semibold underline hover:text-white"
+              onClick={() => setRetryTick((t) => t + 1)}
+            >
+              Retry
+            </button>
+          </p>
+        )}
 
         {loading ? (
           <p className="mt-10 text-center text-sm text-night-400">Seeding the bracket…</p>
