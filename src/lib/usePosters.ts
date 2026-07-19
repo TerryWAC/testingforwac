@@ -56,12 +56,22 @@ export function usePosters(items: PosterItem[]): Record<string, string | null> {
     })
       .then((r) => r.json())
       .then((json) => {
-        if (!json.enabled || !json.posters) return;
+        if (!json.enabled || !json.posters) {
+          // Poster lookups unavailable (no TMDB key) — resolve to null so the
+          // designed fallback card shows instead of an endless shimmer. Not
+          // persisted, so adding a key later re-fetches these.
+          const nulls = Object.fromEntries(missing.map((m) => [m.slug, null]));
+          setPosters((prev) => ({ ...nulls, ...prev }));
+          return;
+        }
         const fresh = json.posters as Record<string, string | null>;
         setPosters((prev) => ({ ...prev, ...fresh }));
         writeStore({ ...readStore(), ...fresh });
       })
-      .catch(() => {})
+      .catch(() => {
+        const nulls = Object.fromEntries(missing.map((m) => [m.slug, null]));
+        setPosters((prev) => ({ ...nulls, ...prev }));
+      })
       .finally(() => {
         inFlight.current = false;
       });
