@@ -315,11 +315,24 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
             </button>
             <h1 className="text-xl font-bold text-white">Tonight</h1>
           </div>
-          <nav className="flex items-center gap-2">
-            <Link href="/compare" className="btn-secondary text-xs">
+          <nav className="flex items-center gap-1.5 overflow-x-auto">
+            <Link href="/wheel" className="btn-secondary shrink-0 text-xs">
+              Wheel
+            </Link>
+            <Link href="/match" className="btn-secondary shrink-0 text-xs">
+              Match
+            </Link>
+            <Link href="/double" className="btn-secondary shrink-0 text-xs">
+              Double
+            </Link>
+            <Link href="/compare" className="btn-secondary shrink-0 text-xs">
               Compare
             </Link>
-            <button className="btn-secondary text-xs" onClick={syncNow} disabled={busy === "sync"}>
+            <button
+              className="btn-secondary shrink-0 text-xs"
+              onClick={syncNow}
+              disabled={busy === "sync"}
+            >
               {busy === "sync" ? "Syncing…" : "Sync RSS"}
             </button>
           </nav>

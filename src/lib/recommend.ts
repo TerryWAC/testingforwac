@@ -22,7 +22,11 @@ const MOOD_LABEL: Record<TonightFilters["mood"], string> = {
  * whenever AI is unavailable. Works purely from the user's own stored library
  * (watchlist + watch history); we deliberately have no external film catalog.
  */
-export function buildCandidates(films: FilmRow[], filters: TonightFilters): Candidate[] {
+export function buildCandidates(
+  films: FilmRow[],
+  filters: TonightFilters,
+  max = 20
+): Candidate[] {
   const watchedSlugs = new Set(
     films.filter((f) => f.entry_type !== "watchlist").map((f) => f.film_slug)
   );
@@ -91,7 +95,7 @@ export function buildCandidates(films: FilmRow[], filters: TonightFilters): Cand
     byFilm.set(f.film_slug, cand);
   }
 
-  const candidates = [...byFilm.values()].sort((a, b) => b.score - a.score).slice(0, 20);
+  const candidates = [...byFilm.values()].sort((a, b) => b.score - a.score).slice(0, max);
 
   // Stable shuffle-ish variety: rotate by day so "Recommend" isn't identical
   // every night while staying deterministic within a day.
