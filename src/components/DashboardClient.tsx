@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { AppNav } from "@/components/AppNav";
 import { PickCard } from "@/components/PickCard";
 import { usePosters } from "@/lib/usePosters";
 import {
@@ -82,7 +83,9 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
         .then((r) => r.json())
         .then((json) => {
           if (typeof json.added === "number" && json.added > 0) {
-            setSyncMessage(`Auto-synced ${json.added} new ${json.added === 1 ? "entry" : "entries"} from RSS`);
+            setSyncMessage(
+              `Found ${json.added} new ${json.added === 1 ? "watch" : "watches"} — library updated automatically`
+            );
             router.refresh();
           }
         })
@@ -134,7 +137,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
       if (!res.ok) throw new Error(json.error ?? "Sync failed");
       setSyncMessage(
         json.added > 0
-          ? `Added ${json.added} new ${json.added === 1 ? "entry" : "entries"} from RSS`
+          ? `Added ${json.added} new ${json.added === 1 ? "watch" : "watches"}`
           : "Library already up to date"
       );
       router.refresh();
@@ -186,7 +189,9 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
   }
 
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="min-h-screen">
+      <AppNav active="dashboard" />
+      <div className="lg:flex">
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-80 max-w-[85vw] transform overflow-y-auto border-r border-night-700/60 bg-night-900 p-5 transition-transform lg:static lg:z-auto lg:translate-x-0 ${
@@ -310,37 +315,22 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
       {/* Main panel */}
       <main className="flex-1 px-4 py-6 sm:px-8">
         <header className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <h1 className="animate-fade-up text-xl font-bold text-white">Tonight</h1>
+          <div className="flex items-center gap-1.5">
             <button
-              className="rounded-lg border border-night-700 p-2 text-slate-300 lg:hidden"
+              className="btn-secondary text-xs lg:hidden"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
             >
-              ☰
+              📊 Stats
             </button>
-            <h1 className="text-xl font-bold text-white">Tonight</h1>
-          </div>
-          <nav className="flex items-center gap-1.5 overflow-x-auto">
-            <Link href="/wheel" className="btn-secondary shrink-0 text-xs">
-              Wheel
-            </Link>
-            <Link href="/match" className="btn-secondary shrink-0 text-xs">
-              Match
-            </Link>
-            <Link href="/double" className="btn-secondary shrink-0 text-xs">
-              Double
-            </Link>
-            <Link href="/compare" className="btn-secondary shrink-0 text-xs">
-              Compare
-            </Link>
             <button
-              className="btn-secondary shrink-0 text-xs"
+              className="btn-secondary text-xs"
               onClick={syncNow}
               disabled={busy === "sync"}
             >
-              {busy === "sync" ? "Syncing…" : "Sync RSS"}
+              {busy === "sync" ? "Refreshing…" : "Refresh"}
             </button>
-          </nav>
+          </div>
         </header>
 
         {syncMessage && (
@@ -350,7 +340,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
         )}
         {lastSyncedAt && !syncMessage && (
           <p className="mb-4 text-xs text-night-400">
-            Library auto-updates from RSS · last synced {new Date(lastSyncedAt).toLocaleString()}
+            Library updates itself · last updated {new Date(lastSyncedAt).toLocaleString()}
           </p>
         )}
 
@@ -531,6 +521,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
           </>
         )}
       </main>
+      </div>
     </div>
   );
 }

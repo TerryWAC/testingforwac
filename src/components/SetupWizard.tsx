@@ -13,19 +13,13 @@ export function SetupWizard({ existingProfile }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [username, setUsername] = useState(existingProfile?.username ?? "");
-  const [rssUrl, setRssUrl] = useState(existingProfile?.rssUrl ?? "");
-  const [rssTouched, setRssTouched] = useState(Boolean(existingProfile));
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<ImportSummary | null>(null);
 
-  const effectiveRss =
-    rssTouched && rssUrl
-      ? rssUrl
-      : username
-        ? `https://letterboxd.com/${username}/rss/`
-        : "";
+  // The update feed is derived from the username — users never see this.
+  const effectiveRss = username ? `https://letterboxd.com/${username}/rss/` : "";
 
   async function submit() {
     if (!file) {
@@ -77,7 +71,7 @@ export function SetupWizard({ existingProfile }: Props) {
       </ol>
 
       {step === 0 && (
-        <div className="card space-y-4">
+        <div className="card animate-fade-up space-y-4">
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-slate-300">
               Letterboxd username
@@ -88,36 +82,22 @@ export function SetupWizard({ existingProfile }: Props) {
               value={username}
               onChange={(e) => setUsername(e.target.value.trim())}
             />
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-300">RSS feed URL</span>
-            <input
-              className="input"
-              value={effectiveRss}
-              onChange={(e) => {
-                setRssTouched(true);
-                setRssUrl(e.target.value);
-              }}
-              placeholder="https://letterboxd.com/yourusername/rss/"
-            />
-            <span className="mt-1 block text-xs text-night-400">
-              Auto-filled from your username — used to keep your library updated automatically.
+            <span className="mt-1.5 block text-xs text-night-400">
+              We use this to keep your library updated automatically — no re-uploading, ever.
             </span>
           </label>
-          <button
-            className="btn-primary w-full"
-            disabled={!username || !effectiveRss}
-            onClick={() => setStep(1)}
-          >
+          <button className="btn-primary w-full" disabled={!username} onClick={() => setStep(1)}>
             Continue
           </button>
         </div>
       )}
 
       {step === 1 && (
-        <div className="card space-y-4">
+        <div className="card animate-fade-up space-y-4">
           <div>
-            <p className="text-sm font-medium text-slate-300">Upload your Letterboxd export</p>
+            <p className="text-sm font-medium text-slate-300">
+              One-time import — upload your Letterboxd export
+            </p>
             <p className="mt-1 text-xs text-night-400">
               Get it from{" "}
               <a
@@ -142,7 +122,8 @@ export function SetupWizard({ existingProfile }: Props) {
               {file ? file.name : "Tap to choose your export ZIP"}
             </span>
             <span className="mt-1 text-xs text-night-400">
-              Parsed once on the server, then stored — the ZIP itself is never kept.
+              You&apos;ll only ever do this once — new watches are picked up automatically from
+              then on.
             </span>
           </label>
           {error && <p className="text-sm text-red-400">{error}</p>}

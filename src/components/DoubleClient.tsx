@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
+import { Tilt } from "@/components/Tilt";
 import { usePosters } from "@/lib/usePosters";
 import { LETTERBOXD_FILM_URL } from "@/lib/types";
 
@@ -210,14 +211,11 @@ export function DoubleClient() {
                         rel="noreferrer"
                         className="group text-center"
                       >
-                        <div className="overflow-hidden rounded-lg">
-                          <Poster
-                            title={f.title}
-                            year={f.year}
-                            url={posters[f.slug]}
-                            className="transition-transform duration-300 group-hover:scale-[1.05]"
-                          />
-                        </div>
+                        <Tilt>
+                          <div className="overflow-hidden rounded-lg">
+                            <Poster title={f.title} year={f.year} url={posters[f.slug]} />
+                          </div>
+                        </Tilt>
                         <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-accent">
                           {p.films.length === 3
                             ? ["Opener", "Main", "Closer"][j]

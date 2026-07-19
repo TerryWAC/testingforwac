@@ -160,7 +160,8 @@ export function MatchClient() {
             <div className="card flex h-full flex-col items-center justify-center text-center">
               <p className="font-semibold text-white">Deck&apos;s empty</p>
               <p className="mt-1 text-sm text-night-400">
-                Switch source, allow rewatches, or sync your RSS for fresh films.
+                Switch source, allow rewatches, or log more films on Letterboxd — they arrive
+                here automatically.
               </p>
             </div>
           ) : (

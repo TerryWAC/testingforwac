@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AppNav } from "@/components/AppNav";
 import { PickCard } from "@/components/PickCard";
 import type { OverlapStats } from "@/lib/compareStats";
 import { usePosters } from "@/lib/usePosters";
@@ -120,17 +120,14 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Compare</h1>
-          <p className="text-sm text-night-400">
-            Find a film that works for everyone — up to 3 profiles.
-          </p>
-        </div>
-        <Link href="/dashboard" className="btn-secondary text-xs">
-          ← Dashboard
-        </Link>
+    <div className="min-h-screen">
+      <AppNav active="compare" />
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+      <header className="mb-6">
+        <h1 className="animate-fade-up text-2xl font-bold text-white">Compare</h1>
+        <p className="animate-fade-up text-sm text-night-400" style={{ animationDelay: "60ms" }}>
+          Find a film that works for everyone — up to 3 profiles.
+        </p>
       </header>
 
       {error && (
@@ -193,11 +190,11 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
           {activeSession.isOwner && (overlap?.members.length ?? 1) < 3 && (
             <div className="card">
               <h2 className="text-sm font-semibold text-white">
-                Add a friend without an account (RSS-only)
+                Add a friend without an account
               </h2>
               <p className="mt-1 text-xs text-night-400">
-                Public compare mode — uses their recent public activity from
-                letterboxd.com/&lt;username&gt;/rss/. Their account must be public.
+                Just their Letterboxd username — we pull their recent public activity
+                automatically. Their account must be public.
               </p>
               <form className="mt-3 flex gap-2" onSubmit={addGuest}>
                 <input
@@ -228,7 +225,7 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
                         @{m.username}
                         {m.isGuest && (
                           <span className="ml-2 rounded bg-night-700 px-1.5 py-0.5 text-[10px] uppercase text-night-400">
-                            RSS-only
+                            Guest
                           </span>
                         )}
                       </span>
@@ -338,6 +335,7 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
           )}
         </div>
       )}
-    </main>
+      </main>
+    </div>
   );
 }

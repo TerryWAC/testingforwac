@@ -33,7 +33,8 @@ export default async function LoginPage() {
       </div>
       <LoginForm />
       <p className="mt-8 text-center text-xs text-night-400">
-        We only use your official Letterboxd export and RSS feed. No scraping, no passwords.
+        One-time import of your official Letterboxd export — then it stays up to date by itself.
+        No scraping, no passwords.
       </p>
     </main>
   );

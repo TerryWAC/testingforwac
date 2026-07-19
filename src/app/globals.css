@@ -55,7 +55,36 @@
   }
 }
 
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%) rotateY(-12deg);
+    opacity: 0.5;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes float-3d {
+  0%,
+  100% {
+    transform: rotateX(1.5deg) translateY(0);
+  }
+  50% {
+    transform: rotateX(-1.5deg) translateY(-7px);
+  }
+}
+
 @layer utilities {
+  .animate-drawer-in {
+    transform-origin: left center;
+    animation: drawer-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .animate-float {
+    animation: float-3d 4.5s ease-in-out infinite;
+    transform-style: preserve-3d;
+  }
   .animate-fade-up {
     animation: fade-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }

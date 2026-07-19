@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
+import { Tilt } from "@/components/Tilt";
 import { usePosters } from "@/lib/usePosters";
 import { LETTERBOXD_FILM_URL } from "@/lib/types";
 
@@ -142,8 +143,8 @@ export function WheelClient() {
             <p className="font-semibold text-white">Not enough films in this source</p>
             <p className="mt-1 text-sm text-night-400">
               {source === "watchlist"
-                ? "Your watchlist looks empty — try “Whole library” with rewatches on, or add films to your Letterboxd watchlist and sync."
-                : "Try enabling rewatches, or import/sync more films."}
+                ? "Your watchlist looks empty — try “Whole library” with rewatches on, or add films to your Letterboxd watchlist and hit Refresh on the Tonight page."
+                : "Try enabling rewatches, or import a fresh export from the menu."}
             </p>
           </div>
         ) : (
@@ -210,9 +211,13 @@ export function WheelClient() {
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent">
               Tonight&apos;s film
             </p>
-            <div className="animate-glow mx-auto mt-4 w-48 overflow-hidden rounded-xl sm:w-56">
-              <Poster title={winner.title} year={winner.year} url={winnerPoster} />
-            </div>
+            <Tilt max={12} className="mx-auto mt-4 w-48 sm:w-56">
+              <div className="animate-float">
+                <div className="animate-glow overflow-hidden rounded-xl">
+                  <Poster title={winner.title} year={winner.year} url={winnerPoster} />
+                </div>
+              </div>
+            </Tilt>
             <p className="mt-4 text-2xl font-bold leading-tight text-white">
               {winner.title}
               {winner.year && (
