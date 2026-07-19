@@ -85,9 +85,18 @@ export async function syncProfileFromRss(
   const added = await insertMissingFilms(profile.id, films);
 
   const admin = createAdminClient();
-  const update: Record<string, string> = { last_synced_at: new Date().toISOString() };
-  if (avatarUrl) update.avatar_url = avatarUrl;
-  await admin.from("profiles").update(update).eq("id", profile.id);
+  await admin
+    .from("profiles")
+    .update({ last_synced_at: new Date().toISOString() })
+    .eq("id", profile.id);
+  if (avatarUrl) {
+    // Never clobber an avatar the user uploaded themselves.
+    await admin
+      .from("profiles")
+      .update({ avatar_url: avatarUrl })
+      .eq("id", profile.id)
+      .is("avatar_url", null);
+  }
 
   return { added };
 }

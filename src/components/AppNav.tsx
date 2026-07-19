@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/match", key: "match", label: "Movie Match" },
   { href: "/double", key: "double", label: "Double Feature" },
   { href: "/compare", key: "compare", label: "Compare" },
+  { href: "/coming", key: "coming", label: "Coming Soon" },
   { href: "/profile", key: "profile", label: "Profile & Friends" },
 ] as const;
 

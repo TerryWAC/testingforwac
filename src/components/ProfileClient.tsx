@@ -126,6 +126,46 @@ export function ProfileClient({
     }
   }
 
+  async function onAvatarFile(file: File | undefined) {
+    if (!file) return;
+    setBusy("avatar");
+    setError(null);
+    try {
+      // Crop to a square and shrink client-side so the stored image is tiny.
+      const bitmap = await createImageBitmap(file);
+      const size = 192;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d")!;
+      const side = Math.min(bitmap.width, bitmap.height);
+      ctx.drawImage(
+        bitmap,
+        (bitmap.width - side) / 2,
+        (bitmap.height - side) / 2,
+        side,
+        side,
+        0,
+        0,
+        size,
+        size
+      );
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataUrl }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error ?? "Could not save photo");
+      setNotice("Profile photo updated");
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save photo");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function resetLibrary() {
     setBusy("reset");
     try {
@@ -143,13 +183,25 @@ export function ProfileClient({
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         {/* Identity */}
         <header className="animate-fade-up mb-6 flex items-center gap-4">
-          <Avatar url={avatarUrl} name={username} />
+          <label className="group relative cursor-pointer" title="Change photo">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => onAvatarFile(e.target.files?.[0])}
+            />
+            <Avatar url={avatarUrl} name={username} />
+            <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-[10px] font-bold uppercase tracking-wide text-white opacity-0 transition-opacity group-hover:opacity-100">
+              {busy === "avatar" ? "Saving…" : "Edit"}
+            </span>
+          </label>
           <div>
             <h1 className="text-2xl font-bold text-white">@{username}</h1>
             <p className="text-xs text-night-400">
               Member since {new Date(memberSince).toLocaleDateString()}
               {lastSyncedAt && <> · library updated {new Date(lastSyncedAt).toLocaleString()}</>}
             </p>
+            <p className="mt-0.5 text-[11px] text-night-400">Tap the circle to set a photo</p>
           </div>
         </header>
 

@@ -4,6 +4,7 @@ import type { FilmRow, TasteSnapshot } from "@/lib/types";
 export function computeSnapshot(films: FilmRow[]): TasteSnapshot {
   const watched = films.filter((f) => f.entry_type !== "watchlist");
   const rated = watched.filter((f) => f.rating !== null);
+  const uniqueRated = new Set(rated.map((f) => f.film_slug)).size;
   const watchlist = films.filter((f) => f.entry_type === "watchlist");
 
   // Dedupe by slug for counts (a rewatch is still one film).
@@ -51,7 +52,7 @@ export function computeSnapshot(films: FilmRow[]): TasteSnapshot {
 
   return {
     totalFilms: uniqueWatched.size,
-    totalRated: rated.length,
+    totalRated: uniqueRated,
     averageRating,
     topDecades,
     topRated,
