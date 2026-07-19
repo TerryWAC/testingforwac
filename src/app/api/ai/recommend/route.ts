@@ -1,0 +1,130 @@
+import { NextResponse } from "next/server";
+
+import { buildCacheKey, getCachedResponse, setCachedResponse, tryConsumeAiQuota } from "@/lib/aiGate";
+import { getFilmsForProfile } from "@/lib/db";
+import { polishWithGemini } from "@/lib/gemini";
+import { blendGroupCandidates, buildCandidates, deterministicPicks } from "@/lib/recommend";
+import { recommendRequestSchema } from "@/lib/schemas";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import type { RecommendResponse } from "@/lib/types";
+
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
+/**
+ * POST /api/ai/recommend — two-stage engine.
+ * Stage 1 always runs (deterministic candidates). Stage 2 is a single Gemini
+ * call, gated by a 24h cache and a 10/day per-user quota; any failure falls
+ * back to deterministic picks so the button always works.
+ */
+export async function POST(request: Request) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  const parsed = recommendRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+      { status: 400 }
+    );
+  }
+  const { filters, count, chatMessage, sessionId } = parsed.data;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, letterboxd_username")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!profile) return NextResponse.json({ error: "No profile yet" }, { status: 404 });
+
+  // ---- Stage 1: deterministic candidates ----
+  let candidates;
+  let groupContext: string | undefined;
+
+  if (sessionId) {
+    // Compare mode: only profiles in a session the user belongs to are visible.
+    const admin = createAdminClient();
+    const { data: membership } = await admin
+      .from("session_profiles")
+      .select("profile_id, sessions!inner(owner_user_id)")
+      .eq("session_id", sessionId);
+
+    const memberIds = (membership ?? []).map((m) => m.profile_id);
+    const { data: session } = await admin
+      .from("sessions")
+      .select("owner_user_id")
+      .eq("id", sessionId)
+      .maybeSingle();
+    const isMember = memberIds.includes(profile.id) || session?.owner_user_id === user.id;
+    if (!session || !isMember) {
+      return NextResponse.json({ error: "Not part of this session" }, { status: 403 });
+    }
+
+    const { data: memberProfiles } = await admin
+      .from("profiles")
+      .select("id, letterboxd_username")
+      .in("id", memberIds.length > 0 ? memberIds : [profile.id]);
+
+    const perProfile = await Promise.all(
+      (memberProfiles ?? []).slice(0, 3).map(async (p) => ({
+        profileName: p.letterboxd_username,
+        candidates: buildCandidates(await getFilmsForProfile(p.id), filters),
+      }))
+    );
+    candidates = blendGroupCandidates(perProfile);
+    groupContext = `Choosing for ${perProfile.length} people (${perProfile
+      .map((p) => p.profileName)
+      .join(", ")}). Prefer films flagged as being in multiple libraries.`;
+  } else {
+    const films = await getFilmsForProfile(profile.id);
+    candidates = buildCandidates(films, filters);
+  }
+
+  if (candidates.length === 0) {
+    return NextResponse.json({ picks: [], source: "deterministic" } satisfies RecommendResponse);
+  }
+
+  const fallback: RecommendResponse = {
+    picks: deterministicPicks(candidates, filters, count),
+    source: "deterministic",
+  };
+
+  // ---- Stage 2: AI polish (cached, rate-limited, always falls back) ----
+  const cacheKey = buildCacheKey({
+    v: 1,
+    profileId: profile.id,
+    sessionId: sessionId ?? null,
+    filters,
+    count,
+    chatMessage: chatMessage ?? null,
+    candidateSlugs: candidates.map((c) => c.slug),
+  });
+
+  try {
+    const cached = await getCachedResponse(cacheKey);
+    if (cached) return NextResponse.json(cached);
+
+    if (!process.env.GEMINI_API_KEY) return NextResponse.json(fallback);
+
+    const allowed = await tryConsumeAiQuota(user.id);
+    if (!allowed) return NextResponse.json(fallback);
+
+    const ai = await polishWithGemini(candidates, filters, count, chatMessage, groupContext);
+    const response: RecommendResponse = { picks: ai.picks, source: "ai", followUp: ai.followUp };
+    await setCachedResponse(cacheKey, response);
+    return NextResponse.json(response);
+  } catch {
+    // Gemini error / quota / malformed output — deterministic picks still ship.
+    return NextResponse.json(fallback);
+  }
+}
