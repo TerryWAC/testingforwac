@@ -1,9 +1,30 @@
 // Shared domain types for Letterboxd Night.
 
-export type Mood = "comedy" | "date" | "thriller" | "weird" | "easy";
-export type Intensity = "light" | "medium" | "heavy";
-export type RuntimeCap = "under90" | "under120" | "any";
-export type LanguagePref = "english" | "any";
+export type Mood =
+  | "comedy"
+  | "date"
+  | "thriller"
+  | "horror"
+  | "action"
+  | "romance"
+  | "weird"
+  | "mindbender"
+  | "feelgood"
+  | "tearjerker"
+  | "classic"
+  | "easy";
+export type Intensity = "light" | "medium" | "heavy" | "extreme";
+export type RuntimeCap = "under90" | "under105" | "under120" | "under150" | "any";
+export type LanguagePref = "english" | "foreign" | "any";
+export type Era =
+  | "any"
+  | "2020s"
+  | "2010s"
+  | "2000s"
+  | "1990s"
+  | "1980s"
+  | "1970s"
+  | "pre1970";
 export type EntryType = "diary" | "watched" | "rating" | "watchlist" | "rss";
 
 export interface Profile {
@@ -45,6 +66,7 @@ export interface TonightFilters {
   intensity: Intensity;
   runtimeCap: RuntimeCap;
   language: LanguagePref;
+  era: Era;
   allowRewatches: boolean;
 }
 

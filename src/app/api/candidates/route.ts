@@ -44,7 +44,14 @@ export async function POST(request: Request) {
 
   const candidates = buildCandidates(
     films,
-    { mood: "easy", intensity: "medium", runtimeCap: "any", language: "any", allowRewatches },
+    {
+      mood: "easy",
+      intensity: "medium",
+      runtimeCap: "any",
+      language: "any",
+      era: "any",
+      allowRewatches,
+    },
     limit
   );
 

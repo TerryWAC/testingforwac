@@ -38,7 +38,7 @@ export async function polishWithGemini(
 
   const prompt = [
     "You are a movie-night concierge. Choose the best films for tonight FROM THE CANDIDATE LIST ONLY.",
-    `Constraints: mood=${filters.mood}, intensity=${filters.intensity}, runtime=${filters.runtimeCap}, language=${filters.language}, rewatches=${filters.allowRewatches ? "allowed" : "not allowed"}.`,
+    `Constraints: mood=${filters.mood}, intensity=${filters.intensity}, runtime=${filters.runtimeCap}, language=${filters.language}, era=${filters.era}, rewatches=${filters.allowRewatches ? "allowed" : "not allowed"}.`,
     groupContext ? `Group context: ${groupContext}` : "",
     chatMessage ? `The user said: "${chatMessage}"` : "",
     `Return STRICT JSON only, no markdown: {"picks":[{"slug":"...","why":"..."}],"followUp":"optional single short question or omit"}.`,

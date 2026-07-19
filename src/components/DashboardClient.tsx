@@ -7,15 +7,15 @@ import { useEffect, useRef, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { PickCard } from "@/components/PickCard";
 import { usePosters } from "@/lib/usePosters";
-import {
-  LETTERBOXD_FILM_URL,
-  type Intensity,
-  type LanguagePref,
-  type Mood,
-  type Pick,
-  type RecommendResponse,
-  type RuntimeCap,
-  type TasteSnapshot,
+import type {
+  Era,
+  Intensity,
+  LanguagePref,
+  Mood,
+  Pick,
+  RecommendResponse,
+  RuntimeCap,
+  TasteSnapshot,
 } from "@/lib/types";
 
 interface Props {
@@ -26,36 +26,57 @@ interface Props {
 }
 
 const MOODS: { value: Mood; label: string }[] = [
-  { value: "comedy", label: "Comedy night" },
-  { value: "date", label: "Date night" },
-  { value: "thriller", label: "Thriller" },
-  { value: "weird", label: "Weird" },
-  { value: "easy", label: "Easy watch" },
+  { value: "easy", label: "😌 Easy watch" },
+  { value: "comedy", label: "😂 Comedy" },
+  { value: "date", label: "💘 Date night" },
+  { value: "thriller", label: "🔪 Thriller" },
+  { value: "horror", label: "👻 Horror" },
+  { value: "action", label: "💥 Action" },
+  { value: "romance", label: "🌹 Romance" },
+  { value: "weird", label: "🌀 Weird" },
+  { value: "mindbender", label: "🧠 Mind-bender" },
+  { value: "feelgood", label: "☀️ Feel-good" },
+  { value: "tearjerker", label: "😭 Tearjerker" },
+  { value: "classic", label: "🎞️ Classic" },
 ];
 const INTENSITIES: { value: Intensity; label: string }[] = [
   { value: "light", label: "Light" },
   { value: "medium", label: "Medium" },
   { value: "heavy", label: "Heavy" },
+  { value: "extreme", label: "Extreme" },
 ];
 const RUNTIMES: { value: RuntimeCap; label: string }[] = [
-  { value: "under90", label: "Under 90" },
-  { value: "under120", label: "Under 120" },
-  { value: "any", label: "Any" },
+  { value: "under90", label: "Under 90m" },
+  { value: "under105", label: "Under 105m" },
+  { value: "under120", label: "Under 2h" },
+  { value: "under150", label: "Under 2.5h" },
+  { value: "any", label: "Any length" },
 ];
 const LANGUAGES: { value: LanguagePref; label: string }[] = [
+  { value: "any", label: "Any language" },
   { value: "english", label: "English only" },
-  { value: "any", label: "Any" },
+  { value: "foreign", label: "Foreign / subtitled" },
+];
+const ERAS: { value: Era; label: string }[] = [
+  { value: "any", label: "Any era" },
+  { value: "2020s", label: "2020s" },
+  { value: "2010s", label: "2010s" },
+  { value: "2000s", label: "2000s" },
+  { value: "1990s", label: "1990s" },
+  { value: "1980s", label: "1980s" },
+  { value: "1970s", label: "1970s" },
+  { value: "pre1970", label: "Pre-1970" },
 ];
 
-export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }: Props) {
+export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tab, setTab] = useState<"tonight" | "chat">("tonight");
 
   const [mood, setMood] = useState<Mood>("easy");
   const [intensity, setIntensity] = useState<Intensity>("medium");
   const [runtimeCap, setRuntimeCap] = useState<RuntimeCap>("any");
   const [language, setLanguage] = useState<LanguagePref>("any");
+  const [era, setEra] = useState<Era>("any");
   const [allowRewatches, setAllowRewatches] = useState(false);
 
   const [picks, setPicks] = useState<Pick[] | null>(null);
@@ -73,8 +94,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
   const [chatInput, setChatInput] = useState("");
   const chatQuestionsAsked = useRef(0);
 
-  // Auto-sync in the background when the library is stale, so users never
-  // have to think about updating — RSS keeps things fresh.
+  // Keep the library fresh silently — users never think about updates.
   const autoSynced = useRef(false);
   useEffect(() => {
     if (syncStale && !autoSynced.current) {
@@ -101,7 +121,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          filters: { mood, intensity, runtimeCap, language, allowRewatches },
+          filters: { mood, intensity, runtimeCap, language, era, allowRewatches },
           count,
           chatMessage,
         }),
@@ -134,7 +154,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
     try {
       const res = await fetch("/api/sync", { method: "POST" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Sync failed");
+      if (!res.ok) throw new Error(json.error ?? "Refresh failed");
       setSyncMessage(
         json.added > 0
           ? `Added ${json.added} new ${json.added === 1 ? "watch" : "watches"}`
@@ -142,7 +162,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
       );
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sync failed");
+      setError(e instanceof Error ? e.message : "Refresh failed");
     } finally {
       setBusy(null);
     }
@@ -154,14 +174,13 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
     setChatInput("");
     setChatLog((log) => [...log, { role: "user", text: message }]);
 
-    // Guided flow: ask up to 2 quick follow-ups before hitting the engine.
     if (chatQuestionsAsked.current === 0) {
       chatQuestionsAsked.current = 1;
       setChatLog((log) => [
         ...log,
         {
           role: "app",
-          text: "Nice — what's the vibe tonight? (e.g. comedy, date night, thriller, something weird, easy watch)",
+          text: "Nice — what's the vibe tonight? (comedy, date night, thriller, horror, something weird, feel-good…)",
         },
       ]);
       return;
@@ -172,7 +191,14 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
       if (m.includes("comed")) setMood("comedy");
       else if (m.includes("date")) setMood("date");
       else if (m.includes("thrill")) setMood("thriller");
+      else if (m.includes("horror") || m.includes("scary")) setMood("horror");
+      else if (m.includes("action")) setMood("action");
+      else if (m.includes("roman")) setMood("romance");
       else if (m.includes("weird")) setMood("weird");
+      else if (m.includes("mind")) setMood("mindbender");
+      else if (m.includes("feel")) setMood("feelgood");
+      else if (m.includes("cry") || m.includes("tear") || m.includes("sad")) setMood("tearjerker");
+      else if (m.includes("classic") || m.includes("old")) setMood("classic");
       else setMood("easy");
       setChatLog((log) => [
         ...log,
@@ -182,6 +208,8 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
     }
     const m = message.toLowerCase();
     if (m.includes("90")) setRuntimeCap("under90");
+    else if (m.includes("105")) setRuntimeCap("under105");
+    else if (m.includes("150") || m.includes("2.5") || m.includes("long")) setRuntimeCap("under150");
     else if (m.includes("120") || m.includes("2 hour") || m.includes("two hour")) setRuntimeCap("under120");
     else setRuntimeCap("any");
     chatQuestionsAsked.current = 0;
@@ -191,146 +219,12 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
   return (
     <div className="min-h-screen">
       <AppNav active="dashboard" />
-      <div className="lg:flex">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 w-80 max-w-[85vw] transform overflow-y-auto border-r border-night-700/60 bg-night-900 p-5 transition-transform lg:static lg:z-auto lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-xs text-night-400">Signed in as</p>
-            <p className="font-semibold text-white">@{username}</p>
-          </div>
-          <button
-            className="rounded-lg p-2 text-night-400 hover:bg-night-800 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Taste snapshot */}
-        <section className="mb-6">
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-night-400">
-            Taste snapshot
-          </h2>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="rounded-lg bg-night-800 p-3">
-              <p className="text-xs text-night-400">Films</p>
-              <p className="text-lg font-bold text-white">{snapshot.totalFilms}</p>
-            </div>
-            <div className="rounded-lg bg-night-800 p-3">
-              <p className="text-xs text-night-400">Avg rating</p>
-              <p className="text-lg font-bold text-white">
-                {snapshot.averageRating ?? "—"}
-                {snapshot.averageRating ? "★" : ""}
-              </p>
-            </div>
-            <div className="rounded-lg bg-night-800 p-3">
-              <p className="text-xs text-night-400">Watchlist</p>
-              <p className="text-lg font-bold text-white">{snapshot.watchlistCount}</p>
-            </div>
-            <div className="rounded-lg bg-night-800 p-3">
-              <p className="text-xs text-night-400">Top decade</p>
-              <p className="text-lg font-bold text-white">
-                {snapshot.topDecades[0]?.decade ?? "—"}
-              </p>
-            </div>
-          </div>
-          {snapshot.mostWatchedYear && (
-            <p className="mt-2 text-xs text-night-400">
-              Most watched year: {snapshot.mostWatchedYear.year} ({snapshot.mostWatchedYear.count}{" "}
-              films)
-            </p>
-          )}
-        </section>
-
-        {/* Recent watches */}
-        <section className="mb-6">
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-night-400">
-            Recent watches
-          </h2>
-          {snapshot.recentWatches.length === 0 ? (
-            <p className="text-xs text-night-400">Nothing logged yet.</p>
-          ) : (
-            <ul className="space-y-1.5">
-              {snapshot.recentWatches.map((f, i) => (
-                <li key={`${f.slug}-${i}`} className="text-sm">
-                  <a
-                    href={LETTERBOXD_FILM_URL(f.slug)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-slate-300 hover:text-accent"
-                  >
-                    {f.title}
-                  </a>{" "}
-                  <span className="text-xs text-night-400">
-                    {f.year ?? ""} · {f.watched_date}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* Top rated */}
-        <section className="mb-6">
-          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-night-400">
-            Top rated
-          </h2>
-          {snapshot.topRated.length === 0 ? (
-            <p className="text-xs text-night-400">No ratings imported yet.</p>
-          ) : (
-            <ul className="space-y-1.5">
-              {snapshot.topRated.map((f, i) => (
-                <li key={`${f.slug}-${i}`} className="flex items-baseline justify-between text-sm">
-                  <a
-                    href={LETTERBOXD_FILM_URL(f.slug)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="truncate text-slate-300 hover:text-accent"
-                  >
-                    {f.title}
-                  </a>
-                  <span className="ml-2 shrink-0 text-xs text-accent">{f.rating}★</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <ProfileTools />
-      </aside>
-
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main panel */}
-      <main className="flex-1 px-4 py-6 sm:px-8">
-        <header className="mb-6 flex items-center justify-between">
+      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
+        <header className="mb-4 flex items-center justify-between">
           <h1 className="animate-fade-up text-xl font-bold text-white">Tonight</h1>
-          <div className="flex items-center gap-1.5">
-            <button
-              className="btn-secondary text-xs lg:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              📊 Stats
-            </button>
-            <button
-              className="btn-secondary text-xs"
-              onClick={syncNow}
-              disabled={busy === "sync"}
-            >
-              {busy === "sync" ? "Refreshing…" : "Refresh"}
-            </button>
-          </div>
+          <button className="btn-secondary text-xs" onClick={syncNow} disabled={busy === "sync"}>
+            {busy === "sync" ? "Refreshing…" : "Refresh"}
+          </button>
         </header>
 
         {syncMessage && (
@@ -360,49 +254,40 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
         </div>
 
         {tab === "tonight" && (
-          <section className="card mb-6 space-y-4">
+          <section className="card animate-fade-up mb-6 space-y-4 overflow-hidden">
             <FilterRow label="Mood">
               {MOODS.map((m) => (
-                <button
-                  key={m.value}
-                  className={`chip ${mood === m.value ? "chip-active" : "hover:border-night-400"}`}
-                  onClick={() => setMood(m.value)}
-                >
+                <Chip key={m.value} active={mood === m.value} onClick={() => setMood(m.value)}>
                   {m.label}
-                </button>
+                </Chip>
+              ))}
+            </FilterRow>
+            <FilterRow label="Era">
+              {ERAS.map((e) => (
+                <Chip key={e.value} active={era === e.value} onClick={() => setEra(e.value)}>
+                  {e.label}
+                </Chip>
               ))}
             </FilterRow>
             <FilterRow label="Intensity">
               {INTENSITIES.map((i) => (
-                <button
-                  key={i.value}
-                  className={`chip ${intensity === i.value ? "chip-active" : "hover:border-night-400"}`}
-                  onClick={() => setIntensity(i.value)}
-                >
+                <Chip key={i.value} active={intensity === i.value} onClick={() => setIntensity(i.value)}>
                   {i.label}
-                </button>
+                </Chip>
               ))}
             </FilterRow>
             <FilterRow label="Runtime">
               {RUNTIMES.map((r) => (
-                <button
-                  key={r.value}
-                  className={`chip ${runtimeCap === r.value ? "chip-active" : "hover:border-night-400"}`}
-                  onClick={() => setRuntimeCap(r.value)}
-                >
+                <Chip key={r.value} active={runtimeCap === r.value} onClick={() => setRuntimeCap(r.value)}>
                   {r.label}
-                </button>
+                </Chip>
               ))}
             </FilterRow>
             <FilterRow label="Language">
               {LANGUAGES.map((l) => (
-                <button
-                  key={l.value}
-                  className={`chip ${language === l.value ? "chip-active" : "hover:border-night-400"}`}
-                  onClick={() => setLanguage(l.value)}
-                >
+                <Chip key={l.value} active={language === l.value} onClick={() => setLanguage(l.value)}>
                   {l.label}
-                </button>
+                </Chip>
               ))}
             </FilterRow>
             <label className="flex items-center gap-2 text-sm text-slate-300">
@@ -429,12 +314,15 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
               >
                 {busy === "surprise" ? "Rolling…" : "Surprise me"}
               </button>
+              <Link href="/slots" className="btn-secondary flex-1 text-center">
+                🎰 Lucky Slots
+              </Link>
             </div>
           </section>
         )}
 
         {tab === "chat" && (
-          <section className="card mb-6">
+          <section className="card animate-fade-up mb-6">
             <div className="mb-3 max-h-72 space-y-2 overflow-y-auto">
               {chatLog.length === 0 && (
                 <p className="text-sm text-night-400">
@@ -487,7 +375,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
           <div className="card text-center">
             <p className="font-semibold text-white">Your library is empty</p>
             <p className="mt-1 text-sm text-night-400">
-              Import your Letterboxd export to get personalized picks.
+              Do the one-time import to get personalized picks.
             </p>
             <Link href="/setup" className="btn-primary mt-4 inline-flex">
               Import library
@@ -502,8 +390,7 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
           <div className="card text-center">
             <p className="font-semibold text-white">No matches with these filters</p>
             <p className="mt-1 text-sm text-night-400">
-              Try allowing rewatches or loosening the filters — or add films to your Letterboxd
-              watchlist and sync.
+              Try a different era, allow rewatches, or loosen the filters.
             </p>
           </div>
         ) : (
@@ -521,7 +408,6 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
           </>
         )}
       </main>
-      </div>
     </div>
   );
 }
@@ -530,61 +416,30 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
   return (
     <div>
       <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-night-400">{label}</p>
-      <div className="flex flex-wrap gap-2">{children}</div>
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {children}
+      </div>
     </div>
   );
 }
 
-function ProfileTools() {
-  const router = useRouter();
-  const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  async function resetProfile() {
-    setBusy(true);
-    try {
-      await fetch("/api/profile/reset", { method: "POST" });
-      router.push("/setup");
-      router.refresh();
-    } finally {
-      setBusy(false);
-    }
-  }
-
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="border-t border-night-700/60 pt-4">
-      <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-night-400">Profile</h2>
-      <div className="space-y-2">
-        <Link href="/setup" className="btn-secondary w-full text-xs">
-          Re-import ZIP
-        </Link>
-        {confirming ? (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
-            <p className="mb-2 text-xs text-red-300">
-              Delete all imported films? You can re-import any time.
-            </p>
-            <div className="flex gap-2">
-              <button className="btn-secondary flex-1 text-xs" onClick={() => setConfirming(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn flex-1 bg-red-500/80 text-xs text-white hover:bg-red-500"
-                onClick={resetProfile}
-                disabled={busy}
-              >
-                {busy ? "Deleting…" : "Delete"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            className="btn-secondary w-full text-xs text-red-300"
-            onClick={() => setConfirming(true)}
-          >
-            Reset profile
-          </button>
-        )}
-      </div>
-    </section>
+    <button
+      className={`chip shrink-0 whitespace-nowrap transition-transform active:scale-95 ${
+        active ? "chip-active" : "hover:border-night-400"
+      }`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   );
 }

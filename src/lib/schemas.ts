@@ -24,10 +24,26 @@ export const rssUrlSchema = z
   );
 
 export const tonightFiltersSchema = z.object({
-  mood: z.enum(["comedy", "date", "thriller", "weird", "easy"]),
-  intensity: z.enum(["light", "medium", "heavy"]),
-  runtimeCap: z.enum(["under90", "under120", "any"]),
-  language: z.enum(["english", "any"]),
+  mood: z.enum([
+    "comedy",
+    "date",
+    "thriller",
+    "horror",
+    "action",
+    "romance",
+    "weird",
+    "mindbender",
+    "feelgood",
+    "tearjerker",
+    "classic",
+    "easy",
+  ]),
+  intensity: z.enum(["light", "medium", "heavy", "extreme"]),
+  runtimeCap: z.enum(["under90", "under105", "under120", "under150", "any"]),
+  language: z.enum(["english", "foreign", "any"]),
+  era: z
+    .enum(["any", "2020s", "2010s", "2000s", "1990s", "1980s", "1970s", "pre1970"])
+    .default("any"),
   allowRewatches: z.boolean(),
 });
 

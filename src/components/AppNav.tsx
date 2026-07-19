@@ -6,9 +6,11 @@ import { useState } from "react";
 const LINKS = [
   { href: "/dashboard", key: "dashboard", label: "Tonight", icon: "🎬" },
   { href: "/wheel", key: "wheel", label: "Spin the Wheel", icon: "🎡" },
+  { href: "/slots", key: "slots", label: "Lucky Slots", icon: "🎰" },
   { href: "/match", key: "match", label: "Movie Match", icon: "💚" },
   { href: "/double", key: "double", label: "Double Feature", icon: "🍿" },
   { href: "/compare", key: "compare", label: "Compare", icon: "👥" },
+  { href: "/profile", key: "profile", label: "Profile & Friends", icon: "👤" },
 ] as const;
 
 export type NavKey = (typeof LINKS)[number]["key"];

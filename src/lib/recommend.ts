@@ -13,9 +13,25 @@ const MOOD_LABEL: Record<TonightFilters["mood"], string> = {
   comedy: "a comedy night",
   date: "date night",
   thriller: "a thriller night",
+  horror: "a horror night",
+  action: "an action night",
+  romance: "a romance night",
   weird: "something weird",
+  mindbender: "a mind-bender",
+  feelgood: "a feel-good night",
+  tearjerker: "a tearjerker",
+  classic: "a classic night",
   easy: "an easy watch",
 };
+
+/** True when a film's year falls inside the chosen era. */
+function inEra(year: number | null, era: TonightFilters["era"]): boolean {
+  if (era === "any") return true;
+  if (year === null) return false;
+  if (era === "pre1970") return year < 1970;
+  const start = parseInt(era, 10);
+  return year >= start && year < start + 10;
+}
 
 /**
  * Stage 1 — deterministic candidate builder. Free, instant, and the fallback
@@ -51,6 +67,9 @@ export function buildCandidates(
   const byFilm = new Map<string, Candidate>();
 
   for (const f of films) {
+    // Era is a hard filter — we have real year data for it.
+    if (!inEra(f.year, filters.era)) continue;
+
     const seen = watchedSlugs.has(f.film_slug) && f.entry_type !== "watchlist";
     const isWatchlist = f.entry_type === "watchlist";
 
