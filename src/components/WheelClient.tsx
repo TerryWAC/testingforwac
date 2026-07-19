@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
+import { fetchCandidates } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
 import { LETTERBOXD_FILM_URL } from "@/lib/types";
 
@@ -49,16 +50,9 @@ export function WheelClient() {
     setWinner(null);
     setShowWinner(false);
     setOffset(0);
-    fetch("/api/candidates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source, allowRewatches, limit: 40 }),
-    })
-      .then((r) => r.json())
-      .then((json) => {
-        if (cancelled) return;
-        if (json.error) throw new Error(json.error);
-        setPool(json.candidates ?? []);
+    fetchCandidates(source, allowRewatches, 40)
+      .then((candidates) => {
+        if (!cancelled) setPool(candidates);
       })
       .catch((e) => !cancelled && setError(e.message))
       .finally(() => !cancelled && setLoading(false));

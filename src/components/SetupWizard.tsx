@@ -140,7 +140,7 @@ export function SetupWizard({ existingProfile }: Props) {
 
       {step === 2 && summary && (
         <div className="card space-y-4 text-center">
-          <p className="text-lg font-semibold text-white">Library imported 🎬</p>
+          <p className="text-lg font-semibold text-white">Library imported</p>
           <dl className="grid grid-cols-2 gap-3 text-left text-sm">
             <div className="rounded-lg bg-night-800 p-3">
               <dt className="text-xs text-night-400">Diary entries</dt>

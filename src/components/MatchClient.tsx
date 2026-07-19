@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
+import { fetchCandidates } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
 import { LETTERBOXD_FILM_URL } from "@/lib/types";
 
@@ -39,16 +40,9 @@ export function MatchClient() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetch("/api/candidates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source, allowRewatches, limit: 40 }),
-    })
-      .then((r) => r.json())
-      .then((json) => {
-        if (cancelled) return;
-        if (json.error) throw new Error(json.error);
-        setDeck(json.candidates ?? []);
+    fetchCandidates(source, allowRewatches, 40)
+      .then((candidates) => {
+        if (!cancelled) setDeck(candidates);
       })
       .catch((e) => !cancelled && setError(e.message))
       .finally(() => !cancelled && setLoading(false));
@@ -232,27 +226,24 @@ export function MatchClient() {
 
         {/* Buttons */}
         {top && !loading && (
-          <div className="mt-5 flex justify-center gap-4">
+          <div className="mt-5 flex justify-center gap-3">
             <button
-              className="btn h-14 w-14 rounded-full border border-red-400/40 bg-night-800 text-xl text-red-400 hover:bg-red-400/10"
+              className="btn flex-1 max-w-32 rounded-full border border-red-400/40 bg-night-800 py-3 font-bold text-red-400 transition-transform hover:bg-red-400/10 active:scale-95"
               onClick={() => decide("no")}
-              aria-label="No"
             >
-              ✕
+              No
             </button>
             <button
-              className="btn h-14 w-14 rounded-full border border-accent-blue/40 bg-night-800 text-xl text-accent-blue hover:bg-accent-blue/10"
+              className="btn flex-1 max-w-32 rounded-full border border-accent-blue/40 bg-night-800 py-3 font-bold text-accent-blue transition-transform hover:bg-accent-blue/10 active:scale-95"
               onClick={() => decide("maybe")}
-              aria-label="Maybe"
             >
-              ?
+              Maybe
             </button>
             <button
-              className="btn h-14 w-14 rounded-full border border-accent/40 bg-night-800 text-xl text-accent hover:bg-accent/10"
+              className="btn flex-1 max-w-32 rounded-full border border-accent/40 bg-night-800 py-3 font-bold text-accent transition-transform hover:bg-accent/10 active:scale-95"
               onClick={() => decide("yes")}
-              aria-label="Yes"
             >
-              ♥
+              Yes
             </button>
           </div>
         )}

@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 
 const LINKS = [
-  { href: "/dashboard", key: "dashboard", label: "Tonight", icon: "🎬" },
-  { href: "/wheel", key: "wheel", label: "Spin the Wheel", icon: "🎡" },
-  { href: "/slots", key: "slots", label: "Lucky Slots", icon: "🎰" },
-  { href: "/match", key: "match", label: "Movie Match", icon: "💚" },
-  { href: "/double", key: "double", label: "Double Feature", icon: "🍿" },
-  { href: "/compare", key: "compare", label: "Compare", icon: "👥" },
-  { href: "/profile", key: "profile", label: "Profile & Friends", icon: "👤" },
+  { href: "/dashboard", key: "dashboard", label: "Tonight" },
+  { href: "/faceoff", key: "faceoff", label: "Final Cut" },
+  { href: "/wheel", key: "wheel", label: "Spin the Wheel" },
+  { href: "/slots", key: "slots", label: "Lucky Slots" },
+  { href: "/match", key: "match", label: "Movie Match" },
+  { href: "/double", key: "double", label: "Double Feature" },
+  { href: "/compare", key: "compare", label: "Compare" },
+  { href: "/profile", key: "profile", label: "Profile & Friends" },
 ] as const;
 
 export type NavKey = (typeof LINKS)[number]["key"];
@@ -30,7 +31,7 @@ export function AppNav({ active }: { active: NavKey }) {
           >
             <span className="h-0.5 w-[18px] rounded-full bg-slate-300" />
             <span className="h-0.5 w-[18px] rounded-full bg-slate-300" />
-            <span className="h-0.5 w-[12px] self-start ml-[11px] rounded-full bg-accent" />
+            <span className="ml-[11px] h-0.5 w-[12px] self-start rounded-full bg-accent" />
           </button>
           <span className="flex gap-1" aria-hidden>
             <span className="h-2.5 w-2.5 rounded-full bg-accent-orange" />
@@ -68,19 +69,16 @@ export function AppNav({ active }: { active: NavKey }) {
             </div>
             <ul className="space-y-1">
               {LINKS.map((l, i) => (
-                <li key={l.key} className="animate-fade-up" style={{ animationDelay: `${60 + i * 45}ms` }}>
+                <li key={l.key} className="animate-fade-up" style={{ animationDelay: `${50 + i * 40}ms` }}>
                   <Link
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-colors ${
+                    className={`flex items-center rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors ${
                       active === l.key
                         ? "bg-accent/15 text-accent"
                         : "text-slate-300 hover:bg-night-800 hover:text-white"
                     }`}
                   >
-                    <span className="text-lg" aria-hidden>
-                      {l.icon}
-                    </span>
                     {l.label}
                     {active === l.key && (
                       <span className="ml-auto h-1.5 w-1.5 rounded-full bg-accent" />
@@ -93,11 +91,8 @@ export function AppNav({ active }: { active: NavKey }) {
               <Link
                 href="/setup"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold text-slate-300 transition-colors hover:bg-night-800 hover:text-white"
+                className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:bg-night-800 hover:text-white"
               >
-                <span className="text-lg" aria-hidden>
-                  ⚙️
-                </span>
                 Update library
               </Link>
               <p className="mt-2 px-3.5 text-[11px] leading-snug text-night-400">

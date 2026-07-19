@@ -15,18 +15,18 @@ interface ReelDef<T> {
 const MOOD_REEL: ReelDef<Mood> = {
   name: "Mood",
   values: [
-    { value: "comedy", label: "😂 Comedy" },
-    { value: "date", label: "💘 Date night" },
-    { value: "thriller", label: "🔪 Thriller" },
-    { value: "horror", label: "👻 Horror" },
-    { value: "action", label: "💥 Action" },
-    { value: "romance", label: "🌹 Romance" },
-    { value: "weird", label: "🌀 Weird" },
-    { value: "mindbender", label: "🧠 Mind-bender" },
-    { value: "feelgood", label: "☀️ Feel-good" },
-    { value: "tearjerker", label: "😭 Tearjerker" },
-    { value: "classic", label: "🎞️ Classic" },
-    { value: "easy", label: "😌 Easy watch" },
+    { value: "comedy", label: "Comedy" },
+    { value: "date", label: "Date night" },
+    { value: "thriller", label: "Thriller" },
+    { value: "horror", label: "Horror" },
+    { value: "action", label: "Action" },
+    { value: "romance", label: "Romance" },
+    { value: "weird", label: "Weird" },
+    { value: "mindbender", label: "Mind-bender" },
+    { value: "feelgood", label: "Feel-good" },
+    { value: "tearjerker", label: "Tearjerker" },
+    { value: "classic", label: "Classic" },
+    { value: "easy", label: "Easy watch" },
   ],
 };
 const ERA_REEL: ReelDef<Era> = {
@@ -39,17 +39,17 @@ const ERA_REEL: ReelDef<Era> = {
     { value: "1980s", label: "1980s" },
     { value: "1970s", label: "1970s" },
     { value: "pre1970", label: "Pre-1970" },
-    { value: "any", label: "Wildcard ✨" },
+    { value: "any", label: "Any era" },
   ],
 };
 const RUNTIME_REEL: ReelDef<RuntimeCap> = {
   name: "Runtime",
   values: [
-    { value: "under90", label: "Under 90m" },
-    { value: "under105", label: "Under 105m" },
+    { value: "under90", label: "Under 1h 30m" },
+    { value: "under105", label: "Under 1h 45m" },
     { value: "under120", label: "Under 2h" },
-    { value: "under150", label: "Under 2.5h" },
-    { value: "any", label: "Epic OK 🍿" },
+    { value: "under150", label: "Under 2h 30m" },
+    { value: "any", label: "Any length" },
   ],
 };
 
@@ -155,7 +155,7 @@ export function SlotsClient() {
     <div className="min-h-screen">
       <AppNav active="slots" />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="animate-fade-up text-2xl font-bold text-white">🎰 Lucky Slots</h1>
+        <h1 className="animate-fade-up text-2xl font-bold text-white">Lucky Slots</h1>
         <p className="animate-fade-up mt-1 text-sm text-night-400" style={{ animationDelay: "60ms" }}>
           Pull the lever — mood, era and runtime lock in one by one, then the picks deal
           themselves.
@@ -213,7 +213,7 @@ export function SlotsClient() {
             {picks.length === 0 ? (
               <div className="card text-center">
                 <p className="font-semibold text-white">
-                  No films in your library match that combo 🎲
+                  No films in your library match that combo
                 </p>
                 <p className="mt-1 text-sm text-night-400">
                   The house wins this round — pull again!

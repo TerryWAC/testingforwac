@@ -6,38 +6,49 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { PickCard } from "@/components/PickCard";
+import { warmCandidates } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
-import type {
-  Era,
-  Intensity,
-  LanguagePref,
-  Mood,
-  Pick,
-  RecommendResponse,
-  RuntimeCap,
-  TasteSnapshot,
+import {
+  LETTERBOXD_FILM_URL,
+  type Era,
+  type Intensity,
+  type LanguagePref,
+  type Mood,
+  type Pick,
+  type RecommendResponse,
+  type RuntimeCap,
+  type TasteSnapshot,
 } from "@/lib/types";
+
+export interface Memory {
+  slug: string;
+  title: string;
+  year: number | null;
+  watchedYear: number;
+  yearsAgo: number;
+}
 
 interface Props {
   username: string;
   snapshot: TasteSnapshot;
   lastSyncedAt: string | null;
   syncStale: boolean;
+  memories: Memory[];
 }
 
 const MOODS: { value: Mood; label: string }[] = [
-  { value: "easy", label: "😌 Easy watch" },
-  { value: "comedy", label: "😂 Comedy" },
-  { value: "date", label: "💘 Date night" },
-  { value: "thriller", label: "🔪 Thriller" },
-  { value: "horror", label: "👻 Horror" },
-  { value: "action", label: "💥 Action" },
-  { value: "romance", label: "🌹 Romance" },
-  { value: "weird", label: "🌀 Weird" },
-  { value: "mindbender", label: "🧠 Mind-bender" },
-  { value: "feelgood", label: "☀️ Feel-good" },
-  { value: "tearjerker", label: "😭 Tearjerker" },
-  { value: "classic", label: "🎞️ Classic" },
+  { value: "easy", label: "Easy watch" },
+  { value: "comedy", label: "Comedy" },
+  { value: "date", label: "Date night" },
+  { value: "thriller", label: "Thriller" },
+  { value: "horror", label: "Horror" },
+  { value: "action", label: "Action" },
+  { value: "romance", label: "Romance" },
+  { value: "weird", label: "Weird" },
+  { value: "mindbender", label: "Mind-bender" },
+  { value: "feelgood", label: "Feel-good" },
+  { value: "tearjerker", label: "Tearjerker" },
+  { value: "classic", label: "Classic" },
 ];
 const INTENSITIES: { value: Intensity; label: string }[] = [
   { value: "light", label: "Light" },
@@ -46,10 +57,10 @@ const INTENSITIES: { value: Intensity; label: string }[] = [
   { value: "extreme", label: "Extreme" },
 ];
 const RUNTIMES: { value: RuntimeCap; label: string }[] = [
-  { value: "under90", label: "Under 90m" },
-  { value: "under105", label: "Under 105m" },
+  { value: "under90", label: "Under 1h 30m" },
+  { value: "under105", label: "Under 1h 45m" },
   { value: "under120", label: "Under 2h" },
-  { value: "under150", label: "Under 2.5h" },
+  { value: "under150", label: "Under 2h 30m" },
   { value: "any", label: "Any length" },
 ];
 const LANGUAGES: { value: LanguagePref; label: string }[] = [
@@ -68,7 +79,7 @@ const ERAS: { value: Era; label: string }[] = [
   { value: "pre1970", label: "Pre-1970" },
 ];
 
-export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
+export function DashboardClient({ snapshot, lastSyncedAt, syncStale, memories }: Props) {
   const router = useRouter();
   const [tab, setTab] = useState<"tonight" | "chat">("tonight");
 
@@ -78,6 +89,24 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
   const [language, setLanguage] = useState<LanguagePref>("any");
   const [era, setEra] = useState<Era>("any");
   const [allowRewatches, setAllowRewatches] = useState(false);
+  const [finishBy, setFinishBy] = useState("");
+
+  // Curfew mode: pick a finish time and we work out the runtime cap for you.
+  function applyCurfew(time: string) {
+    setFinishBy(time);
+    if (!time) return;
+    const [h, m] = time.split(":").map(Number);
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(h, m, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1); // past midnight
+    const minutes = Math.round((target.getTime() - now.getTime()) / 60000);
+    if (minutes <= 95) setRuntimeCap("under90");
+    else if (minutes <= 110) setRuntimeCap("under105");
+    else if (minutes <= 130) setRuntimeCap("under120");
+    else if (minutes <= 160) setRuntimeCap("under150");
+    else setRuntimeCap("any");
+  }
 
   const [picks, setPicks] = useState<Pick[] | null>(null);
   const [pickSource, setPickSource] = useState<"ai" | "deterministic" | null>(null);
@@ -93,6 +122,11 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
   const [chatLog, setChatLog] = useState<{ role: "user" | "app"; text: string }[]>([]);
   const [chatInput, setChatInput] = useState("");
   const chatQuestionsAsked = useRef(0);
+
+  // Warm the candidate cache so Wheel / Match / Final Cut open instantly.
+  useEffect(() => {
+    warmCandidates();
+  }, []);
 
   // Keep the library fresh silently — users never think about updates.
   const autoSynced = useRef(false);
@@ -238,6 +272,28 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
           </p>
         )}
 
+        {memories.length > 0 && (
+          <div className="animate-fade-up mb-4 rounded-lg border border-accent-blue/25 bg-accent-blue/5 px-3 py-2 text-xs text-slate-300">
+            <span className="font-bold uppercase tracking-wider text-accent-blue">
+              On this day
+            </span>{" "}
+            {memories.slice(0, 2).map((m, i) => (
+              <span key={`${m.slug}-${m.watchedYear}`}>
+                {i > 0 && " · "}
+                {m.yearsAgo} {m.yearsAgo === 1 ? "year" : "years"} ago you watched{" "}
+                <a
+                  href={LETTERBOXD_FILM_URL(m.slug)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-white hover:text-accent"
+                >
+                  {m.title}
+                </a>
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="mb-4 flex gap-1 rounded-lg bg-night-900 p-1">
           {(["tonight", "chat"] as const).map((t) => (
@@ -278,11 +334,32 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
             </FilterRow>
             <FilterRow label="Runtime">
               {RUNTIMES.map((r) => (
-                <Chip key={r.value} active={runtimeCap === r.value} onClick={() => setRuntimeCap(r.value)}>
+                <Chip
+                  key={r.value}
+                  active={runtimeCap === r.value}
+                  onClick={() => {
+                    setFinishBy("");
+                    setRuntimeCap(r.value);
+                  }}
+                >
                   {r.label}
                 </Chip>
               ))}
             </FilterRow>
+            <div className="flex items-center gap-2 text-xs text-night-400">
+              <span>or finish by</span>
+              <input
+                type="time"
+                className="input w-auto px-2 py-1 text-xs"
+                value={finishBy}
+                onChange={(e) => applyCurfew(e.target.value)}
+              />
+              {finishBy && (
+                <span className="text-accent">
+                  {RUNTIMES.find((r) => r.value === runtimeCap)?.label} it is
+                </span>
+              )}
+            </div>
             <FilterRow label="Language">
               {LANGUAGES.map((l) => (
                 <Chip key={l.value} active={language === l.value} onClick={() => setLanguage(l.value)}>
@@ -315,7 +392,7 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale }: Props) {
                 {busy === "surprise" ? "Rolling…" : "Surprise me"}
               </button>
               <Link href="/slots" className="btn-secondary flex-1 text-center">
-                🎰 Lucky Slots
+                Lucky Slots
               </Link>
             </div>
           </section>
