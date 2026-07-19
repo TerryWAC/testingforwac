@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -12,7 +13,10 @@ interface ReleaseItem {
   year: number | null;
   date: string; // YYYY-MM-DD regional release date
   posterUrl: string | null;
+  onWatchlist?: boolean;
 }
+
+const normalize = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 let cache: { t: number; data: { nowPlaying: ReleaseItem[]; upcoming: ReleaseItem[] } } | null =
   null;
@@ -55,8 +59,33 @@ export async function GET() {
   const key = process.env.TMDB_API_KEY;
   if (!key) return NextResponse.json({ enabled: false });
 
+  // The user's watchlist titles — upcoming releases they've already
+  // watchlisted on Letterboxd are the truest "recommended for you" signal.
+  const watchlistTitles = new Set<string>();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (profile) {
+    const admin = createAdminClient();
+    const { data: wl } = await admin
+      .from("films")
+      .select("title")
+      .eq("profile_id", profile.id)
+      .eq("entry_type", "watchlist");
+    for (const f of wl ?? []) watchlistTitles.add(normalize(f.title));
+  }
+
+  const withFlags = (items: ReleaseItem[]) =>
+    items.map((m) => ({ ...m, onWatchlist: watchlistTitles.has(normalize(m.title)) }));
+
   if (cache && Date.now() - cache.t < CACHE_TTL_MS) {
-    return NextResponse.json({ enabled: true, ...cache.data });
+    return NextResponse.json({
+      enabled: true,
+      nowPlaying: withFlags(cache.data.nowPlaying),
+      upcoming: withFlags(cache.data.upcoming),
+    });
   }
 
   try {
@@ -84,7 +113,11 @@ export async function GET() {
       .slice(0, 40);
 
     cache = { t: Date.now(), data: { nowPlaying, upcoming } };
-    return NextResponse.json({ enabled: true, nowPlaying, upcoming });
+    return NextResponse.json({
+      enabled: true,
+      nowPlaying: withFlags(nowPlaying),
+      upcoming: withFlags(upcoming),
+    });
   } catch {
     return NextResponse.json({ enabled: true, nowPlaying: [], upcoming: [] });
   }

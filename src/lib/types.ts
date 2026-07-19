@@ -112,6 +112,8 @@ export const LETTERBOXD_SEARCH_URL = (title: string) =>
   `https://letterboxd.com/search/films/${encodeURIComponent(title)}/`;
 export const LETTERBOXD_RSS_URL = (username: string) =>
   `https://letterboxd.com/${encodeURIComponent(username)}/rss/`;
+export const STREMIO_SEARCH_URL = (title: string) =>
+  `https://web.stremio.com/#/search?search=${encodeURIComponent(title)}`;
 
 /**
  * Discovery picks come from the curated catalog, where exact Letterboxd

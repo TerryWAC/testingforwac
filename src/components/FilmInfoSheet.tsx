@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Poster } from "@/components/Poster";
-import { letterboxdUrl } from "@/lib/types";
+import { letterboxdUrl, STREMIO_SEARCH_URL } from "@/lib/types";
 
 export interface FilmInfoTarget {
   slug: string;
@@ -139,9 +139,19 @@ export function FilmInfoSheet({
           <p className="text-center text-[11px] leading-snug text-night-400">
             Anything you log there flows back into this app automatically.
           </p>
-          <button className="btn-secondary w-full" onClick={onClose}>
-            Close
-          </button>
+          <div className="flex gap-2">
+            <a
+              href={STREMIO_SEARCH_URL(target.title)}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-secondary flex-1"
+            >
+              Find on Stremio
+            </a>
+            <button className="btn-secondary flex-1" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
