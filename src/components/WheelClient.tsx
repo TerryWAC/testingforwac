@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Confetti } from "@/components/Confetti";
 import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
@@ -198,6 +199,7 @@ export function WheelClient() {
       {/* Cinematic winner reveal */}
       {winner && showWinner && (
         <div className="animate-overlay-in fixed inset-0 z-50 flex items-center justify-center p-5">
+          <Confetti />
           {/* Blurred poster backdrop */}
           <div className="absolute inset-0 bg-night-950/90 backdrop-blur-sm" onClick={() => setShowWinner(false)} />
           {winnerPoster && (

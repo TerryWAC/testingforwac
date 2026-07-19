@@ -95,7 +95,7 @@ export function FilmInfoSheet({
             ) : info?.inLibrary ? (
               <div className="mt-2 space-y-1 text-sm">
                 {info.rating !== null && (
-                  <p>
+                  <p className="animate-pop-in">
                     <Stars rating={info.rating} />{" "}
                     <span className="text-xs text-night-400">your rating</span>
                   </p>

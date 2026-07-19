@@ -12,17 +12,18 @@ interface Props {
 
 /**
  * Film poster with a designed typographic fallback — never a broken image.
- * Shows a shimmer while the URL is being resolved.
+ * Shimmers while resolving, fades in softly once the image arrives.
  */
 export function Poster({ title, year, url, className = "" }: Props) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const showImage = url && !failed;
 
   return (
     <div
       className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-night-800 ${className}`}
     >
-      {url === undefined && (
+      {(url === undefined || (showImage && !loaded)) && (
         <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-night-800 via-night-700 to-night-800" />
       )}
       {showImage ? (
@@ -30,9 +31,12 @@ export function Poster({ title, year, url, className = "" }: Props) {
         <img
           src={url}
           alt={`${title} poster`}
-          className="absolute inset-0 h-full w-full object-cover"
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
           loading="lazy"
           decoding="async"
+          onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
         />
       ) : (

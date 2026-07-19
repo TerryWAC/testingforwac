@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Confetti } from "@/components/Confetti";
 import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
@@ -143,6 +144,7 @@ export function FaceOffClient() {
           </div>
         ) : champion ? (
           <div className="animate-pop-in mt-8 text-center">
+            <Confetti />
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent">
               Tonight&apos;s champion
             </p>

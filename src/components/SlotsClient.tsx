@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Confetti } from "@/components/Confetti";
 import { PickCard } from "@/components/PickCard";
 import { usePosters } from "@/lib/usePosters";
 import type { Era, Mood, Pick, RecommendResponse, RuntimeCap } from "@/lib/types";
@@ -179,7 +180,7 @@ export function SlotsClient() {
                       : locked[i]
                         ? "border-accent bg-accent/5"
                         : "border-night-700 bg-night-950"
-                  } ${!locked[i] ? "blur-[1px]" : ""}`}
+                  } ${!locked[i] ? "animate-reel-jitter blur-[1px]" : ""}`}
                 >
                   <span
                     className={`text-sm font-black leading-tight sm:text-base ${
@@ -210,6 +211,7 @@ export function SlotsClient() {
 
         {picks !== null && (
           <section className="mt-6">
+            {picks.length > 0 && <Confetti count={20} />}
             {picks.length === 0 ? (
               <div className="card text-center">
                 <p className="font-semibold text-white">

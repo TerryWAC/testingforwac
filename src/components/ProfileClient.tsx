@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { LETTERBOXD_FILM_URL, type TasteSnapshot } from "@/lib/types";
@@ -433,11 +433,31 @@ export function ProfileClient({
   );
 }
 
+/** Eased count-up for numeric stats — the tiles feel alive on page load. */
+function useCountUp(target: number, ms = 800): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let start: number | null = null;
+    let raf: number;
+    const step = (t: number) => {
+      if (start === null) start = t;
+      const p = Math.min(1, (t - start) / ms);
+      setValue(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return value;
+}
+
 function Stat({ label, value }: { label: string; value: string | number }) {
+  const numeric = typeof value === "number";
+  const counted = useCountUp(numeric ? value : 0);
   return (
-    <div className="rounded-lg bg-night-900 p-3">
+    <div className="rounded-lg bg-night-900 p-3 transition-colors hover:bg-night-800">
       <p className="text-xs text-night-400">{label}</p>
-      <p className="text-xl font-bold text-white">{value}</p>
+      <p className="text-xl font-bold tabular-nums text-white">{numeric ? counted : value}</p>
     </div>
   );
 }
