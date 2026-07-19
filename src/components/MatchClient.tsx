@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Poster } from "@/components/Poster";
+import { usePosters } from "@/lib/usePosters";
 import { LETTERBOXD_FILM_URL } from "@/lib/types";
 
 interface MatchItem {
@@ -56,6 +58,8 @@ export function MatchClient() {
   }, [source, allowRewatches]);
 
   const top = deck[0] ?? null;
+  const posters = usePosters([...deck.slice(0, 10), ...saved.slice(0, 20)]);
+  const topPoster = top ? posters[top.slug] : undefined;
 
   function persistSaved(next: MatchItem[]) {
     setSaved(next);
@@ -147,7 +151,7 @@ export function MatchClient() {
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
         {/* Card stack */}
-        <div className="relative mt-6 h-[380px] select-none">
+        <div className="relative mt-6 h-[440px] select-none sm:h-[500px]">
           {loading ? (
             <div className="flex h-full items-center justify-center text-sm text-night-400">
               Dealing the deck…
@@ -165,7 +169,8 @@ export function MatchClient() {
                 <div className="absolute inset-0 scale-95 rounded-xl border border-night-700/60 bg-night-900" />
               )}
               <div
-                className="absolute inset-0 flex cursor-grab touch-none flex-col rounded-xl border border-night-700/60 bg-gradient-to-br from-night-800 to-night-900 p-6 active:cursor-grabbing"
+                key={top.slug}
+                className="animate-overlay-in absolute inset-0 flex cursor-grab touch-none flex-col overflow-hidden rounded-xl border border-night-700/60 bg-night-900 active:cursor-grabbing"
                 style={{
                   transform: cardTransform,
                   transition: exiting ? "transform 0.25s ease-in" : drag ? "none" : "transform 0.2s",
@@ -175,22 +180,39 @@ export function MatchClient() {
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerUp}
               >
-                <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <p className="text-3xl font-bold leading-tight text-white">{top.title}</p>
-                  {top.year && <p className="mt-2 text-lg text-night-400">{top.year}</p>}
+                {/* Full-bleed poster with readable gradient */}
+                {topPoster ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${topPoster})` }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-night-800 to-night-900 pb-32">
+                    <span className="px-8 text-center text-3xl font-black uppercase leading-tight tracking-wide text-slate-300">
+                      {top.title}
+                    </span>
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/75 to-transparent px-5 pb-5 pt-16">
+                  <p className="text-2xl font-bold leading-tight text-white drop-shadow">
+                    {top.title}
+                    {top.year && (
+                      <span className="ml-2 text-base font-medium text-slate-300">{top.year}</span>
+                    )}
+                  </p>
                   {top.reasons.length > 0 && (
-                    <p className="mt-4 text-sm text-slate-300">{top.reasons[0]}</p>
+                    <p className="mt-1.5 text-sm text-slate-200">{top.reasons[0]}</p>
                   )}
+                  <a
+                    href={LETTERBOXD_FILM_URL(top.slug)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-block text-sm font-semibold text-accent hover:underline"
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    View on Letterboxd →
+                  </a>
                 </div>
-                <a
-                  href={LETTERBOXD_FILM_URL(top.slug)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 text-center text-sm font-semibold text-accent hover:underline"
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  View on Letterboxd →
-                </a>
                 {drag && Math.abs(drag.dx) > 30 && (
                   <span
                     className={`absolute top-6 rounded-lg border-2 px-3 py-1 text-lg font-black uppercase ${
@@ -250,8 +272,11 @@ export function MatchClient() {
             </div>
             <ul className="space-y-1.5">
               {saved.map((s) => (
-                <li key={s.slug} className="card flex items-center justify-between py-2.5">
-                  <span className="text-sm text-slate-200">
+                <li key={s.slug} className="card flex items-center gap-3 py-2">
+                  <div className="w-9 shrink-0">
+                    <Poster title={s.title} year={s.year} url={posters[s.slug]} />
+                  </div>
+                  <span className="flex-1 text-sm text-slate-200">
                     {s.title} {s.year && <span className="text-night-400">({s.year})</span>}
                   </span>
                   <a

@@ -43,6 +43,7 @@ npm run dev                  # http://localhost:3000
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | client + server | Publishable key — safe to expose |
 | `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Bypasses RLS. Never commit, never expose |
 | `GEMINI_API_KEY` | **server only** | Optional — without it the deterministic engine runs alone |
+| `TMDB_API_KEY` | **server only** | Optional — enables real posters; typographic cards otherwise |
 
 **Never commit real values.** `.env*` files are gitignored. If a secret key has ever
 been pasted into a chat, shared doc, or client-side code, rotate it in the dashboard.

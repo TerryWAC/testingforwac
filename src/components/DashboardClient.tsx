@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { PickCard } from "@/components/PickCard";
+import { usePosters } from "@/lib/usePosters";
 import {
   LETTERBOXD_FILM_URL,
   type Intensity,
@@ -61,6 +62,10 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
   const [busy, setBusy] = useState<"recommend" | "surprise" | "sync" | "chat" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const posters = usePosters(
+    (picks ?? []).map((p) => ({ slug: p.slug, title: p.title, year: p.year }))
+  );
 
   // Chat state
   const [chatLog, setChatLog] = useState<{ role: "user" | "app"; text: string }[]>([]);
@@ -518,9 +523,9 @@ export function DashboardClient({ username, snapshot, lastSyncedAt, syncStale }:
                 Picks from your library stats (AI polish unavailable right now).
               </p>
             )}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {picks.map((p) => (
-                <PickCard key={p.slug} pick={p} />
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+              {picks.map((p, i) => (
+                <PickCard key={p.slug} pick={p} posterUrl={posters[p.slug]} index={i} />
               ))}
             </div>
           </>

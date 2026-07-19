@@ -1,21 +1,45 @@
+"use client";
+
+import { Poster } from "@/components/Poster";
 import { LETTERBOXD_FILM_URL, type Pick } from "@/lib/types";
 
-/** Poster-less pick card — a stylized placeholder keeps the MVP API-free. */
-export function PickCard({ pick }: { pick: Pick }) {
+interface Props {
+  pick: Pick;
+  posterUrl: string | null | undefined;
+  index?: number;
+}
+
+export function PickCard({ pick, posterUrl, index = 0 }: Props) {
   return (
-    <article className="card flex flex-col">
-      <div className="mb-3 flex aspect-[3/2] items-center justify-center rounded-lg bg-gradient-to-br from-night-800 to-night-700 px-4 text-center">
-        <span className="text-lg font-bold leading-snug text-slate-200">
-          {pick.title}
-          {pick.year && <span className="block text-sm font-medium text-night-400">{pick.year}</span>}
-        </span>
-      </div>
-      <p className="flex-1 text-sm text-slate-300">{pick.why}</p>
+    <article
+      className="card group animate-fade-up flex flex-col p-3 transition-transform duration-200 hover:-translate-y-1"
+      style={{ animationDelay: `${Math.min(index * 70, 500)}ms` }}
+    >
       <a
         href={LETTERBOXD_FILM_URL(pick.slug)}
         target="_blank"
         rel="noreferrer"
-        className="mt-3 text-sm font-semibold text-accent hover:underline"
+        className="relative mb-3 block overflow-hidden rounded-lg"
+      >
+        <Poster
+          title={pick.title}
+          year={pick.year}
+          url={posterUrl}
+          className="transition-transform duration-300 group-hover:scale-[1.04]"
+        />
+        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-3 pb-2 pt-8">
+          <span className="block text-sm font-bold leading-tight text-white">
+            {pick.title}
+            {pick.year && <span className="ml-1.5 font-medium text-slate-400">{pick.year}</span>}
+          </span>
+        </span>
+      </a>
+      <p className="flex-1 text-sm leading-snug text-slate-300">{pick.why}</p>
+      <a
+        href={LETTERBOXD_FILM_URL(pick.slug)}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-2.5 text-xs font-semibold text-accent hover:underline"
       >
         View on Letterboxd →
       </a>

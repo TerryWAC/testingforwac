@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { PickCard } from "@/components/PickCard";
 import type { OverlapStats } from "@/lib/compareStats";
+import { usePosters } from "@/lib/usePosters";
 import {
   LETTERBOXD_FILM_URL,
   type Pick,
@@ -26,6 +27,9 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [picks, setPicks] = useState<Pick[] | null>(null);
   const [pickSource, setPickSource] = useState<"ai" | "deterministic" | null>(null);
+  const posters = usePosters(
+    (picks ?? []).map((p) => ({ slug: p.slug, title: p.title, year: p.year }))
+  );
 
   async function createSession() {
     setBusy("create");
@@ -322,9 +326,9 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
                       No shared candidates yet — add more films or another profile.
                     </p>
                   ) : (
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      {picks.map((p) => (
-                        <PickCard key={p.slug} pick={p} />
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      {picks.map((p, i) => (
+                        <PickCard key={p.slug} pick={p} posterUrl={posters[p.slug]} index={i} />
                       ))}
                     </div>
                   )}

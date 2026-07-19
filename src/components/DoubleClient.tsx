@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Poster } from "@/components/Poster";
+import { usePosters } from "@/lib/usePosters";
 import { LETTERBOXD_FILM_URL } from "@/lib/types";
 
 interface Item {
@@ -136,6 +138,7 @@ export function DoubleClient() {
   }
   const pairings = buildPairings(shuffled, strategy);
   const activeStrategy = STRATEGIES.find((s) => s.value === strategy)!;
+  const posters = usePosters(pairings.flatMap((p) => p.films));
 
   return (
     <div className="min-h-screen">
@@ -193,32 +196,43 @@ export function DoubleClient() {
           <>
             <div className="mt-6 space-y-4">
               {pairings.map((p, i) => (
-                <article key={i} className="card">
-                  <div className={`grid gap-3 ${p.films.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+                <article
+                  key={i}
+                  className="card animate-fade-up"
+                  style={{ animationDelay: `${i * 90}ms` }}
+                >
+                  <div className={`grid gap-3 ${p.films.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
                     {p.films.map((f, j) => (
-                      <div
+                      <a
                         key={f.slug}
-                        className="rounded-lg bg-gradient-to-br from-night-800 to-night-700 p-4 text-center"
+                        href={LETTERBOXD_FILM_URL(f.slug)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group text-center"
                       >
-                        <p className="text-xs font-bold uppercase tracking-widest text-night-400">
+                        <div className="overflow-hidden rounded-lg">
+                          <Poster
+                            title={f.title}
+                            year={f.year}
+                            url={posters[f.slug]}
+                            className="transition-transform duration-300 group-hover:scale-[1.05]"
+                          />
+                        </div>
+                        <p className="mt-2 text-[10px] font-bold uppercase tracking-widest text-accent">
                           {p.films.length === 3
                             ? ["Opener", "Main", "Closer"][j]
                             : ["Starter", "Main event"][j]}
                         </p>
-                        <p className="mt-1 font-bold leading-tight text-white">{f.title}</p>
-                        {f.year && <p className="text-sm text-night-400">{f.year}</p>}
-                        <a
-                          href={LETTERBOXD_FILM_URL(f.slug)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-2 inline-block text-xs font-semibold text-accent hover:underline"
-                        >
-                          Letterboxd →
-                        </a>
-                      </div>
+                        <p className="mt-0.5 text-sm font-bold leading-tight text-white group-hover:text-accent">
+                          {f.title}
+                        </p>
+                        {f.year && <p className="text-xs text-night-400">{f.year}</p>}
+                      </a>
                     ))}
                   </div>
-                  <p className="mt-3 text-sm text-slate-300">{p.why}</p>
+                  <p className="mt-3 border-t border-night-700/60 pt-3 text-sm text-slate-300">
+                    {p.why}
+                  </p>
                 </article>
               ))}
             </div>
