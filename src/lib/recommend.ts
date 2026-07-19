@@ -1,4 +1,6 @@
-import type { FilmRow, Pick, TonightFilters } from "@/lib/types";
+import { CATALOG } from "@/lib/catalog";
+import { deriveSlug } from "@/lib/slug";
+import type { FilmRow, Pick, RuntimeCap, TonightFilters } from "@/lib/types";
 
 export interface Candidate {
   slug: string;
@@ -7,7 +9,17 @@ export interface Candidate {
   score: number;
   reasons: string[];
   seen: boolean;
+  discovery?: boolean;
 }
+
+const INTENSITY_ORDER = ["light", "medium", "heavy", "extreme"];
+const RUNTIME_MAX: Record<RuntimeCap, number> = {
+  under90: 95,
+  under105: 110,
+  under120: 125,
+  under150: 155,
+  any: 100000,
+};
 
 const MOOD_LABEL: Record<TonightFilters["mood"], string> = {
   comedy: "a comedy night",
@@ -38,10 +50,16 @@ function inEra(year: number | null, era: TonightFilters["era"]): boolean {
  * whenever AI is unavailable. Works purely from the user's own stored library
  * (watchlist + watch history); we deliberately have no external film catalog.
  */
+/**
+ * discoverFrom: library used to exclude already-seen films from discovery
+ * blending. Pass null to disable discovery entirely (pure library picks).
+ * Defaults to the same films list.
+ */
 export function buildCandidates(
   films: FilmRow[],
   filters: TonightFilters,
-  max = 20
+  max = 20,
+  discoverFrom: FilmRow[] | null | undefined = undefined
 ): Candidate[] {
   const watchedSlugs = new Set(
     films.filter((f) => f.entry_type !== "watchlist").map((f) => f.film_slug)
@@ -114,12 +132,99 @@ export function buildCandidates(
     byFilm.set(f.film_slug, cand);
   }
 
-  const candidates = [...byFilm.values()].sort((a, b) => b.score - a.score).slice(0, max);
+  const libraryCands = [...byFilm.values()].sort((a, b) => b.score - a.score);
 
   // Stable shuffle-ish variety: rotate by day so "Recommend" isn't identical
   // every night while staying deterministic within a day.
-  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(candidates.length, 1);
-  return [...candidates.slice(dayOffset), ...candidates.slice(0, dayOffset)];
+  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(libraryCands.length, 1);
+  const rotated = [...libraryCands.slice(dayOffset), ...libraryCands.slice(0, dayOffset)];
+
+  // Blend in curated discovery picks (classics and acclaimed films the user
+  // hasn't seen) so recommendations reach beyond the watchlist: roughly one
+  // discovery pick for every two library picks.
+  const discoverBase = discoverFrom === undefined ? films : discoverFrom;
+  const discovery =
+    discoverBase === null
+      ? []
+      : buildDiscoveryCandidates(discoverBase, filters, Math.max(4, Math.floor(max / 3)));
+  const merged: Candidate[] = [];
+  let li = 0;
+  let di = 0;
+  while (merged.length < max && (li < rotated.length || di < discovery.length)) {
+    if (li < rotated.length) merged.push(rotated[li++]);
+    if (li < rotated.length) merged.push(rotated[li++]);
+    if (di < discovery.length) merged.push(discovery[di++]);
+  }
+  return merged.slice(0, max);
+}
+
+/**
+ * Curated catalog picks the user hasn't seen, matching tonight's filters for
+ * real (the catalog carries mood/intensity/runtime/language tags). Ranked by
+ * how the user rates each decade in their own library.
+ */
+export function buildDiscoveryCandidates(
+  films: FilmRow[],
+  filters: TonightFilters,
+  max = 12
+): Candidate[] {
+  const owned = new Set<string>();
+  for (const f of films) {
+    owned.add(f.title.toLowerCase());
+    owned.add(f.film_slug);
+  }
+
+  const decadeAffinity = new Map<number, number>();
+  for (const f of films) {
+    if (f.rating !== null && f.year) {
+      const decade = Math.floor(f.year / 10) * 10;
+      decadeAffinity.set(decade, Math.max(decadeAffinity.get(decade) ?? 0, f.rating));
+    }
+  }
+
+  const wantIntensity = INTENSITY_ORDER.indexOf(filters.intensity);
+  const out: Candidate[] = [];
+
+  for (const entry of CATALOG) {
+    if (owned.has(entry.t.toLowerCase())) continue;
+    const slug = deriveSlug(entry.t, entry.y);
+    if (owned.has(slug) || owned.has(deriveSlug(entry.t))) continue;
+
+    const moodHit =
+      entry.m.includes(filters.mood) ||
+      (filters.mood === "classic" && entry.y < 1985) ||
+      (filters.mood === "date" && entry.m.includes("romance")) ||
+      (filters.mood === "easy" && (entry.m.includes("comedy") || entry.m.includes("feelgood")));
+    if (!moodHit) continue;
+
+    if (Math.abs(INTENSITY_ORDER.indexOf(entry.i) - wantIntensity) > 1) continue;
+    if (entry.r > RUNTIME_MAX[filters.runtimeCap]) continue;
+    const lang = entry.l ?? "en";
+    if (filters.language === "english" && lang !== "en") continue;
+    if (filters.language === "foreign" && lang === "en") continue;
+    if (!inEra(entry.y, filters.era)) continue;
+
+    const decade = Math.floor(entry.y / 10) * 10;
+    const affinity = decadeAffinity.get(decade) ?? 0;
+    const exactMood = entry.m.includes(filters.mood) ? 2 : 0;
+    out.push({
+      slug,
+      title: entry.t,
+      year: entry.y,
+      score: 6 + affinity + exactMood,
+      reasons: [
+        entry.y < 1980
+          ? `A canonical ${decade}s classic you haven't logged`
+          : `Acclaimed pick beyond your library${affinity >= 4 ? ` — you rate the ${decade}s highly` : ""}`,
+      ],
+      seen: false,
+      discovery: true,
+    });
+  }
+
+  out.sort((a, b) => b.score - a.score);
+  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(out.length, 1);
+  return [...out.slice(dayOffset), ...out.slice(0, dayOffset)].slice(0, max);
 }
 
 /** Template "why" copy used when AI is skipped, rate-limited, or errors. */
@@ -132,6 +237,7 @@ export function deterministicPicks(
     title: c.title,
     year: c.year,
     slug: c.slug,
+    discovery: c.discovery,
     why:
       c.reasons.length > 0
         ? `${c.reasons.slice(0, 2).join(". ")}. Fits ${MOOD_LABEL[filters.mood]}.`
@@ -167,7 +273,11 @@ export function blendGroupCandidates(
     .map((c) => {
       if (c.profiles.size > 1) {
         c.score += c.profiles.size * 25; // overlap dominates
-        c.reasons.unshift(`In ${c.profiles.size} of your libraries — an easy compromise`);
+        c.reasons.unshift(
+          c.discovery
+            ? "New to everyone — a fresh compromise"
+            : `In ${c.profiles.size} of your libraries — an easy compromise`
+        );
       }
       const { profiles: _profiles, ...rest } = c;
       return rest;

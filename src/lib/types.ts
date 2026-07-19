@@ -75,6 +75,7 @@ export interface Pick {
   year: number | null;
   slug: string;
   why: string;
+  discovery?: boolean;
 }
 
 export interface RecommendResponse {
@@ -104,5 +105,14 @@ export interface ImportSummary {
 }
 
 export const LETTERBOXD_FILM_URL = (slug: string) => `https://letterboxd.com/film/${slug}/`;
+export const LETTERBOXD_SEARCH_URL = (title: string) =>
+  `https://letterboxd.com/search/films/${encodeURIComponent(title)}/`;
 export const LETTERBOXD_RSS_URL = (username: string) =>
   `https://letterboxd.com/${encodeURIComponent(username)}/rss/`;
+
+/**
+ * Discovery picks come from the curated catalog, where exact Letterboxd
+ * slugs aren't known — link through search so it never 404s.
+ */
+export const letterboxdUrl = (item: { slug: string; title: string; discovery?: boolean }) =>
+  item.discovery ? LETTERBOXD_SEARCH_URL(item.title) : LETTERBOXD_FILM_URL(item.slug);

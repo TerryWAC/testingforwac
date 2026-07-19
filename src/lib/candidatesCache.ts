@@ -1,10 +1,13 @@
 "use client";
 
+export type CandidateSource = "watchlist" | "all" | "classics";
+
 export interface CandidateItem {
   slug: string;
   title: string;
   year: number | null;
   reasons: string[];
+  discovery?: boolean;
 }
 
 const TTL_MS = 5 * 60_000;
@@ -14,7 +17,7 @@ const TTL_MS = 5 * 60_000;
  * so hopping between Wheel / Match / Double / Final Cut is instant.
  */
 export async function fetchCandidates(
-  source: "watchlist" | "all",
+  source: CandidateSource,
   allowRewatches: boolean,
   limit = 40
 ): Promise<CandidateItem[]> {

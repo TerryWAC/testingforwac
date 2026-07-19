@@ -5,15 +5,16 @@ import { useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
-import { fetchCandidates } from "@/lib/candidatesCache";
+import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
-import { LETTERBOXD_FILM_URL } from "@/lib/types";
+import { letterboxdUrl } from "@/lib/types";
 
 interface Item {
   slug: string;
   title: string;
   year: number | null;
   reasons: string[];
+  discovery?: boolean;
 }
 
 type Strategy = "same-era" | "contrast" | "marathon";
@@ -100,7 +101,7 @@ function buildPairings(pool: Item[], strategy: Strategy): Pairing[] {
 export function DoubleClient() {
   const [pool, setPool] = useState<Item[]>([]);
   const [strategy, setStrategy] = useState<Strategy>("same-era");
-  const [source, setSource] = useState<"watchlist" | "all">("watchlist");
+  const [source, setSource] = useState<CandidateSource>("watchlist");
   const [allowRewatches, setAllowRewatches] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -165,6 +166,12 @@ export function DoubleClient() {
           >
             Whole library
           </button>
+          <button
+            className={`chip ${source === "classics" ? "chip-active" : ""}`}
+            onClick={() => setSource("classics")}
+          >
+            Classics
+          </button>
           <label className="chip flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -200,7 +207,7 @@ export function DoubleClient() {
                     {p.films.map((f, j) => (
                       <a
                         key={f.slug}
-                        href={LETTERBOXD_FILM_URL(f.slug)}
+                        href={letterboxdUrl(f)}
                         target="_blank"
                         rel="noreferrer"
                         className="group text-center"

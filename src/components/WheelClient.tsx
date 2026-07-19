@@ -5,15 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
-import { fetchCandidates } from "@/lib/candidatesCache";
+import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
-import { LETTERBOXD_FILM_URL } from "@/lib/types";
+import { letterboxdUrl } from "@/lib/types";
 
 interface WheelItem {
   slug: string;
   title: string;
   year: number | null;
   reasons: string[];
+  discovery?: boolean;
 }
 
 const GAP = 12; // px
@@ -21,7 +22,7 @@ const LOOPS = 5; // how many times the pool repeats in the reel
 
 export function WheelClient() {
   const [pool, setPool] = useState<WheelItem[]>([]);
-  const [source, setSource] = useState<"watchlist" | "all">("watchlist");
+  const [source, setSource] = useState<CandidateSource>("watchlist");
   const [allowRewatches, setAllowRewatches] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +117,12 @@ export function WheelClient() {
             onClick={() => setSource("all")}
           >
             Whole library
+          </button>
+          <button
+            className={`chip ${source === "classics" ? "chip-active" : ""}`}
+            onClick={() => setSource("classics")}
+          >
+            Classics
           </button>
           <label className="chip flex cursor-pointer items-center gap-1.5">
             <input
@@ -223,7 +230,7 @@ export function WheelClient() {
             )}
             <div className="mt-5 flex flex-col gap-2.5">
               <a
-                href={LETTERBOXD_FILM_URL(winner.slug)}
+                href={letterboxdUrl(winner)}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-primary w-full"

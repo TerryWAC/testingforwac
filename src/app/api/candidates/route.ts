@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getFilmsForProfile } from "@/lib/db";
-import { buildCandidates } from "@/lib/recommend";
+import { buildCandidates, buildDiscoveryCandidates } from "@/lib/recommend";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 const bodySchema = z.object({
-  source: z.enum(["watchlist", "all"]).default("all"),
+  source: z.enum(["watchlist", "all", "classics"]).default("all"),
   allowRewatches: z.boolean().default(false),
   limit: z.number().int().min(1).max(60).default(40),
 });
@@ -37,23 +37,26 @@ export async function POST(request: Request) {
     .maybeSingle();
   if (!profile) return NextResponse.json({ error: "No profile yet" }, { status: 404 });
 
-  let films = await getFilmsForProfile(profile.id);
-  if (source === "watchlist") {
-    films = films.filter((f) => f.entry_type === "watchlist");
-  }
+  const allFilms = await getFilmsForProfile(profile.id);
+  const neutralFilters = {
+    mood: "easy" as const,
+    intensity: "medium" as const,
+    runtimeCap: "any" as const,
+    language: "any" as const,
+    era: "any" as const,
+    allowRewatches,
+  };
 
-  const candidates = buildCandidates(
-    films,
-    {
-      mood: "easy",
-      intensity: "medium",
-      runtimeCap: "any",
-      language: "any",
-      era: "any",
-      allowRewatches,
-    },
-    limit
-  );
+  let candidates;
+  if (source === "classics") {
+    // Curated catalog minus anything the user has seen — pure discovery.
+    candidates = buildDiscoveryCandidates(allFilms, neutralFilters, limit);
+  } else {
+    const films =
+      source === "watchlist" ? allFilms.filter((f) => f.entry_type === "watchlist") : allFilms;
+    // Feature pages have an explicit Classics source — keep these pure.
+    candidates = buildCandidates(films, neutralFilters, limit, null);
+  }
 
   return NextResponse.json({
     candidates: candidates.map((c) => ({
@@ -61,6 +64,7 @@ export async function POST(request: Request) {
       title: c.title,
       year: c.year,
       reasons: c.reasons,
+      discovery: c.discovery ?? false,
     })),
   });
 }

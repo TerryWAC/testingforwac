@@ -84,6 +84,7 @@ export async function polishWithGemini(
       title: cand.title,
       year: cand.year,
       slug: cand.slug,
+      discovery: cand.discovery,
       why: (p.why ?? "").slice(0, 240) || "A strong match for tonight.",
     });
     if (picks.length === count) break;

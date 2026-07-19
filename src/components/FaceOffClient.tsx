@@ -5,9 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
-import { fetchCandidates, type CandidateItem } from "@/lib/candidatesCache";
+import { fetchCandidates, type CandidateItem, type CandidateSource } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
-import { LETTERBOXD_FILM_URL } from "@/lib/types";
+import { letterboxdUrl } from "@/lib/types";
 
 /**
  * Final Cut — a knockout tournament for your own library. Eight films enter,
@@ -15,7 +15,7 @@ import { LETTERBOXD_FILM_URL } from "@/lib/types";
  * couples: pass the phone between rounds.
  */
 export function FaceOffClient() {
-  const [source, setSource] = useState<"watchlist" | "all">("watchlist");
+  const [source, setSource] = useState<CandidateSource>("watchlist");
   const [allowRewatches, setAllowRewatches] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +106,12 @@ export function FaceOffClient() {
           >
             Whole library
           </button>
+          <button
+            className={`chip ${source === "classics" ? "chip-active" : ""}`}
+            onClick={() => setSource("classics")}
+          >
+            Classics
+          </button>
           <label className="chip flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -160,7 +166,7 @@ export function FaceOffClient() {
             )}
             <div className="mx-auto mt-5 flex max-w-xs flex-col gap-2.5">
               <a
-                href={LETTERBOXD_FILM_URL(champion.slug)}
+                href={letterboxdUrl(champion)}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-primary w-full"

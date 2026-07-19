@@ -4,15 +4,16 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
 import { Poster } from "@/components/Poster";
-import { fetchCandidates } from "@/lib/candidatesCache";
+import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
-import { LETTERBOXD_FILM_URL } from "@/lib/types";
+import { letterboxdUrl } from "@/lib/types";
 
 interface MatchItem {
   slug: string;
   title: string;
   year: number | null;
   reasons: string[];
+  discovery?: boolean;
 }
 
 const SAVED_KEY = "lbnight-match-saved";
@@ -21,7 +22,7 @@ const SWIPE_THRESHOLD = 90; // px
 export function MatchClient() {
   const [deck, setDeck] = useState<MatchItem[]>([]);
   const [saved, setSaved] = useState<MatchItem[]>([]);
-  const [source, setSource] = useState<"watchlist" | "all">("watchlist");
+  const [source, setSource] = useState<CandidateSource>("watchlist");
   const [allowRewatches, setAllowRewatches] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -131,6 +132,12 @@ export function MatchClient() {
           >
             Whole library
           </button>
+          <button
+            className={`chip ${source === "classics" ? "chip-active" : ""}`}
+            onClick={() => setSource("classics")}
+          >
+            Classics
+          </button>
           <label className="chip flex cursor-pointer items-center gap-1.5">
             <input
               type="checkbox"
@@ -199,7 +206,7 @@ export function MatchClient() {
                     <p className="mt-1.5 text-sm text-slate-200">{top.reasons[0]}</p>
                   )}
                   <a
-                    href={LETTERBOXD_FILM_URL(top.slug)}
+                    href={letterboxdUrl(top)}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 inline-block text-sm font-semibold text-accent hover:underline"
@@ -272,7 +279,7 @@ export function MatchClient() {
                     {s.title} {s.year && <span className="text-night-400">({s.year})</span>}
                   </span>
                   <a
-                    href={LETTERBOXD_FILM_URL(s.slug)}
+                    href={letterboxdUrl(s)}
                     target="_blank"
                     rel="noreferrer"
                     className="text-xs font-semibold text-accent hover:underline"

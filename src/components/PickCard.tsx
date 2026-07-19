@@ -2,7 +2,7 @@
 
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
-import { LETTERBOXD_FILM_URL, type Pick } from "@/lib/types";
+import { letterboxdUrl, type Pick } from "@/lib/types";
 
 interface Props {
   pick: Pick;
@@ -18,7 +18,7 @@ export function PickCard({ pick, posterUrl, index = 0 }: Props) {
     >
       <Tilt className="mb-3">
         <a
-          href={LETTERBOXD_FILM_URL(pick.slug)}
+          href={letterboxdUrl(pick)}
           target="_blank"
           rel="noreferrer"
           className="relative block overflow-hidden rounded-lg"
@@ -34,7 +34,7 @@ export function PickCard({ pick, posterUrl, index = 0 }: Props) {
       </Tilt>
       <p className="flex-1 text-sm leading-snug text-slate-300">{pick.why}</p>
       <a
-        href={LETTERBOXD_FILM_URL(pick.slug)}
+        href={letterboxdUrl(pick)}
         target="_blank"
         rel="noreferrer"
         className="mt-2.5 text-xs font-semibold text-accent hover:underline"
