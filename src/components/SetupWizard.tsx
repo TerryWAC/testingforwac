@@ -161,6 +161,7 @@ export function SetupWizard({ existingProfile }: Props) {
           </dl>
           <p className="text-xs text-night-400">
             Files detected: {summary.filesFound.join(", ")} · {summary.totalUpserted} films stored
+            {summary.reviews > 0 && ` · ${summary.reviews} reviews imported`}
           </p>
           <button className="btn-primary w-full" onClick={() => router.push("/dashboard")}>
             Go to dashboard

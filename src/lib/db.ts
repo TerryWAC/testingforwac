@@ -2,7 +2,7 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { FilmUpsert } from "@/lib/import";
-import { fetchRssFilms } from "@/lib/rss";
+import { fetchRssData } from "@/lib/rss";
 import type { FilmRow, Profile } from "@/lib/types";
 
 /** Sync at most once per this window unless the user asks explicitly. */
@@ -77,18 +77,17 @@ export async function replaceCsvFilms(profileId: string, films: FilmUpsert[]): P
   return insertMissingFilms(profileId, films);
 }
 
-/** Fetch the profile's RSS feed and store any new entries. */
+/** Fetch the profile's feed and store new entries (and the avatar, if shown). */
 export async function syncProfileFromRss(
   profile: Pick<Profile, "id" | "rss_url">
 ): Promise<{ added: number }> {
-  const films = await fetchRssFilms(profile.rss_url);
+  const { films, avatarUrl } = await fetchRssData(profile.rss_url);
   const added = await insertMissingFilms(profile.id, films);
 
   const admin = createAdminClient();
-  await admin
-    .from("profiles")
-    .update({ last_synced_at: new Date().toISOString() })
-    .eq("id", profile.id);
+  const update: Record<string, string> = { last_synced_at: new Date().toISOString() };
+  if (avatarUrl) update.avatar_url = avatarUrl;
+  await admin.from("profiles").update(update).eq("id", profile.id);
 
   return { added };
 }

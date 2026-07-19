@@ -16,12 +16,18 @@ interface RssItem {
   "letterboxd:watchedDate"?: string;
 }
 
+export interface RssData {
+  films: FilmUpsert[];
+  avatarUrl: string | null;
+}
+
 /**
- * Fetch and parse a Letterboxd RSS feed into film rows.
+ * Fetch and parse a Letterboxd RSS feed into film rows (plus the channel
+ * avatar when the feed exposes one).
  * Server-only: avoids CORS and keeps all outbound requests off the client.
  * This uses the official per-user RSS feed — no HTML scraping.
  */
-export async function fetchRssFilms(rssUrl: string): Promise<FilmUpsert[]> {
+export async function fetchRssData(rssUrl: string): Promise<RssData> {
   const parsed = new URL(rssUrl);
   if (parsed.protocol !== "https:" || parsed.hostname !== "letterboxd.com") {
     throw new Error("RSS URL must be a letterboxd.com feed");
@@ -40,8 +46,12 @@ export async function fetchRssFilms(rssUrl: string): Promise<FilmUpsert[]> {
   const parser = new XMLParser({ ignoreAttributes: true });
   const doc = parser.parse(xml);
 
+  const channelImage = doc?.rss?.channel?.image?.url;
+  const avatarUrl =
+    typeof channelImage === "string" && channelImage.startsWith("https://") ? channelImage : null;
+
   const rawItems = doc?.rss?.channel?.item;
-  if (!rawItems) return [];
+  if (!rawItems) return { films: [], avatarUrl };
   const items: RssItem[] = Array.isArray(rawItems) ? rawItems : [rawItems];
 
   const films: FilmUpsert[] = [];
@@ -70,7 +80,8 @@ export async function fetchRssFilms(rssUrl: string): Promise<FilmUpsert[]> {
       watched_date: watchedDate,
       entry_type: "rss",
       source: "rss",
+      review: null,
     });
   }
-  return films;
+  return { films, avatarUrl };
 }

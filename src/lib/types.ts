@@ -33,6 +33,7 @@ export interface Profile {
   letterboxd_username: string;
   rss_url: string;
   is_guest: boolean;
+  avatar_url: string | null;
   created_at: string;
   updated_at: string;
   last_synced_at: string | null;
@@ -48,6 +49,7 @@ export interface FilmRow {
   watched_date: string | null;
   entry_type: EntryType;
   source: "csv" | "rss";
+  review: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -101,6 +103,7 @@ export interface ImportSummary {
   ratings: number;
   watched: number;
   watchlist: number;
+  reviews: number;
   totalUpserted: number;
 }
 

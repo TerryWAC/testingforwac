@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
 import { fetchCandidates, type CandidateItem, type CandidateSource } from "@/lib/candidatesCache";
@@ -26,6 +27,7 @@ export function FaceOffClient() {
   const [pairIndex, setPairIndex] = useState(0);
   const [champion, setChampion] = useState<CandidateItem | null>(null);
   const [matchKey, setMatchKey] = useState(0); // remount animation per match
+  const [showInfo, setShowInfo] = useState(false);
 
   const posters = usePosters(pool);
 
@@ -173,6 +175,9 @@ export function FaceOffClient() {
               >
                 View on Letterboxd
               </a>
+              <button className="btn-secondary w-full" onClick={() => setShowInfo(true)}>
+                More info
+              </button>
               <button className="btn-secondary w-full" onClick={() => startBracket(pool)}>
                 Run it back
               </button>
@@ -230,6 +235,13 @@ export function FaceOffClient() {
           </>
         ) : null}
       </main>
+
+      {champion && showInfo && (
+        <FilmInfoSheet
+          target={{ ...champion, posterUrl: posters[champion.slug], why: champion.reasons[0] }}
+          onClose={() => setShowInfo(false)}
+        />
+      )}
     </div>
   );
 }

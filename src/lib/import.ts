@@ -14,6 +14,7 @@ export interface FilmUpsert {
   watched_date: string | null;
   entry_type: EntryType;
   source: "csv" | "rss";
+  review: string | null;
 }
 
 const MAX_ZIP_BYTES = 30 * 1024 * 1024; // 30 MB — exports are typically < 5 MB
@@ -52,6 +53,7 @@ function rowToFilm(
     watched_date: dateField ? toDate(row[dateField]) : null,
     entry_type: entryType,
     source: "csv",
+    review: null,
   };
 }
 
@@ -69,7 +71,7 @@ export async function parseExportZip(
 
   const zip = await JSZip.loadAsync(buffer);
   const filesFound: string[] = [];
-  const counts = { diaryEntries: 0, ratings: 0, watched: 0, watchlist: 0 };
+  const counts = { diaryEntries: 0, ratings: 0, watched: 0, watchlist: 0, reviews: 0 };
 
   // Keyed by slug|date|type to dedupe within the ZIP itself.
   const filmMap = new Map<string, FilmUpsert>();
@@ -126,6 +128,54 @@ export async function parseExportZip(
   if (watchlist) {
     for (const row of watchlist) {
       if (addFilm(rowToFilm(row, "watchlist", null))) counts.watchlist++;
+    }
+  }
+
+  // reviews.csv carries the user's written reviews — attach them to the
+  // matching watch entries (same film, same date when possible).
+  const reviews = await readCsv("reviews.csv");
+  if (reviews) {
+    for (const row of reviews) {
+      const reviewText = row["Review"]?.trim();
+      const title = row["Name"];
+      if (!reviewText || !title) continue;
+      const year = toYear(row["Year"]);
+      const slug = slugFromUrl(row["Letterboxd URI"]) ?? deriveSlug(title, year);
+      const date = toDate(row["Watched Date"]) ?? toDate(row["Date"]);
+
+      const exactKeys = [
+        `${slug}|${date ?? ""}|diary`,
+        `${slug}|${date ?? ""}|watched`,
+        `${slug}|${date ?? ""}|rating`,
+      ];
+      let attached = false;
+      for (const key of exactKeys) {
+        const film = filmMap.get(key);
+        if (film) {
+          film.review = reviewText.slice(0, 10000);
+          attached = true;
+          break;
+        }
+      }
+      if (!attached) {
+        // Fall back to any entry of this film, else create a standalone row.
+        const any = [...filmMap.values()].find((f) => f.film_slug === slug);
+        if (any) {
+          any.review = reviewText.slice(0, 10000);
+        } else {
+          filmMap.set(`${slug}|${date ?? ""}|diary`, {
+            film_slug: slug,
+            title,
+            year,
+            rating: toRating(row["Rating"]),
+            watched_date: date,
+            entry_type: "diary",
+            source: "csv",
+            review: reviewText.slice(0, 10000),
+          });
+        }
+      }
+      counts.reviews++;
     }
   }
 

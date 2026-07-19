@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { Tilt } from "@/components/Tilt";
 import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
@@ -29,6 +30,7 @@ export function WheelClient() {
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState<WheelItem | null>(null);
   const [showWinner, setShowWinner] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [offset, setOffset] = useState(0);
   const [duration, setDuration] = useState(0);
   const [cardW, setCardW] = useState(130);
@@ -235,8 +237,11 @@ export function WheelClient() {
                 rel="noreferrer"
                 className="btn-primary w-full"
               >
-                View on Letterboxd →
+                View on Letterboxd
               </a>
+              <button className="btn-secondary w-full" onClick={() => setShowInfo(true)}>
+                More info
+              </button>
               <button
                 className="btn-secondary w-full"
                 onClick={() => {
@@ -255,6 +260,13 @@ export function WheelClient() {
             </div>
           </div>
         </div>
+      )}
+
+      {winner && showInfo && (
+        <FilmInfoSheet
+          target={{ ...winner, posterUrl: winnerPoster, why: winner.reasons[0] }}
+          onClose={() => setShowInfo(false)}
+        />
       )}
     </div>
   );

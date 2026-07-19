@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { FilmInfoSheet } from "@/components/FilmInfoSheet";
 import { Poster } from "@/components/Poster";
 import { fetchCandidates, type CandidateSource } from "@/lib/candidatesCache";
 import { usePosters } from "@/lib/usePosters";
@@ -28,6 +29,7 @@ export function MatchClient() {
   const [error, setError] = useState<string | null>(null);
   const [drag, setDrag] = useState<{ dx: number; dy: number } | null>(null);
   const [exiting, setExiting] = useState<"left" | "right" | "up" | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
@@ -205,15 +207,24 @@ export function MatchClient() {
                   {top.reasons.length > 0 && (
                     <p className="mt-1.5 text-sm text-slate-200">{top.reasons[0]}</p>
                   )}
-                  <a
-                    href={letterboxdUrl(top)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-2 inline-block text-sm font-semibold text-accent hover:underline"
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    View on Letterboxd →
-                  </a>
+                  <div className="mt-2 flex items-center gap-4">
+                    <a
+                      href={letterboxdUrl(top)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-semibold text-accent hover:underline"
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      View on Letterboxd
+                    </a>
+                    <button
+                      className="text-sm font-semibold text-accent-blue hover:underline"
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={() => setShowInfo(true)}
+                    >
+                      More info
+                    </button>
+                  </div>
                 </div>
                 {drag && Math.abs(drag.dx) > 30 && (
                   <span
@@ -292,6 +303,13 @@ export function MatchClient() {
           </section>
         )}
       </main>
+
+      {top && showInfo && (
+        <FilmInfoSheet
+          target={{ ...top, posterUrl: topPoster, why: top.reasons[0] }}
+          onClose={() => setShowInfo(false)}
+        />
+      )}
     </div>
   );
 }

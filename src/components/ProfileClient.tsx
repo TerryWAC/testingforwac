@@ -10,20 +10,68 @@ import { LETTERBOXD_FILM_URL, type TasteSnapshot } from "@/lib/types";
 export interface FriendSummary {
   id: string;
   username: string;
+  avatarUrl: string | null;
   filmCount: number;
   recentWatches: { title: string; year: number | null; slug: string; watched_date: string | null }[];
   topRated: { title: string; year: number | null; slug: string; rating: number }[];
 }
 
+export interface ReviewItem {
+  slug: string;
+  title: string;
+  year: number | null;
+  rating: number | null;
+  watched_date: string | null;
+  review: string;
+}
+
 interface Props {
   username: string;
+  avatarUrl: string | null;
   memberSince: string;
   lastSyncedAt: string | null;
   snapshot: TasteSnapshot;
   friends: FriendSummary[];
+  reviews: ReviewItem[];
 }
 
-export function ProfileClient({ username, memberSince, lastSyncedAt, snapshot, friends }: Props) {
+function Avatar({
+  url,
+  name,
+  size = "h-16 w-16 text-2xl",
+}: {
+  url: string | null;
+  name: string;
+  size?: string;
+}) {
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={url}
+        alt={`${name} avatar`}
+        className={`${size} rounded-full object-cover ring-2 ring-accent/40`}
+      />
+    );
+  }
+  return (
+    <div
+      className={`${size} flex items-center justify-center rounded-full bg-gradient-to-br from-accent/30 to-accent-blue/30 font-black text-white`}
+    >
+      {name.slice(0, 1).toUpperCase()}
+    </div>
+  );
+}
+
+export function ProfileClient({
+  username,
+  avatarUrl,
+  memberSince,
+  lastSyncedAt,
+  snapshot,
+  friends,
+  reviews,
+}: Props) {
   const router = useRouter();
   const [friendName, setFriendName] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -95,9 +143,7 @@ export function ProfileClient({ username, memberSince, lastSyncedAt, snapshot, f
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         {/* Identity */}
         <header className="animate-fade-up mb-6 flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-accent/30 to-accent-blue/30 text-2xl font-black text-white">
-            {username.slice(0, 1).toUpperCase()}
-          </div>
+          <Avatar url={avatarUrl} name={username} />
           <div>
             <h1 className="text-2xl font-bold text-white">@{username}</h1>
             <p className="text-xs text-night-400">
@@ -172,6 +218,38 @@ export function ProfileClient({ username, memberSince, lastSyncedAt, snapshot, f
           </div>
         </Collapsible>
 
+        {/* Reviews */}
+        {reviews.length > 0 && (
+          <div className="mt-6">
+            <Collapsible title={`Your reviews (${reviews.length})`} delay={150}>
+              <ul className="space-y-4">
+                {reviews.map((r) => (
+                  <li key={`${r.slug}-${r.watched_date}`}>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <a
+                        href={LETTERBOXD_FILM_URL(r.slug)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-white hover:text-accent"
+                      >
+                        {r.title}
+                        {r.year && <span className="ml-1.5 text-sm text-night-400">{r.year}</span>}
+                      </a>
+                      <span className="shrink-0 text-xs text-night-400">
+                        {r.rating !== null && <span className="text-accent">{r.rating}★ </span>}
+                        {r.watched_date}
+                      </span>
+                    </div>
+                    <blockquote className="mt-1 border-l-2 border-night-700 pl-3 text-sm italic leading-relaxed text-slate-300">
+                      {r.review.length > 300 ? `${r.review.slice(0, 300)}…` : r.review}
+                    </blockquote>
+                  </li>
+                ))}
+              </ul>
+            </Collapsible>
+          </div>
+        )}
+
         {/* Friends */}
         <section className="animate-fade-up mt-6" style={{ animationDelay: "180ms" }}>
           <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-night-400">
@@ -205,9 +283,7 @@ export function ProfileClient({ username, memberSince, lastSyncedAt, snapshot, f
                     className="flex w-full items-center gap-3 text-left"
                     onClick={() => setOpenFriend(openFriend === f.id ? null : f.id)}
                   >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-night-700 font-bold text-white">
-                      {f.username.slice(0, 1).toUpperCase()}
-                    </span>
+                    <Avatar url={f.avatarUrl} name={f.username} size="h-10 w-10 text-base" />
                     <span className="flex-1">
                       <span className="block font-semibold text-white">@{f.username}</span>
                       <span className="text-xs text-night-400">
