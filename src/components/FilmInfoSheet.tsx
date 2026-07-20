@@ -95,6 +95,13 @@ export function FilmInfoSheet({
         onClick={onClose}
       />
       <div className="animate-sheet-in relative w-full max-w-md rounded-t-2xl border border-night-700/60 bg-night-900 p-5 sm:rounded-2xl">
+        <button
+          aria-label="Close"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-night-400 transition-colors hover:bg-night-800 hover:text-white"
+          onClick={onClose}
+        >
+          ✕
+        </button>
         {/* Grab handle on mobile */}
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-night-700 sm:hidden" />
 

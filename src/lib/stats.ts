@@ -1,4 +1,5 @@
-import type { FilmRow, TasteSnapshot } from "@/lib/types";
+import { CATALOG } from "@/lib/catalog";
+import type { FilmRow, Mood, TasteSnapshot } from "@/lib/types";
 
 export interface BuffProfile {
   level: number;
@@ -41,6 +42,22 @@ export function movieBuffProfile(films: FilmRow[]): BuffProfile {
   const nineties = pct(1990, 2000);
   const spread = [...decadeCounts.values()].filter((c) => c >= Math.max(3, dated.length * 0.04))
     .length;
+
+  // Mood signals: match library titles against the tagged catalog. Sparse
+  // but honest — only kicks in with enough matches to mean something.
+  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const ownedTitles = new Set(watched.map((f) => norm(f.title)));
+  const moodCounts = new Map<Mood, number>();
+  let matched = 0;
+  for (const entry of CATALOG) {
+    if (ownedTitles.has(norm(entry.t))) {
+      matched++;
+      for (const m of entry.m) moodCounts.set(m, (moodCounts.get(m) ?? 0) + 1);
+    }
+  }
+  const moodShare = (...moods: Mood[]) =>
+    matched === 0 ? 0 : moods.reduce((s, m) => s + (moodCounts.get(m) ?? 0), 0) / matched;
+  const moodsKnown = matched >= 15;
 
   // Level: volume first, breadth bonus.
   const volumeLevel =
@@ -88,6 +105,66 @@ export function movieBuffProfile(films: FilmRow[]): BuffProfile {
       roast: `A ${avg.toFixed(2)}★ average — everything's a banger in your world. You've speced fully into the enjoyment stat and left crit-thinking at level 1. Genuinely the happiest build in the meta.`,
       strengths: ["Maximum joy uptime", "Immune to disappointment"],
       weaknesses: ["Ratings carry zero information", "Film snobs farm you for XP"],
+    };
+  }
+  if (moodsKnown && moodShare("horror") >= 0.25) {
+    return {
+      level,
+      title: "The Edgelord",
+      tier: grade("B"),
+      roast: `A quarter of your recognisable library is horror. You've min-maxed the disturbing-content stat — about as edgy as you can get without people thinking you're a weirdo. The Babadook walked so you could run.`,
+      strengths: ["High disturbing-content resistance", "Halloween season MVP"],
+      weaknesses: ["Weak against the easily spooked", "Date-night deployment is a gamble"],
+    };
+  }
+  if (moodsKnown && moodShare("action") >= 0.3 && pct(1980, 2000) >= 0.3) {
+    return {
+      level,
+      title: "The Dad Movie Build",
+      tier: grade("A"),
+      roast: `Heavy action loadout with a strong 80s-90s base. The dad movie build has always been one of the most overpowered strategies in the game — it doesn't matter who you are, this gets the job done in almost every situation.`,
+      strengths: ["Works on literally any audience", "Explosion-based crowd control"],
+      weaknesses: ["Film snobs farm you at long range", "Emotional-depth slot left empty"],
+    };
+  }
+  if (moodsKnown && moodShare("romance", "date") >= 0.3) {
+    return {
+      level,
+      title: "The Hopeless Romantic",
+      tier: grade("A"),
+      roast: `Nearly a third of your recognisable picks are romance-coded. You've built entirely around heart damage — devastating on date night, and honestly one of the most underrated builds in the meta. Mother is mothering.`,
+      strengths: ["Date-night ultimate always charged", "+5 emotional intelligence aura"],
+      weaknesses: ["Cynics resist your main attack", "Cries at trailers"],
+    };
+  }
+  if (moodsKnown && moodShare("feelgood") >= 0.35) {
+    return {
+      level,
+      title: "Childhood Nostalgia Build",
+      tier: grade("C"),
+      roast: `You've dumped a huge chunk of your points into the comfort-watch stat. It's the ultimate defensive build — immune to pretension, unbeatable with nieces and nephews — but step into a serious film lobby and you're fighting with a Paddington plushie.`,
+      strengths: ["Immune to pretentious attacks", "Maximum cosiness uptime"],
+      weaknesses: ["Limited endgame content", "'Have you seen anything sad?' hits critical"],
+    };
+  }
+  if (pct(1960, 1990) >= 0.45) {
+    return {
+      level,
+      title: "Boomer Nostalgia",
+      tier: grade("C"),
+      roast: `Almost half your library lives between the 60s and the 80s. You're one of the strongest nostalgia players in the game — but you've dumped everything into one era stat and it shows. Zero versatility, maximum vibes.`,
+      strengths: ["Legendary-era item collection", "Unbeatable at pub quiz decades rounds"],
+      weaknesses: ["Anything post-2000 is off the map", "One-stat wonder"],
+    };
+  }
+  if (moodsKnown && moodShare("classic", "mindbender") >= 0.35 && avg !== null && avg >= 3.2 && avg <= 4.1) {
+    return {
+      level,
+      title: "The Arthouse Nerd",
+      tier: grade(level >= 6 ? "S" : "A"),
+      roast: `A well-judged blend of canon classics and mind-benders, rated with actual discernment. This is the arthouse-nerd hybrid build — strong across the board, and so well-rounded it's almost unfair.`,
+      strengths: ["High film-history AND modern coverage", "Deflects snob attacks with ease"],
+      weaknesses: ["Occasionally unbearable at parties", "Long answer to 'seen anything good?'"],
     };
   }
   if (watchlistCount > total) {

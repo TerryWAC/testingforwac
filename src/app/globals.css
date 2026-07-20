@@ -10,6 +10,12 @@
   body {
     @apply min-h-screen;
   }
+  /* Clear the mobile bottom tab bar. */
+  @media (max-width: 767px) {
+    main {
+      padding-bottom: 5.5rem;
+    }
+  }
 }
 
 @keyframes confetti-fall {

@@ -52,6 +52,8 @@ export const recommendRequestSchema = z.object({
   count: z.union([z.literal(1), z.literal(8)]).default(8),
   chatMessage: z.string().trim().max(500).optional(),
   sessionId: z.string().uuid().optional(),
+  // Recently shown picks the client doesn't want to see again.
+  excludeSlugs: z.array(z.string().max(200)).max(30).default([]),
 });
 
 export const setupSchema = z.object({

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 export type NavKey =
   | "dashboard"
+  | "play"
   | "faceoff"
   | "veto"
   | "wheel"
@@ -20,6 +21,33 @@ export type NavKey =
   | "compare"
   | "profile";
 
+const TAB_OF: Record<NavKey, number> = {
+  dashboard: 0,
+  play: 1,
+  faceoff: 1,
+  veto: 1,
+  wheel: 1,
+  slots: 1,
+  match: 1,
+  double: 1,
+  coin: 1,
+  coming: 2,
+  people: 2,
+  gauntlet: 2,
+  stats: 3,
+  wrapped: 3,
+  compare: 4,
+  profile: 4,
+};
+
+const TABS = [
+  { href: "/dashboard", label: "Tonight", icon: "M8 5.5v13l11-6.5z" },
+  { href: "/play", label: "Play", icon: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" },
+  { href: "/coming", label: "Coming", icon: "M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1zm-1 5h16M9 2v4M15 2v4" },
+  { href: "/stats", label: "Stats", icon: "M5 20V10M12 20V4M19 20v-8" },
+  { href: "/profile", label: "You", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 3.6-6 8-6s8 2 8 6" },
+];
+
 interface NavLink {
   href: string;
   key: NavKey;
@@ -31,6 +59,7 @@ const SECTIONS: { title: string; links: NavLink[] }[] = [
     title: "Pick tonight",
     links: [
       { href: "/dashboard", key: "dashboard", label: "Tonight" },
+      { href: "/play", key: "play", label: "All ways to pick" },
       { href: "/faceoff", key: "faceoff", label: "Final Cut" },
       { href: "/veto", key: "veto", label: "Veto Draft" },
       { href: "/wheel", key: "wheel", label: "Spin the Wheel" },
@@ -159,6 +188,37 @@ export function AppNav({ active }: { active: NavKey }) {
           </nav>
         </div>
       )}
+
+      {/* Mobile bottom tab bar — you can always find your way home. */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-night-700/60 bg-night-950/95 backdrop-blur md:hidden">
+        <div className="mx-auto flex max-w-md">
+          {TABS.map((tab, i) => {
+            const isActive = TAB_OF[active] === i;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`flex flex-1 flex-col items-center gap-0.5 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-[10px] font-bold transition-colors ${
+                  isActive ? "text-accent" : "text-night-400 hover:text-slate-300"
+                }`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d={tab.icon} />
+                </svg>
+                {tab.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }

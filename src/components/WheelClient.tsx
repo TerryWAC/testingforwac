@@ -217,7 +217,7 @@ export function WheelClient() {
           <div className="absolute inset-0 bg-night-950/90 backdrop-blur-sm" onClick={() => setShowWinner(false)} />
           {winnerPoster && (
             <div
-              className="absolute inset-0 opacity-25 blur-2xl"
+              className="pointer-events-none absolute inset-0 opacity-25 blur-2xl"
               style={{
                 backgroundImage: `url(${winnerPoster})`,
                 backgroundSize: "cover",
@@ -225,6 +225,13 @@ export function WheelClient() {
               }}
             />
           )}
+          <button
+            aria-label="Close"
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-night-700 bg-night-900/90 text-lg text-slate-300 transition-colors hover:border-accent hover:text-white"
+            onClick={() => setShowWinner(false)}
+          >
+            ✕
+          </button>
           <div className="animate-pop-in relative w-full max-w-xs text-center">
             <p className="text-xs font-bold uppercase tracking-[0.35em] text-accent">
               Tonight&apos;s film

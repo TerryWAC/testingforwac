@@ -7,6 +7,7 @@ import { PickSkeleton } from "@/components/PickSkeleton";
 import { Confetti } from "@/components/Confetti";
 import { PickCard } from "@/components/PickCard";
 import { buzz } from "@/lib/haptics";
+import { addRecentPicks, getRecentPicks } from "@/lib/recentPicks";
 import { usePosters } from "@/lib/usePosters";
 import type { Era, Mood, Pick, RecommendResponse, RuntimeCap } from "@/lib/types";
 
@@ -140,12 +141,14 @@ export function SlotsClient() {
             allowRewatches: false,
           },
           count: 8,
+          excludeSlugs: getRecentPicks(),
         }),
       });
       const json: RecommendResponse & { error?: string } = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Could not deal picks");
       setPicks(json.picks);
       setPickSource(json.source);
+      addRecentPicks(json.picks.map((p) => p.slug));
       if (json.picks.length > 0) buzz([15, 30, 20]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");

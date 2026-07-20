@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  const { filters, count, chatMessage, sessionId } = parsed.data;
+  const { filters, count, chatMessage, sessionId, excludeSlugs } = parsed.data;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -88,6 +88,13 @@ export async function POST(request: Request) {
   } else {
     const films = await getFilmsForProfile(profile.id);
     candidates = buildCandidates(films, filters);
+  }
+
+  // Variety: drop recently shown picks unless that would starve the results.
+  if (excludeSlugs.length > 0) {
+    const excluded = new Set(excludeSlugs);
+    const fresh = candidates.filter((c) => !excluded.has(c.slug));
+    if (fresh.length >= count) candidates = fresh;
   }
 
   if (candidates.length === 0) {

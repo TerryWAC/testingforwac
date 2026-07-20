@@ -14,6 +14,7 @@ export interface FriendSummary {
   filmCount: number;
   recentWatches: { title: string; year: number | null; slug: string; watched_date: string | null }[];
   topRated: { title: string; year: number | null; slug: string; rating: number }[];
+  build: { level: number; title: string; tier: string };
 }
 
 export interface Badge {
@@ -375,6 +376,9 @@ export function ProfileClient({
                       <span className="block font-semibold text-white">@{f.username}</span>
                       <span className="text-xs text-night-400">
                         {f.filmCount} films from their public activity
+                      </span>
+                      <span className="mt-1 inline-block rounded bg-night-800 px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                        Lv {f.build.level} · {f.build.title} · {f.build.tier} tier
                       </span>
                     </span>
                     <span className="text-night-400">{openFriend === f.id ? "▴" : "▾"}</span>

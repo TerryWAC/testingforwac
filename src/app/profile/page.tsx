@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { ProfileClient, type Badge, type FriendSummary } from "@/components/ProfileClient";
 import { getFilmsForProfile } from "@/lib/db";
-import { computeSnapshot, longestStreak } from "@/lib/stats";
+import { computeSnapshot, longestStreak, movieBuffProfile } from "@/lib/stats";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -75,6 +75,7 @@ export default async function ProfilePage() {
       };
       const friendFilms = await getFilmsForProfile(row.profile_id);
       const friendSnapshot = computeSnapshot(friendFilms);
+      const friendBuff = movieBuffProfile(friendFilms);
       return {
         id: row.id,
         username: p.letterboxd_username,
@@ -82,6 +83,7 @@ export default async function ProfilePage() {
         filmCount: friendSnapshot.totalFilms,
         recentWatches: friendSnapshot.recentWatches.slice(0, 3),
         topRated: friendSnapshot.topRated.slice(0, 3),
+        build: { level: friendBuff.level, title: friendBuff.title, tier: friendBuff.tier },
       };
     })
   );

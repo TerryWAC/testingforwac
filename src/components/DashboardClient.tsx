@@ -8,6 +8,7 @@ import { AppNav } from "@/components/AppNav";
 import { PickCard } from "@/components/PickCard";
 import { PickSkeleton } from "@/components/PickSkeleton";
 import { warmCandidates } from "@/lib/candidatesCache";
+import { addRecentPicks, getRecentPicks } from "@/lib/recentPicks";
 import { usePosters } from "@/lib/usePosters";
 import {
   LETTERBOXD_FILM_URL,
@@ -193,12 +194,14 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale, memories }:
           filters: { mood, intensity, runtimeCap, language, era, allowRewatches },
           count,
           chatMessage,
+          excludeSlugs: getRecentPicks(),
         }),
       });
       const json: RecommendResponse & { error?: string } = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Could not get picks");
       setPicks(json.picks);
       setPickSource(json.source);
+      addRecentPicks(json.picks.map((p) => p.slug));
       if (chatMessage) {
         setChatLog((log) => [
           ...log,
