@@ -16,6 +16,13 @@ export interface FriendSummary {
   topRated: { title: string; year: number | null; slug: string; rating: number }[];
 }
 
+export interface Badge {
+  id: string;
+  label: string;
+  desc: string;
+  earned: boolean;
+}
+
 export interface ReviewItem {
   slug: string;
   title: string;
@@ -33,6 +40,7 @@ interface Props {
   snapshot: TasteSnapshot;
   friends: FriendSummary[];
   reviews: ReviewItem[];
+  badges: Badge[];
 }
 
 function Avatar({
@@ -71,6 +79,7 @@ export function ProfileClient({
   snapshot,
   friends,
   reviews,
+  badges,
 }: Props) {
   const router = useRouter();
   const [friendName, setFriendName] = useState("");
@@ -226,6 +235,32 @@ export function ProfileClient({
               value={snapshot.averageRating !== null ? `${snapshot.averageRating}★` : "—"}
             />
             <Stat label="Watchlist" value={snapshot.watchlistCount} />
+          </div>
+        </section>
+
+        {/* Achievements */}
+        <section className="animate-fade-up mb-6" style={{ animationDelay: "90ms" }}>
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-night-400">
+            Achievements ({badges.filter((b) => b.earned).length}/{badges.length})
+          </h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {badges.map((b, i) => (
+              <div
+                key={b.id}
+                className={`animate-fade-up rounded-lg border p-2.5 ${
+                  b.earned
+                    ? "border-accent/40 bg-accent/5"
+                    : "border-night-700/60 bg-night-900 opacity-50"
+                }`}
+                style={{ animationDelay: `${100 + i * 40}ms` }}
+                title={b.desc}
+              >
+                <p className={`text-sm font-bold ${b.earned ? "text-accent" : "text-slate-400"}`}>
+                  {b.earned ? "◆" : "◇"} {b.label}
+                </p>
+                <p className="mt-0.5 text-[11px] leading-snug text-night-400">{b.desc}</p>
+              </div>
+            ))}
           </div>
         </section>
 

@@ -23,6 +23,12 @@ interface FilmInfo {
   review: string | null;
 }
 
+interface Provider {
+  name: string;
+  logoUrl: string | null;
+  kind: "stream" | "rent";
+}
+
 function Stars({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
@@ -49,6 +55,7 @@ export function FilmInfoSheet({
 }) {
   const [info, setInfo] = useState<FilmInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [providers, setProviders] = useState<Provider[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,10 +71,22 @@ export function FilmInfoSheet({
       })
       .catch(() => {})
       .finally(() => !cancelled && setLoading(false));
+
+    fetch("/api/where", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: target.title, year: target.year }),
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (!cancelled && json.enabled) setProviders(json.providers ?? []);
+      })
+      .catch(() => {});
+
     return () => {
       cancelled = true;
     };
-  }, [target.slug]);
+  }, [target.slug, target.title, target.year]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
@@ -127,6 +146,34 @@ export function FilmInfoSheet({
 
         {target.why && <p className="mt-4 text-sm text-slate-300">{target.why}</p>}
 
+        {providers && providers.length > 0 && (
+          <div className="animate-fade-up mt-4">
+            <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-night-400">
+              Where to watch
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {providers.map((p) => (
+                <span
+                  key={p.name}
+                  title={`${p.name}${p.kind === "rent" ? " (rent)" : ""}`}
+                  className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold ${
+                    p.kind === "stream"
+                      ? "border-accent/40 text-slate-200"
+                      : "border-night-700 text-night-400"
+                  }`}
+                >
+                  {p.logoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.logoUrl} alt="" className="h-4 w-4 rounded" />
+                  )}
+                  {p.name}
+                  {p.kind === "rent" && <span className="text-[9px] uppercase">rent</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-5 space-y-2">
           <a
             href={letterboxdUrl(target)}
@@ -141,6 +188,12 @@ export function FilmInfoSheet({
           </p>
           <div className="flex gap-2">
             <a
+              href={`/tonight?slug=${encodeURIComponent(target.slug)}&title=${encodeURIComponent(target.title)}${target.year ? `&year=${target.year}` : ""}${target.discovery ? "&d=1" : ""}`}
+              className="btn-secondary flex-1"
+            >
+              Watch tonight
+            </a>
+            <a
               href={STREMIO_SEARCH_URL(target.title)}
               target="_blank"
               rel="noreferrer"
@@ -148,10 +201,10 @@ export function FilmInfoSheet({
             >
               Find on Stremio
             </a>
-            <button className="btn-secondary flex-1" onClick={onClose}>
-              Close
-            </button>
           </div>
+          <button className="btn-secondary w-full" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>

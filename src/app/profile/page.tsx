@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
-import { ProfileClient, type FriendSummary } from "@/components/ProfileClient";
+import { ProfileClient, type Badge, type FriendSummary } from "@/components/ProfileClient";
 import { getFilmsForProfile } from "@/lib/db";
-import { computeSnapshot } from "@/lib/stats";
+import { computeSnapshot, longestStreak } from "@/lib/stats";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -35,6 +35,28 @@ export default async function ProfilePage() {
       watched_date: f.watched_date,
       review: f.review as string,
     }));
+
+  // Achievements.
+  const watched = films.filter((f) => f.entry_type !== "watchlist");
+  const decadesExplored = new Set(
+    watched.filter((f) => f.year).map((f) => Math.floor((f.year as number) / 10) * 10)
+  ).size;
+  const streak = longestStreak(
+    watched.filter((f) => f.watched_date).map((f) => f.watched_date as string)
+  );
+  const reviewCount = films.filter((f) => f.review).length;
+  const badges: Badge[] = [
+    { id: "first", label: "First Steps", desc: "Log your first film", earned: snapshot.totalFilms >= 1 },
+    { id: "c100", label: "Century Club", desc: "Watch 100 films", earned: snapshot.totalFilms >= 100 },
+    { id: "c250", label: "Cinephile", desc: "Watch 250 films", earned: snapshot.totalFilms >= 250 },
+    { id: "c500", label: "Obsessed", desc: "Watch 500 films", earned: snapshot.totalFilms >= 500 },
+    { id: "c1000", label: "The Archivist", desc: "Watch 1,000 films", earned: snapshot.totalFilms >= 1000 },
+    { id: "critic", label: "The Critic", desc: "Rate 100 films", earned: snapshot.totalRated >= 100 },
+    { id: "time", label: "Time Traveler", desc: "Watch films from 7+ decades", earned: decadesExplored >= 7 },
+    { id: "words", label: "Wordsmith", desc: "Write 10 reviews", earned: reviewCount >= 10 },
+    { id: "dream", label: "The Dreamer", desc: "50 films on your watchlist", earned: snapshot.watchlistCount >= 50 },
+    { id: "roll", label: "On a Roll", desc: "Watch films 7 days in a row", earned: streak >= 7 },
+  ];
 
   // Friends and their public snapshots.
   const admin = createAdminClient();
@@ -73,6 +95,7 @@ export default async function ProfilePage() {
       snapshot={snapshot}
       friends={friends}
       reviews={reviews}
+      badges={badges}
     />
   );
 }

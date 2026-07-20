@@ -156,4 +156,66 @@ export const CATALOG: CatalogEntry[] = [
   { t: "Forrest Gump", y: 1994, m: ["classic", "feelgood", "tearjerker", "easy"], i: "light", r: 142 },
   { t: "Ocean's Eleven", y: 2001, m: ["easy", "comedy", "action"], i: "light", r: 116 },
   { t: "Knives Out", y: 2019, m: ["easy", "comedy", "thriller", "date"], i: "light", r: 130 },
+
+  // Sci-fi
+  { t: "Interstellar", y: 2014, m: ["mindbender", "tearjerker", "action"], i: "medium", r: 169 },
+  { t: "Dune", y: 2021, m: ["action", "mindbender"], i: "medium", r: 155 },
+  { t: "The Martian", y: 2015, m: ["feelgood", "action", "easy"], i: "light", r: 144 },
+  { t: "E.T. the Extra-Terrestrial", y: 1982, m: ["feelgood", "tearjerker", "easy", "classic"], i: "light", r: 115 },
+  { t: "Star Wars", y: 1977, m: ["action", "classic", "easy", "feelgood"], i: "light", r: 121 },
+  { t: "The Empire Strikes Back", y: 1980, m: ["action", "classic", "easy"], i: "medium", r: 124 },
+  { t: "Edge of Tomorrow", y: 2014, m: ["action", "comedy", "easy"], i: "medium", r: 113 },
+  { t: "District 9", y: 2009, m: ["action", "thriller", "weird"], i: "heavy", r: 112 },
+  { t: "Moon", y: 2009, m: ["mindbender", "weird"], i: "medium", r: 97 },
+  { t: "Her", y: 2013, m: ["romance", "mindbender", "tearjerker"], i: "medium", r: 126 },
+  { t: "Ex Machina", y: 2014, m: ["mindbender", "thriller"], i: "medium", r: 108 },
+  { t: "The Prestige", y: 2006, m: ["mindbender", "thriller"], i: "medium", r: 130 },
+
+  // War
+  { t: "Saving Private Ryan", y: 1998, m: ["classic", "tearjerker", "action"], i: "heavy", r: 169 },
+  { t: "Dunkirk", y: 2017, m: ["thriller", "action"], i: "heavy", r: 106 },
+  { t: "1917", y: 2019, m: ["thriller", "action"], i: "heavy", r: 119 },
+  { t: "Full Metal Jacket", y: 1987, m: ["classic", "thriller"], i: "heavy", r: 116 },
+
+  // Westerns
+  { t: "Unforgiven", y: 1992, m: ["classic", "thriller"], i: "medium", r: 130 },
+  { t: "Django Unchained", y: 2012, m: ["action", "thriller"], i: "heavy", r: 165 },
+  { t: "True Grit", y: 2010, m: ["action", "easy"], i: "medium", r: 110 },
+
+  // Musicals
+  { t: "The Sound of Music", y: 1965, m: ["classic", "feelgood", "date", "easy"], i: "light", r: 172 },
+  { t: "Grease", y: 1978, m: ["feelgood", "date", "easy", "classic"], i: "light", r: 110 },
+  { t: "Mamma Mia!", y: 2008, m: ["feelgood", "comedy", "date", "easy"], i: "light", r: 108 },
+  { t: "The Greatest Showman", y: 2017, m: ["feelgood", "date", "easy"], i: "light", r: 105 },
+
+  // Heists & crime capers
+  { t: "Reservoir Dogs", y: 1992, m: ["thriller", "classic"], i: "heavy", r: 99 },
+  { t: "Baby Driver", y: 2017, m: ["action", "easy", "date"], i: "medium", r: 113 },
+  { t: "Inside Man", y: 2006, m: ["thriller", "easy"], i: "medium", r: 129 },
+
+  // Animation
+  { t: "Spider-Man: Into the Spider-Verse", y: 2018, m: ["action", "feelgood", "easy"], i: "light", r: 117 },
+  { t: "WALL-E", y: 2008, m: ["feelgood", "romance", "easy"], i: "light", r: 98 },
+  { t: "Inside Out", y: 2015, m: ["feelgood", "tearjerker", "easy"], i: "light", r: 95 },
+  { t: "Akira", y: 1988, m: ["weird", "action", "mindbender"], i: "heavy", r: 124, l: "ja" },
+  { t: "The Incredibles", y: 2004, m: ["action", "feelgood", "easy", "comedy"], i: "light", r: 115 },
+  { t: "Finding Nemo", y: 2003, m: ["feelgood", "easy", "tearjerker"], i: "light", r: 100 },
+
+  // Sports
+  { t: "Rocky", y: 1976, m: ["classic", "feelgood", "tearjerker"], i: "medium", r: 120 },
+  { t: "Creed", y: 2015, m: ["feelgood", "action"], i: "medium", r: 133 },
+  { t: "Moneyball", y: 2011, m: ["feelgood", "easy"], i: "light", r: 133 },
+
+  // Noir
+  { t: "Double Indemnity", y: 1944, m: ["classic", "thriller"], i: "medium", r: 107 },
+  { t: "The Third Man", y: 1949, m: ["classic", "thriller"], i: "medium", r: 104 },
+
+  // More comedy / teen
+  { t: "Clueless", y: 1995, m: ["comedy", "date", "easy", "feelgood"], i: "light", r: 97 },
+  { t: "Mean Girls", y: 2004, m: ["comedy", "easy", "feelgood"], i: "light", r: 97 },
+  { t: "Lady Bird", y: 2017, m: ["comedy", "tearjerker", "feelgood"], i: "light", r: 94 },
+  { t: "Bridesmaids", y: 2011, m: ["comedy", "easy"], i: "light", r: 125 },
+  { t: "Game Night", y: 2018, m: ["comedy", "thriller", "date", "easy"], i: "light", r: 100 },
+  { t: "Palm Springs", y: 2020, m: ["comedy", "romance", "mindbender", "date"], i: "light", r: 90 },
+  { t: "Shutter Island", y: 2010, m: ["thriller", "mindbender", "horror"], i: "heavy", r: 138 },
 ];

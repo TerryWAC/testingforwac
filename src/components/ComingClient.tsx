@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Rail } from "@/components/Rail";
 import { Tilt } from "@/components/Tilt";
 import { LETTERBOXD_SEARCH_URL, STREMIO_SEARCH_URL } from "@/lib/types";
 
@@ -107,7 +108,7 @@ export function ComingClient() {
                 <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-accent">
                   From your watchlist
                 </h2>
-                <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <Rail>
                   {watchlisted.map((m) => (
                     <a
                       key={`${m.title}-${m.date}`}
@@ -139,7 +140,7 @@ export function ComingClient() {
                       <p className="text-[11px] text-accent">{formatDay(m.date)}</p>
                     </a>
                   ))}
-                </div>
+                </Rail>
               </section>
             )}
 
@@ -149,7 +150,7 @@ export function ComingClient() {
                 <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-night-400">
                   In cinemas now
                 </h2>
-                <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <Rail>
                   {data.nowPlaying!.map((m) => (
                     <a
                       key={m.title}
@@ -178,7 +179,7 @@ export function ComingClient() {
                       </p>
                     </a>
                   ))}
-                </div>
+                </Rail>
               </section>
             )}
 

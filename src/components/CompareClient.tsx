@@ -27,6 +27,7 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [picks, setPicks] = useState<Pick[] | null>(null);
   const [pickSource, setPickSource] = useState<"ai" | "deterministic" | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const posters = usePosters(
     (picks ?? []).map((p) => ({ slug: p.slug, title: p.title, year: p.year }))
   );
@@ -179,6 +180,23 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
               <p className="text-2xl font-bold tracking-[0.3em] text-accent">
                 {activeSession.joinCode}
               </p>
+              <button
+                className="mt-1.5 text-xs font-semibold text-accent-blue hover:underline"
+                onClick={async () => {
+                  const url = `${window.location.origin}/join/${activeSession.joinCode}`;
+                  try {
+                    if (navigator.share) await navigator.share({ url });
+                    else {
+                      await navigator.clipboard.writeText(url);
+                      setError(null);
+                      setLinkCopied(true);
+                      setTimeout(() => setLinkCopied(false), 2000);
+                    }
+                  } catch {}
+                }}
+              >
+                {linkCopied ? "Link copied" : "Copy invite link"}
+              </button>
             </div>
             <div className="text-right text-sm text-night-400">
               {overlap?.members.length ?? 1}/3 profiles
