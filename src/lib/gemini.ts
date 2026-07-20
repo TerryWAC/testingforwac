@@ -28,12 +28,16 @@ export async function polishWithGemini(
   if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
 
   const candidateList = candidates
-    .map(
-      (c) =>
-        `- slug:${c.slug} | ${c.title}${c.year ? ` (${c.year})` : ""} | signals: ${
-          c.reasons.join("; ") || "none"
-        }`
-    )
+    .map((c) => {
+      const meta = [
+        c.runtime ? `${c.runtime} min` : null,
+        c.genreNames?.length ? c.genreNames.join("/") : null,
+        c.vote ? `TMDB ${c.vote}` : null,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      return `- slug:${c.slug} | ${c.title}${c.year ? ` (${c.year})` : ""}${meta ? ` | ${meta}` : ""} | signals: ${c.reasons.join("; ") || "none"}`;
+    })
     .join("\n");
 
   const prompt = [

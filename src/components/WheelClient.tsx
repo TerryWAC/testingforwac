@@ -18,6 +18,8 @@ interface WheelItem {
   year: number | null;
   reasons: string[];
   discovery?: boolean;
+  runtime?: number | null;
+  genre?: string | null;
 }
 
 const GAP = 12; // px
@@ -249,6 +251,13 @@ export function WheelClient() {
                 <span className="ml-2 text-lg font-medium text-night-400">{winner.year}</span>
               )}
             </p>
+            {(winner.genre || winner.runtime) && (
+              <p className="mt-1 text-xs font-semibold text-accent">
+                {[winner.genre, winner.runtime ? `${winner.runtime} min` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
             {winner.reasons.length > 0 && (
               <p className="mt-2 text-sm text-slate-300">{winner.reasons[0]}</p>
             )}

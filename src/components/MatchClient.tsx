@@ -16,6 +16,8 @@ interface MatchItem {
   year: number | null;
   reasons: string[];
   discovery?: boolean;
+  runtime?: number | null;
+  genre?: string | null;
 }
 
 const SAVED_KEY = "lbnight-match-saved";
@@ -139,7 +141,7 @@ export function MatchClient() {
     <div className="min-h-screen">
       <AppNav active="match" />
       <main className="mx-auto max-w-md px-4 py-6">
-        <h1 className="text-2xl font-bold text-white">Movie Match</h1>
+        <h1 className="title-grad text-2xl font-bold">Movie Match</h1>
         <p className="mt-1 text-sm text-night-400">
           Swipe right to save, left to pass, up for maybe — or use the buttons.
         </p>
@@ -237,6 +239,13 @@ export function MatchClient() {
                       <span className="ml-2 text-base font-medium text-slate-300">{top.year}</span>
                     )}
                   </p>
+                  {(top.genre || top.runtime) && (
+                    <p className="mt-1 text-xs font-semibold text-accent">
+                      {[top.genre, top.runtime ? `${top.runtime} min` : null]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
                   {top.reasons.length > 0 && (
                     <p className="mt-1.5 text-sm text-slate-200">{top.reasons[0]}</p>
                   )}

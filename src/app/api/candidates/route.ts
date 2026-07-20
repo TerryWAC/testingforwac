@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getFilmsForProfile } from "@/lib/db";
-import { buildCandidates, buildDiscoveryCandidates } from "@/lib/recommend";
+import { GENRE_NAMES, getFilmMeta } from "@/lib/filmMeta";
+import { buildCandidates, buildDiscoveryCandidates, refineCandidates } from "@/lib/recommend";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -58,6 +59,14 @@ export async function POST(request: Request) {
     candidates = buildCandidates(films, neutralFilters, limit, null);
   }
 
+  try {
+    const metaMap = await getFilmMeta(
+      candidates.map((c) => ({ slug: c.slug, title: c.title, year: c.year })),
+      10
+    );
+    candidates = refineCandidates(candidates, neutralFilters, metaMap, GENRE_NAMES);
+  } catch {}
+
   return NextResponse.json({
     candidates: candidates.map((c) => ({
       slug: c.slug,
@@ -65,6 +74,8 @@ export async function POST(request: Request) {
       year: c.year,
       reasons: c.reasons,
       discovery: c.discovery ?? false,
+      runtime: c.runtime ?? null,
+      genre: c.genreNames?.[0] ?? null,
     })),
   });
 }

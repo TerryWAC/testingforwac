@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { buildCacheKey, getCachedResponse, setCachedResponse, tryConsumeAiQuota } from "@/lib/aiGate";
+import { GENRE_NAMES, getFilmMeta } from "@/lib/filmMeta";
 import { getFilmsForProfile } from "@/lib/db";
 import { polishWithGemini } from "@/lib/gemini";
-import { blendGroupCandidates, buildCandidates, deterministicPicks } from "@/lib/recommend";
+import { blendGroupCandidates, buildCandidates, deterministicPicks, refineCandidates } from "@/lib/recommend";
 import { recommendRequestSchema } from "@/lib/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -121,6 +122,15 @@ export async function POST(request: Request) {
       // Social enrichment is best-effort — recommendations never fail on it.
     }
   }
+
+  // Real metadata pass: genres, runtime, language, acclaim (progressively
+  // cached in film_meta, so coverage and quality grow with every request).
+  try {
+    const metaMap = await getFilmMeta(
+      candidates.map((c) => ({ slug: c.slug, title: c.title, year: c.year }))
+    );
+    candidates = refineCandidates(candidates, filters, metaMap, GENRE_NAMES);
+  } catch {}
 
   // Variety: drop recently shown picks unless that would starve the results.
   if (excludeSlugs.length > 0) {

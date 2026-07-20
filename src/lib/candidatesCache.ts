@@ -8,6 +8,8 @@ export interface CandidateItem {
   year: number | null;
   reasons: string[];
   discovery?: boolean;
+  runtime?: number | null;
+  genre?: string | null;
 }
 
 const TTL_MS = 5 * 60_000;

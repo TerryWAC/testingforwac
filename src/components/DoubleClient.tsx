@@ -238,7 +238,7 @@ export function DoubleClient({ seenTitles }: { seenTitles: string[] }) {
     <div className="min-h-screen">
       <AppNav active="double" />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="text-2xl font-bold text-white">Double Feature</h1>
+        <h1 className="title-grad text-2xl font-bold">Double Feature</h1>
         <p className="mt-1 text-sm text-night-400">{activeStrategy.blurb}</p>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">

@@ -10,6 +10,10 @@ export interface Candidate {
   reasons: string[];
   seen: boolean;
   discovery?: boolean;
+  // Enriched by refineCandidates when metadata is known.
+  runtime?: number | null;
+  genreNames?: string[];
+  vote?: number | null;
 }
 
 const INTENSITY_ORDER = ["light", "medium", "heavy", "extreme"];
@@ -227,22 +231,104 @@ export function buildDiscoveryCandidates(
   return [...out.slice(dayOffset), ...out.slice(0, dayOffset)].slice(0, max);
 }
 
+// TMDB genre ids that satisfy each mood.
+const MOOD_GENRES: Record<TonightFilters["mood"], number[]> = {
+  comedy: [35],
+  date: [10749, 35],
+  thriller: [53, 9648, 80],
+  horror: [27],
+  action: [28, 12],
+  romance: [10749],
+  weird: [14, 878],
+  mindbender: [878, 9648],
+  feelgood: [35, 10751, 16, 10402],
+  tearjerker: [18],
+  classic: [],
+  easy: [35, 10751, 12, 16],
+};
+
+export interface CandidateMeta {
+  runtime: number | null;
+  genres: number[];
+  language: string | null;
+  vote: number | null;
+}
+
+/**
+ * Second pass over candidates once real metadata is known: hard-filter
+ * runtime and language (with a starvation guard), score genuine genre
+ * matches and acclaim, and attach display metadata for the UI and AI.
+ */
+export function refineCandidates(
+  candidates: Candidate[],
+  filters: TonightFilters,
+  meta: Map<string, CandidateMeta>,
+  genreNames: Record<number, string>
+): Candidate[] {
+  if (meta.size === 0) return candidates;
+  const runtimeMax = RUNTIME_MAX[filters.runtimeCap];
+  const wantGenres = new Set(MOOD_GENRES[filters.mood]);
+
+  const passes = (c: Candidate) => {
+    const m = meta.get(c.slug);
+    if (!m) return true; // unknown metadata never disqualifies
+    if (m.runtime && m.runtime > runtimeMax + 10) return false;
+    if (filters.language === "english" && m.language && m.language !== "en") return false;
+    if (filters.language === "foreign" && m.language === "en") return false;
+    return true;
+  };
+
+  let refined = candidates.filter(passes);
+  if (refined.length < Math.min(8, candidates.length)) refined = candidates; // never starve
+
+  for (const c of refined) {
+    const m = meta.get(c.slug);
+    if (!m) continue;
+    c.runtime = m.runtime;
+    c.vote = m.vote;
+    c.genreNames = m.genres.map((g) => genreNames[g]).filter(Boolean).slice(0, 3);
+
+    if (wantGenres.size > 0 && m.genres.some((g) => wantGenres.has(g))) {
+      c.score += 4;
+      const genreLabel = c.genreNames[0] ?? "genre";
+      const reason = `A genuine ${genreLabel.toLowerCase()} pick`;
+      if (!c.reasons.includes(reason)) c.reasons.unshift(reason);
+    }
+    if (m.vote !== null && m.vote >= 7.5) {
+      c.score += 2;
+      const reason = `Rated ${m.vote} on TMDB`;
+      if (!c.reasons.includes(reason)) c.reasons.push(reason);
+    }
+    if (m.runtime && filters.runtimeCap !== "any" && m.runtime <= runtimeMax) {
+      c.score += 1;
+    }
+  }
+
+  return refined.sort((a, b) => b.score - a.score);
+}
+
 /** Template "why" copy used when AI is skipped, rate-limited, or errors. */
 export function deterministicPicks(
   candidates: Candidate[],
   filters: TonightFilters,
   count: number
 ): Pick[] {
-  return candidates.slice(0, count).map((c) => ({
-    title: c.title,
-    year: c.year,
-    slug: c.slug,
-    discovery: c.discovery,
-    why:
+  return candidates.slice(0, count).map((c) => {
+    const detail = [c.genreNames?.[0], c.runtime ? `${c.runtime} min` : null]
+      .filter(Boolean)
+      .join(" · ");
+    const base =
       c.reasons.length > 0
         ? `${c.reasons.slice(0, 2).join(". ")}. Fits ${MOOD_LABEL[filters.mood]}.`
-        : `From your library — a solid fit for ${MOOD_LABEL[filters.mood]}.`,
-  }));
+        : `From your library — a solid fit for ${MOOD_LABEL[filters.mood]}.`;
+    return {
+      title: c.title,
+      year: c.year,
+      slug: c.slug,
+      discovery: c.discovery,
+      why: detail ? `${base} (${detail})` : base,
+    };
+  });
 }
 
 /**
