@@ -8,7 +8,14 @@ import type { FilmRow, Profile } from "@/lib/types";
 /** Sync at most once per this window unless the user asks explicitly. */
 export const AUTO_SYNC_STALE_HOURS = 6;
 
-export async function getFilmsForProfile(profileId: string): Promise<FilmRow[]> {
+// Review text is heavy and only the profile page needs it — skip by default.
+const FILM_COLUMNS =
+  "id, profile_id, film_slug, title, year, rating, watched_date, entry_type, source, created_at, updated_at";
+
+export async function getFilmsForProfile(
+  profileId: string,
+  opts?: { withReviews?: boolean }
+): Promise<FilmRow[]> {
   const admin = createAdminClient();
   const all: FilmRow[] = [];
   const page = 1000;
@@ -16,12 +23,15 @@ export async function getFilmsForProfile(profileId: string): Promise<FilmRow[]> 
   for (let from = 0; ; from += page) {
     const { data, error } = await admin
       .from("films")
-      .select("*")
+      .select(opts?.withReviews ? "*" : FILM_COLUMNS)
       .eq("profile_id", profileId)
       .order("created_at", { ascending: true })
       .range(from, from + page - 1);
     if (error) throw new Error(error.message);
-    all.push(...((data ?? []) as FilmRow[]));
+    for (const row of (data ?? []) as unknown as FilmRow[]) {
+      if (!opts?.withReviews) row.review = null;
+      all.push(row);
+    }
     if (!data || data.length < page) break;
   }
   return all;

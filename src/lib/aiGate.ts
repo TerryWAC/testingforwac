@@ -22,7 +22,11 @@ export async function getCachedResponse(cacheKey: string): Promise<RecommendResp
     .eq("cache_key", cacheKey)
     .maybeSingle();
   if (!data) return null;
-  if (new Date(data.expires_at) < new Date()) return null;
+  if (new Date(data.expires_at) < new Date()) {
+    // Opportunistic housekeeping: sweep all expired entries, not just this one.
+    void admin.from("ai_cache").delete().lt("expires_at", new Date().toISOString());
+    return null;
+  }
   return data.response_json as RecommendResponse;
 }
 

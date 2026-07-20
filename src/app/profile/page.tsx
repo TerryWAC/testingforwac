@@ -20,7 +20,7 @@ export default async function ProfilePage() {
     .maybeSingle();
   if (!profile) redirect("/setup");
 
-  const films = await getFilmsForProfile(profile.id);
+  const films = await getFilmsForProfile(profile.id, { withReviews: true });
   const snapshot = computeSnapshot(films);
 
   const reviews = films
