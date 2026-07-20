@@ -80,7 +80,7 @@ export function ComingClient() {
     <div className="min-h-screen">
       <AppNav active="coming" />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="animate-fade-up text-2xl font-bold text-white">Coming Soon</h1>
+        <h1 className="animate-fade-up title-grad text-2xl font-bold">Coming Soon</h1>
         <p className="animate-fade-up mt-1 text-sm text-night-400" style={{ animationDelay: "60ms" }}>
           The release calendar — tap a day to see what drops.
         </p>

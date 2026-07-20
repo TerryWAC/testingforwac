@@ -125,7 +125,7 @@ export function CompareClient({ username, activeSession, overlap }: Props) {
       <AppNav active="compare" />
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
       <header className="mb-6">
-        <h1 className="animate-fade-up text-2xl font-bold text-white">Compare</h1>
+        <h1 className="animate-fade-up title-grad text-2xl font-bold">Compare</h1>
         <p className="animate-fade-up text-sm text-night-400" style={{ animationDelay: "60ms" }}>
           Find a film that works for everyone — up to 3 profiles.
         </p>

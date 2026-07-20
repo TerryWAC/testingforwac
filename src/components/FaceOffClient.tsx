@@ -94,7 +94,7 @@ export function FaceOffClient() {
     <div className="min-h-screen">
       <AppNav active="faceoff" />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="animate-fade-up text-2xl font-bold text-white">Final Cut</h1>
+        <h1 className="animate-fade-up title-grad text-2xl font-bold">Final Cut</h1>
         <p className="animate-fade-up mt-1 text-sm text-night-400" style={{ animationDelay: "60ms" }}>
           Eight films enter, one leaves. Tap the film you&apos;d rather watch in each face-off —
           pass the phone between rounds if you&apos;re deciding together.

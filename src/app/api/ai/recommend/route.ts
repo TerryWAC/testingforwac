@@ -88,6 +88,38 @@ export async function POST(request: Request) {
   } else {
     const films = await getFilmsForProfile(profile.id);
     candidates = buildCandidates(films, filters);
+
+    // Friend-aware boost: films your friends have watched or watchlisted get
+    // a social signal in the "why" — great picks for shared taste.
+    try {
+      const admin = createAdminClient();
+      const { data: friendRows } = await admin
+        .from("friends")
+        .select("profile_id, profiles!inner(letterboxd_username)")
+        .eq("owner_user_id", user.id)
+        .limit(3);
+      if (friendRows && friendRows.length > 0) {
+        const friendFilms = new Map<string, string>();
+        for (const row of friendRows) {
+          const name = (row.profiles as unknown as { letterboxd_username: string })
+            .letterboxd_username;
+          const fFilms = await getFilmsForProfile(row.profile_id);
+          for (const f of fFilms) {
+            if (!friendFilms.has(f.film_slug)) friendFilms.set(f.film_slug, name);
+          }
+        }
+        for (const c of candidates) {
+          const friendName = friendFilms.get(c.slug);
+          if (friendName) {
+            c.score += 3;
+            c.reasons.push(`@${friendName} has it in their orbit too`);
+          }
+        }
+        candidates.sort((a, b) => b.score - a.score);
+      }
+    } catch {
+      // Social enrichment is best-effort — recommendations never fail on it.
+    }
   }
 
   // Variety: drop recently shown picks unless that would starve the results.

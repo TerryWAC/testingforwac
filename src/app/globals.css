@@ -189,6 +189,9 @@
     @apply rounded-full border border-night-700 bg-night-800 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors;
   }
   .chip-active {
-    @apply border-accent bg-accent/15 text-accent;
+    @apply border-accent bg-accent/15 text-accent shadow-[0_0_14px_rgba(0,192,48,0.25)];
+  }
+  .title-grad {
+    @apply bg-gradient-to-r from-white via-white to-slate-400 bg-clip-text text-transparent;
   }
 }

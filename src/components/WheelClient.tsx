@@ -106,7 +106,7 @@ export function WheelClient() {
     <div className="min-h-screen">
       <AppNav active="wheel" />
       <main className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="animate-fade-up text-2xl font-bold text-white">Spin the Wheel</h1>
+        <h1 className="animate-fade-up title-grad text-2xl font-bold">Spin the Wheel</h1>
         <p className="animate-fade-up mt-1 text-sm text-night-400" style={{ animationDelay: "60ms" }}>
           Can&apos;t decide? Let the reel pick from your own library. Respin as much as you like.
         </p>

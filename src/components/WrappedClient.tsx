@@ -46,7 +46,7 @@ export function WrappedClient(props: Props) {
       <AppNav active="wrapped" />
       <main className="mx-auto max-w-md px-4 py-6">
         <div className="flex items-center justify-between">
-          <h1 className="animate-fade-up text-2xl font-bold text-white">Wrapped</h1>
+          <h1 className="animate-fade-up title-grad text-2xl font-bold">Wrapped</h1>
           <div className="flex gap-1.5">
             {years.slice(0, 4).map((y) => (
               <Link

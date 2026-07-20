@@ -134,7 +134,7 @@ export function GauntletClient() {
       <main className="mx-auto max-w-3xl px-4 py-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="animate-fade-up text-2xl font-bold text-white">The Gauntlet</h1>
+            <h1 className="animate-fade-up title-grad text-2xl font-bold">The Gauntlet</h1>
             <p className="animate-fade-up mt-1 text-sm text-night-400" style={{ animationDelay: "60ms" }}>
               A themed film every day. How long can you keep the run alive?
             </p>

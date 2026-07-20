@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { DoubleClient } from "@/components/DoubleClient";
+import { getFilmsForProfile } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DoublePage() {
@@ -17,5 +18,14 @@ export default async function DoublePage() {
     .maybeSingle();
   if (!profile) redirect("/setup");
 
-  return <DoubleClient />;
+  const films = await getFilmsForProfile(profile.id);
+  const seenTitles = [
+    ...new Set(
+      films
+        .filter((f) => f.entry_type !== "watchlist")
+        .map((f) => f.title.toLowerCase().replace(/[^a-z0-9]/g, ""))
+    ),
+  ];
+
+  return <DoubleClient seenTitles={seenTitles} />;
 }
