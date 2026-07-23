@@ -30,9 +30,13 @@ The ping channel **is** the squad — no lobby needed:
 
 The topic name is the only secret, so pick/keep something unguessable.
 
+## Testing
+
+`npm test` runs an automated suite (~40s) that spawns the real watcher against simulated logs using Deadlock's genuine line formats: a full queue→pop→connect match, the practice range (must NOT ping), a cancelled queue (must NOT ping), backup detection when the primary line is missing, two matches in one session, a game restart truncating the log, config migration, and the `--find`/`--test` modes.
+
 ## How detection works
 
-Deadlock prints `Lobby <id> for Match <id> created` to its console log at the exact moment the queue pops — that's the line the watcher alerts on (with `CL: Connected to` as a backup as the game joins the server). It also recognizes the queue start/stop messages, so while you're searching the watcher prints `✓ Queue started — watching for the pop...` — if you see that, you know detection is live end-to-end.
+Deadlock prints `Lobby <id> for Match <id> created` to its console log at the exact moment the queue pops — that's the line the watcher alerts on. As a safety net, `CL: Connected to` (the game joining a server) also triggers the alert, but **only while a queue is active** — otherwise entering the practice range or a custom lobby would false-ping. The watcher tracks queue state from the matchmaking start/stop messages, so while you're searching it prints `✓ Queue started — watching for the pop...` — if you see that, you know detection is live end-to-end.
 
 ## If the alert doesn't fire (or fires at the wrong time)
 

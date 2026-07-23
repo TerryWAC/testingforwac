@@ -5,6 +5,7 @@
   "main": "watch.js",
   "scripts": {
     "start": "node watch.js",
+    "test": "node test.js",
     "test-alert": "node watch.js --test",
     "learn": "node watch.js --learn"
   },

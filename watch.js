@@ -30,17 +30,27 @@ process.stdout.on('error', () => {});
 
 // ---------------------------------------------------------------- config ---
 
-const CONFIG_PATH = path.join(__dirname, 'config.json');
+const argv = process.argv.slice(2);
+const argConfig = argv.indexOf('--config');
+const CONFIG_PATH = argConfig !== -1 && argv[argConfig + 1]
+  ? path.resolve(argv[argConfig + 1])
+  : path.join(__dirname, 'config.json');
 const DEFAULTS = {
   // Path to Deadlock's console.log. null = try the common Steam locations.
   logPath: null,
   // Case-insensitive regexes. If ANY matches a new log line, the alert fires.
   // "Lobby N for Match N created" is the line Deadlock prints the moment the
-  // queue pops; "CL: Connected to" is a backup that fires as the game joins
-  // the match server (the cooldown stops it double-pinging). If a patch
-  // changes the wording, use `--find` or `--learn` to get the new line.
+  // queue pops. If a patch changes the wording, use `--find` or `--learn`.
   patterns: [
     'Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created',
+  ],
+  // Backup patterns fire ONLY while a queue is active (between the queue
+  // start and stop messages below). "CL: Connected to" appears when the game
+  // joins any server — including the practice range and custom lobbies — so
+  // ungated it would false-ping; gated, it catches a match even if a patch
+  // renames the lobby line. The cooldown stops it double-pinging after the
+  // primary pattern already fired.
+  backupPatterns: [
     "\\[Client\\] CL:\\s+Connected to",
   ],
   // Lines that mark entering/leaving the matchmaking queue — used only for
@@ -55,16 +65,22 @@ const DEFAULTS = {
   ntfyTopic: null,
 };
 
-// Patterns shipped before the real log lines were identified — configs still
-// carrying these are auto-upgraded to the verified defaults.
-const LEGACY_PATTERNS = JSON.stringify([
-  'match\\s*(ready|found|made)',
-  'party_?match',
-  'matchmaking.*(ready|found|complete)',
-  'lobby.*(ready|found)',
-  'Connect(ing)? to .*server',
-  'CCitadelLobby.*match',
-]);
+// Pattern lists shipped by earlier versions — configs still carrying one of
+// these verbatim are auto-upgraded to the current verified defaults.
+const LEGACY_PATTERN_SETS = [
+  JSON.stringify([
+    'match\\s*(ready|found|made)',
+    'party_?match',
+    'matchmaking.*(ready|found|complete)',
+    'lobby.*(ready|found)',
+    'Connect(ing)? to .*server',
+    'CCitadelLobby.*match',
+  ]),
+  JSON.stringify([
+    'Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created',
+    "\\[Client\\] CL:\\s+Connected to",
+  ]),
+];
 
 function loadConfig() {
   let user = {};
@@ -76,8 +92,9 @@ function loadConfig() {
     }
     return null; // no config yet — triggers the setup wizard
   }
-  if (JSON.stringify(user.patterns) === LEGACY_PATTERNS) {
+  if (LEGACY_PATTERN_SETS.includes(JSON.stringify(user.patterns))) {
     delete user.patterns;
+    delete user.backupPatterns;
     saveConfig({ ...DEFAULTS, ...user });
     console.log('(Updated config.json to the verified match-found patterns.)');
   }
@@ -193,14 +210,19 @@ function fireAlert(config, line) {
 
 function tailFile(logPath, onLine) {
   // Start at end-of-file; survive the file being truncated/recreated on
-  // game restart (size shrink = start over from 0).
+  // game restart (size shrink = start over from 0). Reads are serialized —
+  // a tick is skipped while the previous read is still in flight, so lines
+  // from a burst of log output can't interleave out of order.
   let pos = fs.existsSync(logPath) ? fs.statSync(logPath).size : 0;
   let buf = '';
+  let reading = false;
   setInterval(() => {
+    if (reading) return;
     let stat;
     try { stat = fs.statSync(logPath); } catch { return; }
     if (stat.size < pos) { pos = 0; buf = ''; }
     if (stat.size === pos) return;
+    reading = true;
     const stream = fs.createReadStream(logPath, { start: pos, end: stat.size - 1 });
     pos = stat.size;
     stream.on('data', chunk => {
@@ -209,6 +231,8 @@ function tailFile(logPath, onLine) {
       buf = lines.pop();
       lines.forEach(onLine);
     });
+    stream.on('close', () => { reading = false; });
+    stream.on('error', () => { reading = false; });
   }, 500);
 }
 
@@ -395,20 +419,27 @@ async function main() {
     ? `Phone pings: ON — topic "${config.ntfyTopic}" (share it so friends get pinged too)`
     : 'Phone pings: off — run "node watch.js --setup" to enable');
   console.log('Queue up and alt-tab away — I will yell when the match pops.\n');
+  const backupPatterns = (config.backupPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStart = (config.queueStartPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
+  let inQueue = false;
   tailFile(logPath, line => {
     if (queueStart.some(re => re.test(line))) {
+      inQueue = true;
       console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
       return;
     }
     if (queueStop.some(re => re.test(line))) {
+      inQueue = false;
       console.log(`  · Queue stopped (${new Date().toLocaleTimeString()}).`);
       return;
     }
-    if (!patterns.some(re => re.test(line))) return;
+    const hit = patterns.some(re => re.test(line)) ||
+      (inQueue && backupPatterns.some(re => re.test(line)));
+    if (!hit) return;
     if (Date.now() - lastAlert < config.cooldownSeconds * 1000) return;
     lastAlert = Date.now();
+    inQueue = false; // this queue is resolved; next connect needs a new queue
     fireAlert(config, line);
   });
 }
