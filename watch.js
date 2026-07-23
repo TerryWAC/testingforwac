@@ -1,23 +1,24 @@
 #!/usr/bin/env node
-// Deadlock Match Ping — single-player queue-pop watcher. Zero dependencies.
+// Deadlock Match Ping — queue-pop watcher with phone pushes. Zero dependencies.
 //
-// Tails Deadlock's console.log (enable with the -condebug launch option) and
-// the moment a line matches a "match found" pattern it pings YOU: loud beeps,
-// a desktop notification, and (optionally) a push to your phone via ntfy.sh.
+// Tails Deadlock's console.log (enabled with the -condebug launch option) and
+// the moment a line matches a "match found" pattern it pings you: loud beeps,
+// a desktop notification, and a push to your phone via ntfy.sh. Friends who
+// subscribe to your topic get the phone push too.
 //
 // Usage:
-//   node watch.js                 start watching (auto-detects console.log)
+//   node watch.js                 first run: guided setup, then start watching
+//   node watch.js --setup         re-run the guided setup
 //   node watch.js --log <path>    watch a specific console.log
-//   node watch.js --test          fire the alert right now to check sound/notify
-//   node watch.js --learn        capture log lines while you queue, so you can
-//                                 identify the exact match-found line on a patch
-//
-// Config lives in config.json next to this file.
+//   node watch.js --test          fire the alert right now to check everything
+//   node watch.js --learn        capture log lines while you queue, to find
+//                                 the exact match-found line on a new patch
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const https = require('https');
+const crypto = require('crypto');
 const { execFile } = require('child_process');
 const readline = require('readline');
 
@@ -43,9 +44,9 @@ const DEFAULTS = {
   ],
   // Seconds to ignore further matches after an alert (one pop = one ping).
   cooldownSeconds: 60,
-  // Optional: phone pings via https://ntfy.sh — install the ntfy app on your
-  // phone, subscribe to a topic (pick something unguessable, it's the only
-  // secret), and put the topic name here. null = disabled.
+  // Phone pings via https://ntfy.sh — the setup wizard fills this in.
+  // Everyone subscribed to this topic gets the push (that's how you ping
+  // friends too). The topic name is the only secret.
   ntfyTopic: null,
 };
 
@@ -57,8 +58,13 @@ function loadConfig() {
       console.error(`Could not parse ${CONFIG_PATH}: ${e.message}`);
       process.exit(1);
     }
+    return null; // no config yet — triggers the setup wizard
   }
   return { ...DEFAULTS, ...user };
+}
+
+function saveConfig(config) {
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n');
 }
 
 // ------------------------------------------------------- find console.log ---
@@ -71,8 +77,9 @@ function candidateLogPaths() {
     roots.push(
       path.join('C:', 'Program Files (x86)', 'Steam'),
       path.join('C:', 'Program Files', 'Steam'),
-      ...'DEFGH'.split('').map(d => path.join(`${d}:`, 'SteamLibrary')),
+      ...'CDEFGH'.split('').map(d => path.join(`${d}:`, 'SteamLibrary')),
       ...'DEFGH'.split('').map(d => path.join(`${d}:`, 'Steam')),
+      ...'DEFGH'.split('').map(d => path.join(`${d}:`, 'Games', 'Steam')),
     );
   } else if (process.platform === 'darwin') {
     roots.push(path.join(home, 'Library', 'Application Support', 'Steam'));
@@ -127,16 +134,28 @@ function desktopNotify(title, body) {
   }
 }
 
-function phoneNotify(topic, title, body) {
-  if (!topic) return;
-  const req = https.request({
-    hostname: 'ntfy.sh',
-    path: `/${encodeURIComponent(topic)}`,
-    method: 'POST',
-    headers: { Title: title, Priority: 'urgent', Tags: 'dart' },
-  }, res => res.resume());
-  req.on('error', err => console.error(`  (ntfy push failed: ${err.message})`));
-  req.end(body);
+function phonePush(topic, title, body) {
+  return new Promise(resolve => {
+    if (!topic) return resolve(false);
+    // JSON publish format — headers must be ASCII, but the JSON body may
+    // contain full UTF-8 (emoji in the title).
+    const payload = JSON.stringify({
+      topic, title, message: body, priority: 5, tags: ['dart'],
+    });
+    const req = https.request({
+      hostname: 'ntfy.sh',
+      path: '/',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10_000,
+    }, res => { res.resume(); resolve(res.statusCode === 200); });
+    req.on('error', err => {
+      console.error(`  (phone push failed: ${err.message})`);
+      resolve(false);
+    });
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.end(payload);
+  });
 }
 
 function fireAlert(config, line) {
@@ -146,7 +165,7 @@ function fireAlert(config, line) {
   if (line) console.log(`    matched line: ${line.trim()}`);
   beepLoop(8);
   desktopNotify(title, body);
-  phoneNotify(config.ntfyTopic, title, body);
+  return phonePush(config.ntfyTopic, title, body);
 }
 
 // ------------------------------------------------------------------- tail ---
@@ -172,48 +191,127 @@ function tailFile(logPath, onLine) {
   }, 500);
 }
 
+// ----------------------------------------------------------- setup wizard ---
+
+function ask(rl, q) {
+  // Resolve with '' if stdin closes (piped input ran out) so setup still
+  // completes and saves instead of silently exiting.
+  return new Promise(resolve => {
+    const onClose = () => resolve('');
+    rl.once('close', onClose);
+    rl.question(q, a => {
+      rl.removeListener('close', onClose);
+      resolve(a.trim());
+    });
+  });
+}
+
+async function setupWizard(existing) {
+  const config = { ...DEFAULTS, ...(existing || {}) };
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  console.log('');
+  console.log('  ╔═══════════════════════════════════════╗');
+  console.log('  ║   🎯  DEADLOCK MATCH PING — SETUP     ║');
+  console.log('  ╚═══════════════════════════════════════╝');
+
+  // Step 1: the game log
+  console.log('\nStep 1 of 3 — Deadlock\'s log file');
+  let logPath = findLogPath(config);
+  if (logPath) {
+    console.log(`  ✓ Found it: ${logPath}`);
+  } else {
+    console.log('  Deadlock needs one launch option so it writes a log file:');
+    console.log('    Steam → right-click Deadlock → Properties → Launch Options → add:  -condebug');
+    console.log('  Then launch Deadlock once. (You can finish this setup first.)');
+    const p = await ask(rl, '  Path to console.log if you know it (Enter to auto-detect later): ');
+    if (p) config.logPath = p;
+  }
+
+  // Step 2: phone pushes
+  console.log('\nStep 2 of 3 — Phone pings (via the free ntfy app, no account needed)');
+  if (!config.ntfyTopic) {
+    config.ntfyTopic = 'deadlock-' + crypto.randomBytes(4).toString('hex');
+  }
+  console.log(`  Your private channel:  ${config.ntfyTopic}`);
+  console.log('  1. Install "ntfy" on your phone:');
+  console.log('       Android: https://play.google.com/store/apps/details?id=io.heckel.ntfy');
+  console.log('       iPhone:  https://apps.apple.com/us/app/ntfy/id1625396347');
+  console.log(`  2. In the app: + Subscribe to topic → type:  ${config.ntfyTopic}`);
+  const send = await ask(rl, '  Press Enter to send a test ping to check it (or type "skip"): ');
+  if (send.toLowerCase() !== 'skip') {
+    const ok = await phonePush(config.ntfyTopic, '🎯 Deadlock Match Ping',
+      'Test ping — you are all set!');
+    console.log(ok ? '  ✓ Test ping sent — check your phone!'
+                   : '  ✗ Could not reach ntfy.sh — check your internet, or run --test later.');
+  }
+
+  // Step 3: friends
+  console.log('\nStep 3 of 3 — Ping your friends too (optional)');
+  console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
+  console.log('  the same phone ping when your match pops. Just share the topic name.');
+  console.log('  (If they queue too, they can run this watcher with the same topic —');
+  console.log('  whoever\'s match pops first pings the whole squad.)');
+
+  saveConfig(config);
+  console.log(`\n  ✓ Saved to ${CONFIG_PATH}. Run "node watch.js --setup" to change anything.\n`);
+  rl.close();
+  return config;
+}
+
 // ------------------------------------------------------------------ modes ---
 
-const args = process.argv.slice(2);
-const config = loadConfig();
-const argLog = args.indexOf('--log');
-if (argLog !== -1 && args[argLog + 1]) config.logPath = args[argLog + 1];
+async function main() {
+  const args = process.argv.slice(2);
+  let config = loadConfig();
+  const firstRun = config === null;
+  if (firstRun) config = { ...DEFAULTS };
+  const argLog = args.indexOf('--log');
+  if (argLog !== -1 && args[argLog + 1]) config.logPath = args[argLog + 1];
 
-if (args.includes('--test')) {
-  console.log('Firing a test alert (sound + desktop notification' +
-    (config.ntfyTopic ? ' + phone push' : '') + ')...');
-  fireAlert(config, null);
-  setTimeout(() => process.exit(0), 4000);
-} else if (args.includes('--learn')) {
-  const logPath = findLogPath(config);
-  if (!logPath) { console.error(noLogHelp()); process.exit(1); }
-  console.log(`Learn mode — watching ${logPath}`);
-  console.log('Queue up in Deadlock. The moment the match pops, press ENTER here.');
-  console.log('I will print the log lines from the last 20 seconds so you can spot');
-  console.log('the match-found line, then add it to "patterns" in config.json.\n');
-  const recent = [];
-  tailFile(logPath, line => {
-    recent.push({ at: Date.now(), line });
-    while (recent.length && Date.now() - recent[0].at > 20_000) recent.shift();
-  });
-  readline.createInterface({ input: process.stdin }).on('line', () => {
-    console.log('\n--- log lines from the last 20 seconds ---');
-    if (!recent.length) console.log('(nothing — is -condebug set and the game running?)');
-    for (const r of recent) console.log(r.line);
-    console.log('--- end ---\n');
-    console.log('Pick the line that appeared when the match popped and add a matching');
-    console.log(`regex to "patterns" in ${CONFIG_PATH}. Ctrl+C to quit.`);
-  });
-} else {
+  if (args.includes('--test')) {
+    console.log('Firing a test alert (sound + desktop notification' +
+      (config.ntfyTopic ? ' + phone push' : '') + ')...');
+    await fireAlert(config, null);
+    setTimeout(() => process.exit(0), 3500);
+    return;
+  }
+
+  if (args.includes('--setup') || (firstRun && !args.includes('--learn'))) {
+    config = await setupWizard(firstRun ? null : config);
+    if (argLog !== -1 && args[argLog + 1]) config.logPath = args[argLog + 1];
+  }
+
+  if (args.includes('--learn')) {
+    const logPath = findLogPath(config);
+    if (!logPath) { console.error(noLogHelp()); process.exit(1); }
+    console.log(`Learn mode — watching ${logPath}`);
+    console.log('Queue up in Deadlock. The moment the match pops, press ENTER here.');
+    console.log('I will print the log lines from the last 20 seconds so you can spot');
+    console.log('the match-found line, then add it to "patterns" in config.json.\n');
+    const recent = [];
+    tailFile(logPath, line => {
+      recent.push({ at: Date.now(), line });
+      while (recent.length && Date.now() - recent[0].at > 20_000) recent.shift();
+    });
+    readline.createInterface({ input: process.stdin }).on('line', () => {
+      console.log('\n--- log lines from the last 20 seconds ---');
+      if (!recent.length) console.log('(nothing — is -condebug set and the game running?)');
+      for (const r of recent) console.log(r.line);
+      console.log('--- end ---\n');
+      console.log('Pick the line that appeared when the match popped and add a matching');
+      console.log(`regex to "patterns" in ${CONFIG_PATH}. Ctrl+C to quit.`);
+    });
+    return;
+  }
+
   const logPath = findLogPath(config);
   if (!logPath) { console.error(noLogHelp()); process.exit(1); }
   const patterns = config.patterns.map(p => new RegExp(p, 'i'));
   let lastAlert = 0;
   console.log(`Deadlock Match Ping — watching ${logPath}`);
-  console.log(`Patterns: ${config.patterns.join('  |  ')}`);
   console.log(config.ntfyTopic
-    ? `Phone pings: ON (ntfy.sh/${config.ntfyTopic})`
-    : 'Phone pings: off (set "ntfyTopic" in config.json to enable)');
+    ? `Phone pings: ON — topic "${config.ntfyTopic}" (share it so friends get pinged too)`
+    : 'Phone pings: off — run "node watch.js --setup" to enable');
   console.log('Queue up and alt-tab away — I will yell when the match pops.\n');
   tailFile(logPath, line => {
     if (!patterns.some(re => re.test(line))) return;
@@ -234,3 +332,5 @@ function noLogHelp() {
     '     or set "logPath" in config.json.',
   ].join('\n');
 }
+
+main();

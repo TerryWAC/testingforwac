@@ -1,60 +1,38 @@
 # 🎯 Deadlock Match Ping
 
-Pings **you** the moment your Deadlock match pops — so you can alt-tab, watch YouTube, or walk away during a long queue without missing the accept (and eating a low-priority penalty).
+Get a **phone push, desktop notification, and loud beep** the moment your Deadlock match pops — so you can alt-tab, watch YouTube, or leave the room during a long queue without missing the accept (and eating a low-priority penalty).
 
-Just you, no lobby, no server, no accounts. A tiny watcher runs on your PC, tails Deadlock's own console log, and the instant it sees the match-found line it:
+Works for just you, and optionally your friends: anyone who subscribes to your ping channel on their phone gets the push too. No server, no accounts, nothing to sign up for.
 
-- 🔊 plays a loud beep burst
-- 🖥️ fires a desktop notification (Windows toast / macOS / Linux notify-send)
-- 📱 optionally pushes to your **phone** via [ntfy.sh](https://ntfy.sh) — free, no signup
+## Quick start
 
-## Setup (2 minutes)
+**Windows:** install [Node.js](https://nodejs.org) if you don't have it (`winget install OpenJS.NodeJS.LTS`), then just **double-click `Start-Deadlock-Match-Ping.bat`**.
 
-1. **Turn on Deadlock's log file.** In Steam: right-click Deadlock → **Properties** → **Launch Options** → add:
+**Mac/Linux:** `node watch.js`
 
-   ```
-   -condebug
-   ```
+The first run walks you through everything:
 
-   This makes the game write everything to `.../Steam/steamapps/common/Deadlock/game/citadel/console.log`.
+1. **Finds Deadlock's log file** — you add one launch option in Steam (right-click Deadlock → Properties → Launch Options → `-condebug`) so the game writes a `console.log` it can watch.
+2. **Sets up phone pings** — it generates a private channel name for you, points you at the free [ntfy](https://ntfy.sh) app (Android/iPhone, no account), you subscribe to your channel, and it sends a **test ping to your phone** on the spot.
+3. **Friends (optional)** — share your channel name; anyone subscribed to it in ntfy gets the same push when your match pops.
 
-2. **Run the watcher** (needs Node.js 18+, nothing to install):
+Then queue up and walk away. When the match is found: phone buzzes, Windows toast pops over whatever you're doing, speakers beep.
 
-   ```bash
-   node watch.js
-   ```
+Run `node watch.js --test` any time to fire a fake alert and confirm everything works. Run `node watch.js --setup` to change settings.
 
-   It auto-detects `console.log` in the usual Steam locations. If yours is elsewhere:
+## Using it with friends
 
-   ```bash
-   node watch.js --log "D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\console.log"
-   ```
+The ping channel **is** the squad — no lobby needed:
 
-3. **Check the alert works** before trusting it with a queue:
+- Everyone installs ntfy on their phone and subscribes to the same topic (e.g. `deadlock-a1b2c3d4`).
+- When the match pops on your PC, **everyone's phone gets pinged** at once.
+- If a friend also runs the watcher, they set the same `ntfyTopic` in their `config.json` — then whoever's game pops first pings the whole squad.
 
-   ```bash
-   node watch.js --test
-   ```
-
-4. Queue up in Deadlock, alt-tab, live your life. When the match pops, you'll know.
-
-## Phone pings (optional, recommended)
-
-If you wander away from the PC entirely:
-
-1. Install the **ntfy** app ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iOS](https://apps.apple.com/us/app/ntfy/id1625396347)).
-2. In the app, subscribe to a topic with a hard-to-guess name, e.g. `terry-deadlock-x7k2p`. (The topic name is the only secret — anyone who knows it can see the pings.)
-3. Copy `config.example.json` to `config.json` and set:
-
-   ```json
-   { "ntfyTopic": "terry-deadlock-x7k2p" }
-   ```
-
-Now the match-found ping hits your phone too.
+The topic name is the only secret, so pick/keep something unguessable.
 
 ## If the alert doesn't fire (or fires at the wrong time)
 
-Valve doesn't document Deadlock's log format and it can change between patches, so the watcher ships with a set of best-guess patterns for the match-found line. To nail down the exact line **your** build prints:
+Valve doesn't document Deadlock's log format and it can change between patches, so the watcher ships with best-guess patterns for the match-found line. To nail down the exact line **your** build prints:
 
 ```bash
 node watch.js --learn
@@ -66,4 +44,4 @@ Queue up normally; the moment the match pops, press **Enter** in the terminal. I
 
 ## How it works
 
-Single file, zero npm dependencies. `watch.js` polls `console.log` every 500 ms (handles the game truncating/recreating it on restart), matches new lines against the configured regexes, and fires the alert — PowerShell toast + `[console]::beep` on Windows, `osascript`/`afplay` on macOS, `notify-send`/`paplay` on Linux, plus an HTTP POST to ntfy.sh if configured.
+Single file, zero npm dependencies. `watch.js` polls `console.log` every 500 ms (handles the game truncating/recreating it on restart), matches new lines against the configured regexes, and fires the alert — PowerShell toast + `[console]::beep` on Windows, `osascript`/`afplay` on macOS, `notify-send`/`paplay` on Linux, plus an HTTPS POST to `ntfy.sh/<your-topic>` for the phone pushes. `config.example.json` shows all settings.
