@@ -35,16 +35,18 @@ const DEFAULTS = {
   // Path to Deadlock's console.log. null = try the common Steam locations.
   logPath: null,
   // Case-insensitive regexes. If ANY matches a new log line, the alert fires.
-  // Valve changes log text between patches — use `--learn` to find the line
-  // your build prints when the queue pops, then add/adjust patterns here.
+  // "Lobby N for Match N created" is the line Deadlock prints the moment the
+  // queue pops; "CL: Connected to" is a backup that fires as the game joins
+  // the match server (the cooldown stops it double-pinging). If a patch
+  // changes the wording, use `--find` or `--learn` to get the new line.
   patterns: [
-    'match\\s*(ready|found|made)',
-    'party_?match',
-    'matchmaking.*(ready|found|complete)',
-    'lobby.*(ready|found)',
-    'Connect(ing)? to .*server',
-    'CCitadelLobby.*match',
+    'Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created',
+    "\\[Client\\] CL:\\s+Connected to",
   ],
+  // Lines that mark entering/leaving the matchmaking queue — used only for
+  // console status so you can see the watcher is really tracking your queue.
+  queueStartPatterns: ['k_EMsgClientToGCStartMatchmaking'],
+  queueStopPatterns: ['k_EMsgClientToGCStopMatchmaking'],
   // Seconds to ignore further matches after an alert (one pop = one ping).
   cooldownSeconds: 60,
   // Phone pings via https://ntfy.sh — the setup wizard fills this in.
@@ -52,6 +54,17 @@ const DEFAULTS = {
   // friends too). The topic name is the only secret.
   ntfyTopic: null,
 };
+
+// Patterns shipped before the real log lines were identified — configs still
+// carrying these are auto-upgraded to the verified defaults.
+const LEGACY_PATTERNS = JSON.stringify([
+  'match\\s*(ready|found|made)',
+  'party_?match',
+  'matchmaking.*(ready|found|complete)',
+  'lobby.*(ready|found)',
+  'Connect(ing)? to .*server',
+  'CCitadelLobby.*match',
+]);
 
 function loadConfig() {
   let user = {};
@@ -62,6 +75,11 @@ function loadConfig() {
       process.exit(1);
     }
     return null; // no config yet — triggers the setup wizard
+  }
+  if (JSON.stringify(user.patterns) === LEGACY_PATTERNS) {
+    delete user.patterns;
+    saveConfig({ ...DEFAULTS, ...user });
+    console.log('(Updated config.json to the verified match-found patterns.)');
   }
   return { ...DEFAULTS, ...user };
 }
@@ -377,7 +395,17 @@ async function main() {
     ? `Phone pings: ON — topic "${config.ntfyTopic}" (share it so friends get pinged too)`
     : 'Phone pings: off — run "node watch.js --setup" to enable');
   console.log('Queue up and alt-tab away — I will yell when the match pops.\n');
+  const queueStart = (config.queueStartPatterns || []).map(p => new RegExp(p, 'i'));
+  const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
   tailFile(logPath, line => {
+    if (queueStart.some(re => re.test(line))) {
+      console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
+      return;
+    }
+    if (queueStop.some(re => re.test(line))) {
+      console.log(`  · Queue stopped (${new Date().toLocaleTimeString()}).`);
+      return;
+    }
     if (!patterns.some(re => re.test(line))) return;
     if (Date.now() - lastAlert < config.cooldownSeconds * 1000) return;
     lastAlert = Date.now();

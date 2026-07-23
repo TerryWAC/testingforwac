@@ -1,13 +1,11 @@
 {
   "logPath": null,
   "patterns": [
-    "match\\s*(ready|found|made)",
-    "party_?match",
-    "matchmaking.*(ready|found|complete)",
-    "lobby.*(ready|found)",
-    "Connect(ing)? to .*server",
-    "CCitadelLobby.*match"
+    "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created",
+    "\\[Client\\] CL:\\s+Connected to"
   ],
+  "queueStartPatterns": ["k_EMsgClientToGCStartMatchmaking"],
+  "queueStopPatterns": ["k_EMsgClientToGCStopMatchmaking"],
   "cooldownSeconds": 60,
   "ntfyTopic": null
 }

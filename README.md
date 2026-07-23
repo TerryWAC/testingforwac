@@ -30,9 +30,13 @@ The ping channel **is** the squad — no lobby needed:
 
 The topic name is the only secret, so pick/keep something unguessable.
 
+## How detection works
+
+Deadlock prints `Lobby <id> for Match <id> created` to its console log at the exact moment the queue pops — that's the line the watcher alerts on (with `CL: Connected to` as a backup as the game joins the server). It also recognizes the queue start/stop messages, so while you're searching the watcher prints `✓ Queue started — watching for the pop...` — if you see that, you know detection is live end-to-end.
+
 ## If the alert doesn't fire (or fires at the wrong time)
 
-Valve doesn't document Deadlock's log format and it can change between patches, so the watcher ships with best-guess patterns for the match-found line. Two tools to nail down the exact line **your** build prints:
+A game patch can reword the log lines. Two tools to find the new line **your** build prints:
 
 **Right after a match popped without an alert** (the evidence is already in the log):
 
