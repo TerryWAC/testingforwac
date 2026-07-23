@@ -2,12 +2,12 @@
 
 **Never miss a Deadlock queue pop again.** Get a phone push, desktop notification, and a beep the moment your match is found — alt-tab, watch YouTube, or leave the room during long queues without eating a low-priority penalty.
 
-> "🎯 Haze — MATCH FOUND · YOU HAVE A GAME — GO GO GO! You queued 4m 32s."
-> "🎮 Playing Haze — Street Brawl · Match is loading — get ready!"
+> "🎯 MATCH FOUND · YOU HAVE A GAME — GO GO GO! You queued 4m 32s."
+> "🎮 You got Haze — Street Brawl · Match is loading — get ready!"
 
 - 📱 **Phone pushes** via the free [ntfy](https://ntfy.sh) app — no account, no signup
 - 🖥️ **Desktop toasts** that pop over whatever you're doing (Windows / macOS / Linux)
-- 🦸 **Names your hero, the game mode** (Normal / Street Brawl) **and how long you queued**
+- 🦸 **Reveals which of your 3 hero picks you got**, the **game mode** (Normal / Street Brawl), and **how long you queued**
 - 👥 **Squad mode** — friends subscribe to your channel and get pinged too
 - 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
 - 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
@@ -73,7 +73,7 @@ Setup generates a short private code (e.g. `dl-k4mq7x` — 9 characters, easy to
 "pcSound":      "soft"
 ```
 
-`{hero}` becomes your selected hero, `{mode}` the game mode, `{queue}` your queue time (appended automatically if not placed). At load-in you get a follow-up ping naming hero and mode ("🎮 Playing Haze — Street Brawl") when they were not known at the pop. `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes **and match durations** — the watcher times each match from pop to end) lives in `queue-stats.json`; your recent queue average shows at startup and after each pop, and `--stats` prints the full report card. `cooldownSeconds` (default 60) stops one pop from double-pinging.
+Deadlock assigns one of your 3 selected heroes when the match is made, so the pop ping fires instantly and a follow-up seconds later reveals the assignment: "🎮 You got Haze — Street Brawl". `{hero}` and `{mode}` in templates are filled when known and dropped cleanly when not; `{queue}` is your queue time (appended automatically if not placed). `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes **and match durations** — the watcher times each match from pop to end) lives in `queue-stats.json`; your recent queue average shows at startup and after each pop, and `--stats` prints the full report card. `cooldownSeconds` (default 60) stops one pop from double-pinging.
 
 ## How it works
 
@@ -83,7 +83,7 @@ Deadlock, launched with `-condebug`, writes its console to `game/citadel/console
 - matchmaking start/stop messages → queue tracking (`✓ Queue started`)
 - server connect while queued → backup alert if a patch renames the lobby line
 - match end, local (`loopback`) connections, stale buffered lines, and a post-match quiet window → **never** alert — extensively tested against false pings
-- hero select & load-in lines → hero name in your ping; map lines → game mode (Normal / Street Brawl)
+- load-in lines → which of your 3 hero picks the game assigned; map lines → game mode (Normal / Street Brawl)
 
 Alerts go out as a PowerShell toast + beeps on Windows (`osascript`/`notify-send` on macOS/Linux) and an HTTPS POST to `ntfy.sh/<your-topic>` for phones. `config.example.json` documents every setting.
 

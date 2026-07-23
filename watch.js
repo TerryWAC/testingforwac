@@ -623,7 +623,10 @@ async function setupWizard(existing) {
   // Step 4: make the ping yours
   console.log('\nStep 4 of 6 — Make the ping yours (optional)');
   console.log(`  Current alert:  "${config.alertTitle}"`);
-  console.log('  {hero} becomes your selected hero — e.g. "🎯 Haze — MATCH FOUND".');
+  console.log('  Deadlock assigns one of your 3 hero picks when the match is made, so');
+  console.log('  the pop ping fires instantly and a follow-up seconds later reveals it:');
+  console.log('  "🎮 You got Haze — Street Brawl". ({hero} in a custom title is filled');
+  console.log('  when known and dropped cleanly when not.)');
   const custom = await ask(rl, '  Custom alert title, {hero} allowed (Enter to keep it): ');
   if (custom) {
     config.alertTitle = custom;
@@ -882,11 +885,13 @@ async function main() {
           lastHero = name;
           console.log(`  · Hero: ${name}`);
         }
-        // Pop already pinged without a hero? Send one follow-up as the game
-        // loads you in, so the phone still says who you're playing.
-        if (!heroAnnounced && lastAlert && Date.now() - lastAlert < 180_000 && /Loaded hero/i.test(line)) {
+        // The game just assigned one of your selected heroes — announce it.
+        // (The pop ping can't know which of your 3 picks you'll get, so this
+        // follow-up at load-in is the hero reveal.)
+        if (!heroAnnounced && lastAlert && Date.now() - lastAlert < 180_000) {
           heroAnnounced = true;
-          const what = `🎮 Playing ${name}${currentMode ? ` — ${currentMode}` : ''}`;
+          updateLastStat({ hero: name });
+          const what = `🎮 You got ${name}${currentMode ? ` — ${currentMode}` : ''}`;
           phonePush(config.ntfyTopic, what, 'Match is loading — get ready!');
           discordPush(config.discordWebhook, `${what} — match is loading!`);
           desktopNotify(what, 'Match is loading — get ready!');
@@ -899,6 +904,11 @@ async function main() {
       inQueue = true;
       queueStartedAt = Date.now();
       currentMode = null; // mode is only known once the new match loads
+      // Deadlock assigns you ONE of your (up to 3) selected heroes when the
+      // match is made — so at queue time the hero is unknowable. Forget any
+      // menu-hover sightings; the real assignment is announced at load-in.
+      lastHero = null;
+      heroAnnounced = false;
       console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
       return;
     }
@@ -962,18 +972,18 @@ async function main() {
     if (Date.now() - lastAlert < config.cooldownSeconds * 1000) return;
     lastAlert = Date.now();
     inQueue = false; // this queue is resolved; next connect needs a new queue
-    heroAnnounced = Boolean(lastHero); // hero in this ping = no follow-up needed
+    heroAnnounced = false; // the assigned hero is revealed at load-in
     let queueSeconds = null;
     if (queueStartedAt) {
       queueSeconds = (Date.now() - queueStartedAt) / 1000;
       queueStartedAt = 0;
-      const stats = recordQueue(queueSeconds, lastHero);
+      const stats = recordQueue(queueSeconds, null); // hero assigned at load-in
       const avg = avgSeconds(stats);
-      fireAlert(config, line, lastHero, queueSeconds, currentMode);
+      fireAlert(config, line, null, queueSeconds, currentMode);
       console.log(`    Queue time: ${fmtDuration(queueSeconds)}` +
         (avg != null && stats.length > 1 ? ` (recent average ${fmtDuration(avg)})` : ''));
     } else {
-      fireAlert(config, line, lastHero, null, currentMode);
+      fireAlert(config, line, null, null, currentMode);
     }
   });
 }

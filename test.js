@@ -175,21 +175,28 @@ async function main() {
     assert(await waitFor(out, t => alerts({ text: t }) === 1), 'fresh-stamped line pings');
   });
 
-  await scenario('14. Hero selected in menu shows up in the pop ping', async (env, out) => {
+  await scenario('14. Menu-hover hero never leaks into the pop ping (3-pick assignment)', async (env, out) => {
     append(env, 'VMDL Camera Pose Success! loading models/heroes/atlas/atlas_body.vmdl');
-    assert(await waitFor(out, t => t.includes('Hero: Abrams')), 'hero spotted from menu');
+    assert(await waitFor(out, t => t.includes('Hero: Abrams')), 'hover logged to console');
     append(env, LINES.queueStart);
     append(env, LINES.lobbyCreated);
-    assert(await waitFor(out, t => t.includes('Abrams — MATCH FOUND')),
-      'ping title names the hero');
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    assert(!out.text.includes('Abrams — MATCH FOUND'),
+      'pop ping does not claim the hovered hero', out.text.split('MATCH FOUND')[0].slice(-80));
+    append(env, '[Server] Loaded hero 3/hero_gigawatt'); // game assigned Seven, not Abrams
+    assert(await waitFor(out, t => t.includes('You got Seven')), 'assignment reveal names the real hero');
   });
 
-  await scenario('15. Hero unknown at pop → follow-up ping at load-in', async (env, out) => {
+  await scenario('15. Assigned hero announced at load-in and recorded in stats', async (env, out) => {
     append(env, LINES.queueStart);
     append(env, LINES.lobbyCreated);
     await waitFor(out, t => alerts({ text: t }) === 1);
     append(env, '[Server] Loaded hero 3/hero_gigawatt');
-    assert(await waitFor(out, t => t.includes('Playing Seven')), 'follow-up names loaded hero');
+    assert(await waitFor(out, t => t.includes('You got Seven')), 'follow-up names assigned hero');
+    await sleep(300);
+    const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
+    assert(stats[stats.length - 1].hero === 'Seven', 'assigned hero saved to stats',
+      JSON.stringify(stats[stats.length - 1]));
   });
 
   await scenario('16. Post-match quiet window: end-of-game noise never pings', async (env, out) => {
@@ -300,7 +307,7 @@ async function main() {
     await waitFor(out, t => alerts({ text: t }) === 1);
     append(env, '[HostStateManager] Host activate: GameLoop (dl_brawl_night)');
     append(env, '[Server] Loaded hero 3/hero_gigawatt');
-    assert(await waitFor(out, t => t.includes('Playing Seven — Street Brawl')),
+    assert(await waitFor(out, t => t.includes('You got Seven — Street Brawl')),
       'follow-up names hero and mode');
     const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
     assert(stats[stats.length - 1].mode === 'Street Brawl', 'mode recorded in stats',
