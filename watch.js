@@ -60,6 +60,12 @@ const DEFAULTS = {
   // Never alert on these: connections to the game's own machine (menu,
   // practice range, local/bot servers) are not real match servers.
   ignorePatterns: ['loopback', '127\\.0\\.0\\.1', 'localhost'],
+  // Lines that mark a match ending — they open the post-match quiet window.
+  matchEndPatterns: [
+    'Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+destroyed',
+    'Disconnecting from server',
+    'Server shutting down',
+  ],
   // Deadlock buffers its log and can flush minutes-old lines in one burst
   // (e.g. when the game opens or closes). Lines whose own timestamp is older
   // than this many seconds never alert.
@@ -73,9 +79,16 @@ const DEFAULTS = {
   // Seconds to ignore further matches after an alert (one pop = one ping).
   cooldownSeconds: 60,
   // What the ping says — shows up in the phone push, the desktop toast, and
-  // the console. Make it yours: "TERRY — GAME'S UP", "GET IN HERE", etc.
-  alertTitle: '🎯 DEADLOCK MATCH FOUND',
-  alertMessage: 'Tab back in and accept!',
+  // the console. {hero} becomes your selected hero's name ("🎯 Haze — MATCH
+  // FOUND"); if no hero is known yet it's cleanly dropped.
+  alertTitle: '🎯 {hero} — MATCH FOUND',
+  alertMessage: 'Queue popped — tab in and accept!',
+  // PC speaker noise when the match pops: 'loud' (beep storm), 'soft'
+  // (a couple of gentle beeps — the toast + phone do the shouting), or 'off'.
+  pcSound: 'soft',
+  // After a match ends, stay quiet for this long unless a NEW queue starts —
+  // kills any leftover end-of-game log noise for good.
+  postMatchQuietSeconds: 120,
   // Phone pings via https://ntfy.sh — the setup wizard fills this in.
   // Everyone subscribed to this topic gets the push (that's how you ping
   // friends too). The topic name is the only secret.
@@ -109,11 +122,23 @@ function loadConfig() {
     }
     return null; // no config yet — triggers the setup wizard
   }
+  let migrated = false;
   if (LEGACY_PATTERN_SETS.includes(JSON.stringify(user.patterns))) {
     delete user.patterns;
     delete user.backupPatterns;
+    migrated = true;
+  }
+  // Wizard-generated "name" alerts ("🎯 TERRY — MATCH FOUND") move to the
+  // hero-based default; hand-typed custom titles are left alone.
+  if (/^🎯 .+ — MATCH FOUND$/.test(user.alertTitle || '') &&
+      /^.+, the queue popped — tab in and accept!$/.test(user.alertMessage || '')) {
+    delete user.alertTitle;
+    delete user.alertMessage;
+    migrated = true;
+  }
+  if (migrated) {
     saveConfig({ ...DEFAULTS, ...user });
-    console.log('(Updated config.json to the verified match-found patterns.)');
+    console.log('(Updated config.json to the latest defaults.)');
   }
   return { ...DEFAULTS, ...user };
 }
@@ -166,9 +191,13 @@ function beepLoop(times) {
   }, 350);
 }
 
-function desktopNotify(title, body) {
+function desktopNotify(title, body, pcSound = 'soft') {
   const opts = { windowsHide: true };
   if (process.platform === 'win32') {
+    const beeps = { loud: 6, soft: 2, off: 0 }[pcSound] ?? 2;
+    const beepPs = beeps
+      ? `1..${beeps} | ForEach-Object { [console]::beep(880, 150); Start-Sleep -Milliseconds 120 };`
+      : '';
     // Toast via PowerShell (no modules needed), plus a system sound.
     const ps = `
       [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null;
@@ -176,7 +205,7 @@ function desktopNotify(title, body) {
       $x.GetElementsByTagName('text').Item(0).InnerText = '${title.replace(/'/g, "''")}';
       $x.GetElementsByTagName('text').Item(1).InnerText = '${body.replace(/'/g, "''")}';
       [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Deadlock Match Ping').Show([Windows.UI.Notifications.ToastNotification]::new($x));
-      1..6 | ForEach-Object { [console]::beep(1100, 200); Start-Sleep -Milliseconds 80 }
+      ${beepPs}
     `;
     execFile('powershell', ['-NoProfile', '-Command', ps], opts, () => {});
   } else if (process.platform === 'darwin') {
@@ -213,18 +242,31 @@ function phonePush(topic, title, body) {
   });
 }
 
+// Fill {hero} into a template; with no hero known, drop the placeholder and
+// any dangling separator so "🎯 {hero} — MATCH FOUND" → "🎯 MATCH FOUND".
+function formatWithHero(tpl, hero) {
+  if (!tpl.includes('{hero}')) return { text: tpl, usedHero: false };
+  if (hero) return { text: tpl.split('{hero}').join(hero), usedHero: true };
+  const text = tpl.replace(/\s*\{hero\}\s*[—–:-]*\s*/g, ' ').replace(/\s+/g, ' ').trim();
+  return { text, usedHero: true };
+}
+
 function fireAlert(config, line, hero) {
-  const title = config.alertTitle || DEFAULTS.alertTitle;
-  let body = config.alertMessage || DEFAULTS.alertMessage;
-  if (hero) body += ` Hero: ${hero}.`;
+  const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero);
+  const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero);
+  const title = t.text;
+  let body = b.text;
+  // Custom templates without {hero} still get the hero mentioned somewhere.
+  if (hero && !t.usedHero && !b.usedHero) body += ` Hero: ${hero}.`;
+  const pcSound = config.pcSound || DEFAULTS.pcSound;
   // Phone + toast go FIRST: a Windows console stuck in selection mode blocks
   // stdout writes, and the pings must not wait behind a frozen console.
   const push = phonePush(config.ntfyTopic, title, body);
-  desktopNotify(title, body);
+  desktopNotify(title, body, pcSound);
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
   console.log(`    ${body}`);
   if (line) console.log(`    matched line: ${line.trim()}`);
-  beepLoop(8);
+  beepLoop({ loud: 8, soft: 2, off: 0 }[pcSound] ?? 2);
   return push;
 }
 
@@ -345,18 +387,15 @@ async function setupWizard(existing) {
 
   // Step 3: make the ping yours
   console.log('\nStep 3 of 4 — Make the ping yours (optional)');
-  console.log(`  Current alert:  "${config.alertTitle}" / "${config.alertMessage}"`);
-  const who = await ask(rl, '  Your name, to put it in the alert (Enter to skip): ');
-  if (who) {
-    config.alertTitle = `🎯 ${who.toUpperCase()} — MATCH FOUND`;
-    config.alertMessage = `${who}, the queue popped — tab in and accept!`;
-    console.log(`  ✓ Alert is now: "${config.alertTitle}"`);
-  }
-  const custom = await ask(rl, '  Or type a fully custom alert title (Enter to keep it): ');
+  console.log(`  Current alert:  "${config.alertTitle}"`);
+  console.log('  {hero} becomes your selected hero — e.g. "🎯 Haze — MATCH FOUND".');
+  const custom = await ask(rl, '  Custom alert title, {hero} allowed (Enter to keep it): ');
   if (custom) {
     config.alertTitle = custom;
     console.log(`  ✓ Alert is now: "${config.alertTitle}"`);
   }
+  const vol = await ask(rl, '  PC beep volume — loud / soft / off (Enter = soft): ');
+  if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
   // Step 4: friends
   console.log('\nStep 4 of 4 — Ping your friends too (optional)');
@@ -494,10 +533,13 @@ async function main() {
   const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
   const ignore = (config.ignorePatterns || []).map(p => new RegExp(p, 'i'));
   const heroRes = (config.heroPatterns || DEFAULTS.heroPatterns).map(p => new RegExp(p, 'i'));
+  const matchEnd = (config.matchEndPatterns || DEFAULTS.matchEndPatterns).map(p => new RegExp(p, 'i'));
   const staleMs = (config.staleSeconds ?? DEFAULTS.staleSeconds) * 1000;
+  const quietMs = (config.postMatchQuietSeconds ?? DEFAULTS.postMatchQuietSeconds) * 1000;
   let inQueue = false;
   let lastHero = null;
   let heroAnnounced = false;
+  let lastMatchEnd = 0;
   tailFile(logPath, line => {
     for (const re of heroRes) {
       const m = re.exec(line);
@@ -528,9 +570,19 @@ async function main() {
       console.log(`  · Queue stopped (${new Date().toLocaleTimeString()}).`);
       return;
     }
+    if (matchEnd.some(re => re.test(line))) {
+      // Match over — go quiet. Only a fresh queue start re-arms alerts, so
+      // whatever the game logs while wrapping up can't ping.
+      inQueue = false;
+      lastMatchEnd = Date.now();
+      return;
+    }
     const hit = patterns.some(re => re.test(line)) ||
       (inQueue && backupPatterns.some(re => re.test(line)));
     if (!hit) return;
+    // Post-match quiet window: after a match ends, ignore alert lines unless
+    // a new queue has started since.
+    if (!inQueue && lastMatchEnd && Date.now() - lastMatchEnd < quietMs) return;
     // Local self-connections (menu, practice range, bot servers) never alert.
     if (ignore.some(re => re.test(line))) return;
     // Lines the game flushed late (their own timestamp is old) never alert —

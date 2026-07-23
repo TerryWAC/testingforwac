@@ -177,8 +177,8 @@ async function main() {
     assert(await waitFor(out, t => t.includes('Hero: Abrams')), 'hero spotted from menu');
     append(env, LINES.queueStart);
     append(env, LINES.lobbyCreated);
-    assert(await waitFor(out, t => /MATCH FOUND[\s\S]*Hero: Abrams/.test(t)),
-      'ping message names the hero');
+    assert(await waitFor(out, t => t.includes('Abrams — MATCH FOUND')),
+      'ping title names the hero');
   });
 
   await scenario('15. Hero unknown at pop → follow-up ping at load-in', async (env, out) => {
@@ -187,6 +187,23 @@ async function main() {
     await waitFor(out, t => alerts({ text: t }) === 1);
     append(env, '[Server] Loaded hero 3/hero_gigawatt');
     assert(await waitFor(out, t => t.includes('Playing Seven')), 'follow-up names loaded hero');
+  });
+
+  await scenario('16. Post-match quiet window: end-of-game noise never pings', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    await sleep(2500); // outlast the test cooldown so the window is doing the work
+    append(env, LINES.lobbyDestroyed);
+    // Buffered end-of-game flush replays an UNSTAMPED lobby-created line —
+    // the stale check can't catch it; the quiet window must.
+    append(env, LINES.lobbyCreated);
+    append(env, LINES.serverConnect);
+    await sleep(1500);
+    assert(alerts(out) === 1, 'end-of-game replay stayed silent', `got ${alerts(out)}`);
+    append(env, LINES.queueStart); // fresh queue re-arms
+    append(env, 'Lobby 77777 for Match 66666 created');
+    assert(await waitFor(out, t => alerts({ text: t }) === 2), 'fresh queue pings again');
   });
 
   // 7. Legacy config migration (no watcher needed)

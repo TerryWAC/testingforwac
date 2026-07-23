@@ -8,8 +8,17 @@
   ],
   "queueStartPatterns": ["k_EMsgClientToGCStartMatchmaking"],
   "queueStopPatterns": ["k_EMsgClientToGCStopMatchmaking"],
+  "matchEndPatterns": [
+    "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+destroyed",
+    "Disconnecting from server",
+    "Server shutting down"
+  ],
+  "ignorePatterns": ["loopback", "127\\.0\\.0\\.1", "localhost"],
+  "staleSeconds": 120,
+  "postMatchQuietSeconds": 120,
   "cooldownSeconds": 60,
-  "alertTitle": "🎯 TERRY — MATCH FOUND",
-  "alertMessage": "The queue popped — tab in and accept!",
+  "alertTitle": "🎯 {hero} — MATCH FOUND",
+  "alertMessage": "Queue popped — tab in and accept!",
+  "pcSound": "soft",
   "ntfyTopic": null
 }

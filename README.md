@@ -22,14 +22,15 @@ Run `node watch.js --test` any time to fire a fake alert and confirm everything 
 
 ## Customising the ping
 
-The setup wizard asks for your name and turns the alert into e.g. **"🎯 TERRY — MATCH FOUND"**, or you can type a fully custom title. You can also edit `config.json` directly any time:
+By default the alert names your selected hero: **"🎯 Haze — MATCH FOUND"**. The watcher tracks which hero you have picked from the game's own log (menu selection and server load-in); if the hero isn't known when the queue pops, you get a follow-up ping ("🎮 Playing Haze") as the match loads. Set your own text in the wizard or in `config.json` — `{hero}` is replaced with the hero's name:
 
 ```json
-"alertTitle": "GET IN HERE",
-"alertMessage": "Queue popped. Move."
+"alertTitle": "🎯 {hero} — MATCH FOUND",
+"alertMessage": "Queue popped. Move.",
+"pcSound": "soft"
 ```
 
-Both show up everywhere — the phone push, the desktop toast, and the console. `node watch.js --test` previews them.
+`pcSound` controls the PC beeping — `"loud"`, `"soft"` (default: a couple of gentle beeps; the toast and phone do the shouting), or `"off"`. The phone push and desktop toast always fire regardless. `node watch.js --test` previews everything.
 
 ## Using it with friends
 
