@@ -203,11 +203,14 @@ function phonePush(topic, title, body) {
 function fireAlert(config, line) {
   const title = config.alertTitle || DEFAULTS.alertTitle;
   const body = config.alertMessage || DEFAULTS.alertMessage;
+  // Phone + toast go FIRST: a Windows console stuck in selection mode blocks
+  // stdout writes, and the pings must not wait behind a frozen console.
+  const push = phonePush(config.ntfyTopic, title, body);
+  desktopNotify(title, body);
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
   if (line) console.log(`    matched line: ${line.trim()}`);
   beepLoop(8);
-  desktopNotify(title, body);
-  return phonePush(config.ntfyTopic, title, body);
+  return push;
 }
 
 // ------------------------------------------------------------------- tail ---
@@ -437,7 +440,12 @@ async function main() {
   console.log(config.ntfyTopic
     ? `Phone pings: ON — topic "${config.ntfyTopic}" (share it so friends get pinged too)`
     : 'Phone pings: off — run "node watch.js --setup" to enable');
-  console.log('Queue up and alt-tab away — I will yell when the match pops.\n');
+  console.log('Queue up and alt-tab away — I will yell when the match pops.');
+  if (process.platform === 'win32') {
+    console.log('Tip: don\'t click inside this window — if the title bar says "Select",');
+    console.log('Windows has PAUSED the app; press Esc in the window to resume.');
+  }
+  console.log('');
   const backupPatterns = (config.backupPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStart = (config.queueStartPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
