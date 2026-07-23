@@ -335,6 +335,35 @@ async function main() {
     try { process.kill(pid); } catch {}
   }
 
+  console.log('\n26. Discord webhook receives the Game Tracker ping');
+  {
+    const http = require('http');
+    const received = [];
+    const server = http.createServer((req, res) => {
+      let b = '';
+      req.on('data', d => { b += d; });
+      req.on('end', () => { received.push(JSON.parse(b)); res.writeHead(204); res.end(); });
+    });
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const port = server.address().port;
+    const env = makeEnv('discord', {
+      discordWebhook: `http://127.0.0.1:${port}/api/webhooks/test/token`,
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(800);
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    await sleep(600);
+    child.kill();
+    server.close();
+    assert(received.length === 1, 'exactly one Discord message', `got ${received.length}`);
+    const msg = received[0] || {};
+    assert(msg.username === 'Game Tracker', 'sent as Game Tracker bot', JSON.stringify(msg));
+    assert((msg.content || '').includes('@everyone') && msg.content.includes('MATCH FOUND'),
+      'mentions everyone with the match alert', msg.content);
+  }
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {

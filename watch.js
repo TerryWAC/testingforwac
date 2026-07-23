@@ -108,6 +108,12 @@ const DEFAULTS = {
   // Everyone subscribed to this topic gets the push (that's how you ping
   // friends too). The topic name is the only secret.
   ntfyTopic: null,
+  // Discord pings: a channel webhook URL. Messages arrive from a bot named
+  // "Game Tracker" — friends in the server need zero installs.
+  discordWebhook: null,
+  // Prepended to the Discord match-found message so people actually get
+  // notified. Set to "" for a silent message, or e.g. "<@&ROLE_ID>".
+  discordMention: '@everyone',
 };
 
 // Pattern lists shipped by earlier versions — configs still carrying one of
@@ -393,6 +399,30 @@ function formatWithHero(tpl, hero, mode) {
   return { text: m.text, usedHero: h.used };
 }
 
+function discordPush(webhook, content) {
+  return new Promise(resolve => {
+    if (!webhook) return resolve(false);
+    let u;
+    try { u = new URL(webhook); } catch { return resolve(false); }
+    const mod = u.protocol === 'http:' ? require('http') : https; // http only ever used by tests
+    const payload = JSON.stringify({ username: 'Game Tracker', content });
+    const req = mod.request({
+      hostname: u.hostname,
+      port: u.port || undefined,
+      path: u.pathname + u.search,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10_000,
+    }, res => { res.resume(); resolve(res.statusCode >= 200 && res.statusCode < 300); });
+    req.on('error', err => {
+      console.error(`  (Discord ping failed: ${err.message})`);
+      resolve(false);
+    });
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.end(payload);
+  });
+}
+
 function fireAlert(config, line, hero, queueSeconds, mode) {
   const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero, mode);
   const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero, mode);
@@ -406,9 +436,11 @@ function fireAlert(config, line, hero, queueSeconds, mode) {
     else body += ` You queued ${dur}.`;
   }
   const pcSound = config.pcSound || DEFAULTS.pcSound;
-  // Phone + toast go FIRST: a Windows console stuck in selection mode blocks
-  // stdout writes, and the pings must not wait behind a frozen console.
+  // Phone/Discord/toast go FIRST: a Windows console stuck in selection mode
+  // blocks stdout writes, and the pings must not wait behind a frozen console.
   const push = phonePush(config.ntfyTopic, title, body);
+  const mention = config.discordMention ?? DEFAULTS.discordMention;
+  discordPush(config.discordWebhook, `${mention ? mention + ' ' : ''}${title} — ${body}`);
   desktopNotify(title, body, pcSound);
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
   console.log(`    ${body}`);
@@ -513,7 +545,7 @@ async function setupWizard(existing) {
   console.log('  ╚═══════════════════════════════════════╝');
 
   // Step 1: the game log
-  console.log('\nStep 1 of 4 — Deadlock\'s log file');
+  console.log('\nStep 1 of 6 — Deadlock\'s log file');
   let logPath = findLogPath(config);
   if (logPath) {
     console.log(`  ✓ Found it: ${logPath}`);
@@ -526,7 +558,7 @@ async function setupWizard(existing) {
   }
 
   // Step 2: phone pushes
-  console.log('\nStep 2 of 4 — Phone pings (via the free ntfy app, no account needed)');
+  console.log('\nStep 2 of 6 — Phone pings (via the free ntfy app, no account needed)');
   if (!config.ntfyTopic) {
     // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with no
     // confusable characters (no 0/o, 1/l/i) — easy to type into the phone.
@@ -548,8 +580,24 @@ async function setupWizard(existing) {
                    : '  ✗ Could not reach ntfy.sh — check your internet, or run --test later.');
   }
 
-  // Step 3: make the ping yours
-  console.log('\nStep 3 of 5 — Make the ping yours (optional)');
+  // Step 3: Discord — pings arrive from a "Game Tracker" bot, zero installs
+  console.log('\nStep 3 of 6 — Discord pings (optional, great for squads)');
+  console.log('  Pings arrive in a channel from a bot named "Game Tracker" — friends');
+  console.log('  in the server need to install NOTHING.');
+  console.log('  In Discord: your channel → ⚙ Edit Channel → Integrations → Webhooks →');
+  console.log('  New Webhook → name it Game Tracker → Copy Webhook URL.');
+  const hook = await ask(rl, '  Paste the webhook URL (Enter to skip): ');
+  if (hook && /^https:\/\/(\w+\.)?discord(app)?\.com\/api\/webhooks\//.test(hook)) {
+    config.discordWebhook = hook;
+    const ok = await discordPush(hook, '🎯 Game Tracker is connected — test ping!');
+    console.log(ok ? '  ✓ Test message sent — check the channel!'
+                   : '  ✗ Discord did not accept it — double-check the URL, or re-run --setup later.');
+  } else if (hook) {
+    console.log('  ✗ That does not look like a Discord webhook URL — skipped (re-run --setup to retry).');
+  }
+
+  // Step 4: make the ping yours
+  console.log('\nStep 4 of 6 — Make the ping yours (optional)');
   console.log(`  Current alert:  "${config.alertTitle}"`);
   console.log('  {hero} becomes your selected hero — e.g. "🎯 Haze — MATCH FOUND".');
   const custom = await ask(rl, '  Custom alert title, {hero} allowed (Enter to keep it): ');
@@ -560,8 +608,8 @@ async function setupWizard(existing) {
   const vol = await ask(rl, '  PC beep volume — loud / soft / off (Enter = soft): ');
   if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
-  // Step 4: friends
-  console.log('\nStep 4 of 5 — Ping your friends too (optional)');
+  // Step 5: friends
+  console.log('\nStep 5 of 6 — Ping your friends too (optional)');
   console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
   console.log('  the same phone ping when your match pops. Just share the code.');
   console.log('  (If they queue too, they can run this watcher with the same code —');
@@ -572,7 +620,7 @@ async function setupWizard(existing) {
     const steamLine = IS_SEA
       ? `"${process.execPath}" --steam %command% -condebug`
       : `"${path.join(APP_DIR, 'steam-launch.bat')}" %command% -condebug`;
-    console.log('\nStep 5 of 5 — Auto-start with Deadlock (recommended)');
+    console.log('\nStep 6 of 6 — Auto-start with Deadlock (recommended)');
     try {
       const clip = spawn('clip', [], { windowsHide: true });
       clip.stdin.end(steamLine);
@@ -816,6 +864,7 @@ async function main() {
           heroAnnounced = true;
           const what = `🎮 Playing ${name}${currentMode ? ` — ${currentMode}` : ''}`;
           phonePush(config.ntfyTopic, what, 'Match is loading — get ready!');
+          discordPush(config.discordWebhook, `${what} — match is loading!`);
           desktopNotify(what, 'Match is loading — get ready!');
           console.log(`  ${what} — match is loading.`);
         }
