@@ -112,6 +112,35 @@ const LEGACY_PATTERN_SETS = [
   ]),
 ];
 
+// Queue history lives next to the config (last 50 pops: when, how long, hero).
+const STATS_PATH = path.basename(CONFIG_PATH) === 'config.json'
+  ? path.join(path.dirname(CONFIG_PATH), 'queue-stats.json')
+  : CONFIG_PATH.replace(/\.json$/, '') + '.stats.json';
+
+function loadStats() {
+  try { return JSON.parse(fs.readFileSync(STATS_PATH, 'utf8')); }
+  catch { return []; }
+}
+
+function recordQueue(seconds, hero) {
+  const stats = loadStats();
+  stats.push({ at: new Date().toISOString(), seconds, hero: hero || null });
+  while (stats.length > 50) stats.shift();
+  try { fs.writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2) + '\n'); } catch {}
+  return stats;
+}
+
+function avgSeconds(stats, lastN = 20) {
+  const recent = stats.slice(-lastN);
+  if (!recent.length) return null;
+  return recent.reduce((a, s) => a + s.seconds, 0) / recent.length;
+}
+
+function fmtDuration(seconds) {
+  const m = Math.floor(seconds / 60), s = Math.round(seconds % 60);
+  return m ? `${m}m ${s}s` : `${s}s`;
+}
+
 function loadConfig() {
   let user = {};
   try { user = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); }
@@ -251,13 +280,18 @@ function formatWithHero(tpl, hero) {
   return { text, usedHero: true };
 }
 
-function fireAlert(config, line, hero) {
+function fireAlert(config, line, hero, queueSeconds) {
   const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero);
   const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero);
   const title = t.text;
   let body = b.text;
   // Custom templates without {hero} still get the hero mentioned somewhere.
   if (hero && !t.usedHero && !b.usedHero) body += ` Hero: ${hero}.`;
+  if (queueSeconds != null) {
+    const dur = fmtDuration(queueSeconds);
+    if (body.includes('{queue}')) body = body.split('{queue}').join(dur);
+    else body += ` You queued ${dur}.`;
+  }
   const pcSound = config.pcSound || DEFAULTS.pcSound;
   // Phone + toast go FIRST: a Windows console stuck in selection mode blocks
   // stdout writes, and the pings must not wait behind a frozen console.
@@ -540,6 +574,15 @@ async function main() {
   let lastHero = null;
   let heroAnnounced = false;
   let lastMatchEnd = 0;
+  let queueStartedAt = 0;
+  let lastMissWarn = 0;
+  {
+    const stats = loadStats();
+    const avg = avgSeconds(stats);
+    if (avg != null) {
+      console.log(`Queue stats: ${stats.length} pops recorded, recent average ${fmtDuration(avg)}.\n`);
+    }
+  }
   tailFile(logPath, line => {
     for (const re of heroRes) {
       const m = re.exec(line);
@@ -562,6 +605,7 @@ async function main() {
     }
     if (queueStart.some(re => re.test(line))) {
       inQueue = true;
+      queueStartedAt = Date.now();
       console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
       return;
     }
@@ -579,7 +623,30 @@ async function main() {
     }
     const hit = patterns.some(re => re.test(line)) ||
       (inQueue && backupPatterns.some(re => re.test(line)));
-    if (!hit) return;
+    if (!hit) {
+      // Patch insurance: joining a remote server with no queue seen, no
+      // recent pop, and no match just ended means detection may be deaf —
+      // a game patch likely reworded the queue/match log lines.
+      if (backupPatterns.some(re => re.test(line)) &&
+          !ignore.some(re => re.test(line))) {
+        const ts = parseLogTime(line);
+        const fresh = ts === null || Date.now() - ts <= staleMs;
+        const inQuiet = lastMatchEnd && Date.now() - lastMatchEnd < quietMs;
+        if (fresh && !inQuiet &&
+            Date.now() - lastAlert > 10 * 60_000 &&
+            Date.now() - lastMissWarn > 60 * 60_000) {
+          lastMissWarn = Date.now();
+          const warnTitle = '⚠ Deadlock Match Ping: possible missed match';
+          const warnBody = 'You joined a server but I never saw a queue or match pop. ' +
+            'If you did just queue into a match, a game patch may have changed the ' +
+            'log format — run "node watch.js --find" after this game.';
+          phonePush(config.ntfyTopic, warnTitle, warnBody);
+          desktopNotify(warnTitle, warnBody, 'off');
+          console.log(`\n  ${warnTitle}\n  ${warnBody}\n`);
+        }
+      }
+      return;
+    }
     // Post-match quiet window: after a match ends, ignore alert lines unless
     // a new queue has started since.
     if (!inQueue && lastMatchEnd && Date.now() - lastMatchEnd < quietMs) return;
@@ -596,7 +663,18 @@ async function main() {
     lastAlert = Date.now();
     inQueue = false; // this queue is resolved; next connect needs a new queue
     heroAnnounced = Boolean(lastHero); // hero in this ping = no follow-up needed
-    fireAlert(config, line, lastHero);
+    let queueSeconds = null;
+    if (queueStartedAt) {
+      queueSeconds = (Date.now() - queueStartedAt) / 1000;
+      queueStartedAt = 0;
+      const stats = recordQueue(queueSeconds, lastHero);
+      const avg = avgSeconds(stats);
+      fireAlert(config, line, lastHero, queueSeconds);
+      console.log(`    Queue time: ${fmtDuration(queueSeconds)}` +
+        (avg != null && stats.length > 1 ? ` (recent average ${fmtDuration(avg)})` : ''));
+    } else {
+      fireAlert(config, line, lastHero, null);
+    }
   });
 }
 

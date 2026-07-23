@@ -206,6 +206,25 @@ async function main() {
     assert(await waitFor(out, t => alerts({ text: t }) === 2), 'fresh queue pings again');
   });
 
+  await scenario('17. Ping says how long you queued, stats recorded', async (env, out) => {
+    append(env, LINES.queueStart);
+    await waitFor(out, t => t.includes('Queue started'));
+    await sleep(2000); // "queue" for a couple of seconds
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(out, t => /You queued \d+s/.test(t)), 'queue duration in ping');
+    assert(await waitFor(out, t => t.includes('Queue time:')), 'queue time on console');
+    const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
+    assert(Array.isArray(stats) && stats.length === 1 && stats[0].seconds >= 1,
+      'stats file recorded the pop', JSON.stringify(stats));
+  });
+
+  await scenario('18. Patch insurance: unexplained server join warns loudly', async (env, out) => {
+    append(env, LINES.serverConnect); // no queue, no pop, remote server
+    assert(await waitFor(out, t => t.includes('possible missed match')), 'warning shown');
+    await sleep(500);
+    assert(alerts(out) === 0, 'warning is not a match ping', `got ${alerts(out)}`);
+  });
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {

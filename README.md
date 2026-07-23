@@ -32,6 +32,14 @@ By default the alert names your selected hero: **"🎯 Haze — MATCH FOUND"**. 
 
 `pcSound` controls the PC beeping — `"loud"`, `"soft"` (default: a couple of gentle beeps; the toast and phone do the shouting), or `"off"`. The phone push and desktop toast always fire regardless. `node watch.js --test` previews everything.
 
+## Queue stats
+
+The ping tells you how long you waited — "Queue popped — tab in and accept! You queued 4m 32s." (put `{queue}` in a custom `alertMessage` to place it yourself). The watcher keeps your last 50 queues in `queue-stats.json` and shows your recent average at startup and after each pop.
+
+## Patch insurance
+
+Valve can reword the log lines in a patch, which would silently break detection. The watcher guards against this: if you join a remote game server without it ever seeing a queue or a match pop, it warns you on every channel — phone, toast, and console — that detection may be broken, and points you at `node watch.js --find` to fix the pattern in one step. (Rate-limited to once an hour, and it never fires after a normal match or in the practice range.)
+
 ## Using it with friends
 
 The ping channel **is** the squad — no lobby needed:
