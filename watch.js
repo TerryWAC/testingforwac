@@ -59,6 +59,10 @@ const DEFAULTS = {
   queueStopPatterns: ['k_EMsgClientToGCStopMatchmaking'],
   // Seconds to ignore further matches after an alert (one pop = one ping).
   cooldownSeconds: 60,
+  // What the ping says — shows up in the phone push, the desktop toast, and
+  // the console. Make it yours: "TERRY — GAME'S UP", "GET IN HERE", etc.
+  alertTitle: '🎯 DEADLOCK MATCH FOUND',
+  alertMessage: 'Tab back in and accept!',
   // Phone pings via https://ntfy.sh — the setup wizard fills this in.
   // Everyone subscribed to this topic gets the push (that's how you ping
   // friends too). The topic name is the only secret.
@@ -197,8 +201,8 @@ function phonePush(topic, title, body) {
 }
 
 function fireAlert(config, line) {
-  const title = '🎯 DEADLOCK MATCH FOUND';
-  const body = 'Tab back in and accept!';
+  const title = config.alertTitle || DEFAULTS.alertTitle;
+  const body = config.alertMessage || DEFAULTS.alertMessage;
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
   if (line) console.log(`    matched line: ${line.trim()}`);
   beepLoop(8);
@@ -263,7 +267,7 @@ async function setupWizard(existing) {
   console.log('  ╚═══════════════════════════════════════╝');
 
   // Step 1: the game log
-  console.log('\nStep 1 of 3 — Deadlock\'s log file');
+  console.log('\nStep 1 of 4 — Deadlock\'s log file');
   let logPath = findLogPath(config);
   if (logPath) {
     console.log(`  ✓ Found it: ${logPath}`);
@@ -276,7 +280,7 @@ async function setupWizard(existing) {
   }
 
   // Step 2: phone pushes
-  console.log('\nStep 2 of 3 — Phone pings (via the free ntfy app, no account needed)');
+  console.log('\nStep 2 of 4 — Phone pings (via the free ntfy app, no account needed)');
   if (!config.ntfyTopic) {
     config.ntfyTopic = 'deadlock-' + crypto.randomBytes(4).toString('hex');
   }
@@ -293,8 +297,23 @@ async function setupWizard(existing) {
                    : '  ✗ Could not reach ntfy.sh — check your internet, or run --test later.');
   }
 
-  // Step 3: friends
-  console.log('\nStep 3 of 3 — Ping your friends too (optional)');
+  // Step 3: make the ping yours
+  console.log('\nStep 3 of 4 — Make the ping yours (optional)');
+  console.log(`  Current alert:  "${config.alertTitle}" / "${config.alertMessage}"`);
+  const who = await ask(rl, '  Your name, to put it in the alert (Enter to skip): ');
+  if (who) {
+    config.alertTitle = `🎯 ${who.toUpperCase()} — MATCH FOUND`;
+    config.alertMessage = `${who}, the queue popped — tab in and accept!`;
+    console.log(`  ✓ Alert is now: "${config.alertTitle}"`);
+  }
+  const custom = await ask(rl, '  Or type a fully custom alert title (Enter to keep it): ');
+  if (custom) {
+    config.alertTitle = custom;
+    console.log(`  ✓ Alert is now: "${config.alertTitle}"`);
+  }
+
+  // Step 4: friends
+  console.log('\nStep 4 of 4 — Ping your friends too (optional)');
   console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
   console.log('  the same phone ping when your match pops. Just share the topic name.');
   console.log('  (If they queue too, they can run this watcher with the same topic —');

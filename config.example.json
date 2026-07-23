@@ -1,11 +1,15 @@
 {
   "logPath": null,
   "patterns": [
-    "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created",
+    "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created"
+  ],
+  "backupPatterns": [
     "\\[Client\\] CL:\\s+Connected to"
   ],
   "queueStartPatterns": ["k_EMsgClientToGCStartMatchmaking"],
   "queueStopPatterns": ["k_EMsgClientToGCStopMatchmaking"],
   "cooldownSeconds": 60,
+  "alertTitle": "🎯 TERRY — MATCH FOUND",
+  "alertMessage": "The queue popped — tab in and accept!",
   "ntfyTopic": null
 }

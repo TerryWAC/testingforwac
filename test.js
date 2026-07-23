@@ -18,6 +18,8 @@ const LINES = {
   queueStop: '[GCClient] Send msg 9012 (k_EMsgClientToGCStopMatchmaking)',
   lobbyCreated: 'Lobby 34817593 for Match 29471852 created',
   serverConnect: "[Client] CL:  Connected to '=[A:1:2039411713:29811]'",
+  lobbyDestroyed: 'Lobby 34817593 for Match 29471852 destroyed',
+  serverDisconnect: '[Client] Disconnecting from server: completed',
   noise: '[Client] Heartbeat sent to coordinator',
 };
 
@@ -60,9 +62,9 @@ async function waitFor(out, pred, ms = 4000) {
   return pred(out.text);
 }
 
-async function scenario(name, fn) {
+async function scenario(name, fn, configOverrides) {
   console.log(`\n${name}`);
-  const env = makeEnv(name.replace(/\W+/g, '-'));
+  const env = makeEnv(name.replace(/\W+/g, '-'), configOverrides);
   const { child, out } = startWatcher(env);
   await sleep(800); // let the watcher open the log
   try { await fn(env, out); }
@@ -124,6 +126,26 @@ async function main() {
     append(env, LINES.lobbyCreated);
     assert(await waitFor(out, t => alerts({ text: t }) === 1), 'alert after truncation');
   });
+
+  await scenario('10. Match END does not ping (disconnect + hideout reconnect)', async (env, out) => {
+    // Full lifecycle: queue → pop (1 alert) → play → match ends, client
+    // disconnects and reconnects to the hideout. No second ping.
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    await sleep(2500); // outlast the 2s test cooldown, like a real match would
+    append(env, LINES.lobbyDestroyed);
+    append(env, LINES.serverDisconnect);
+    append(env, LINES.serverConnect); // back to the hideout server
+    await sleep(1500);
+    assert(alerts(out) === 1, 'no ping at match end', `got ${alerts(out)}`);
+  });
+
+  await scenario('11. Custom alert text is used', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(out, t => t.includes('YO TERRY GAME TIME')), 'custom title in alert');
+  }, { alertTitle: 'YO TERRY GAME TIME', alertMessage: 'move it' });
 
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');

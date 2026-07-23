@@ -20,6 +20,17 @@ Then queue up and walk away. When the match is found: phone buzzes, Windows toas
 
 Run `node watch.js --test` any time to fire a fake alert and confirm everything works. Run `node watch.js --setup` to change settings.
 
+## Customising the ping
+
+The setup wizard asks for your name and turns the alert into e.g. **"🎯 TERRY — MATCH FOUND"**, or you can type a fully custom title. You can also edit `config.json` directly any time:
+
+```json
+"alertTitle": "GET IN HERE",
+"alertMessage": "Queue popped. Move."
+```
+
+Both show up everywhere — the phone push, the desktop toast, and the console. `node watch.js --test` previews them.
+
 ## Using it with friends
 
 The ping channel **is** the squad — no lobby needed:
