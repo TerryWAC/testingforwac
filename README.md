@@ -32,13 +32,25 @@ The topic name is the only secret, so pick/keep something unguessable.
 
 ## If the alert doesn't fire (or fires at the wrong time)
 
-Valve doesn't document Deadlock's log format and it can change between patches, so the watcher ships with best-guess patterns for the match-found line. To nail down the exact line **your** build prints:
+Valve doesn't document Deadlock's log format and it can change between patches, so the watcher ships with best-guess patterns for the match-found line. Two tools to nail down the exact line **your** build prints:
+
+**Right after a match popped without an alert** (the evidence is already in the log):
+
+```bash
+node watch.js --find
+```
+
+This scans your existing `console.log` and lists every matchmaking-looking line with how often it appeared. The match-found line is usually one that appeared exactly **once** and mentions match/lobby/server assignment. Copy a distinctive part of it into `"patterns"` in `config.json`.
+
+**To pinpoint it by timing** (during your next queue):
 
 ```bash
 node watch.js --learn
 ```
 
-Queue up normally; the moment the match pops, press **Enter** in the terminal. It prints every log line from the last 20 seconds — find the one that appeared at the pop, then add a matching regex to `"patterns"` in `config.json`. From then on detection is exact.
+Queue up normally; the moment the match pops, press **Enter** in the terminal. It prints every log line from the last 20 seconds — the one that appeared at the pop is your line.
+
+Both modes also warn you if the log file looks stale — which means the watcher is looking at the wrong file, or `-condebug` isn't set in Steam.
 
 `cooldownSeconds` (default 60) stops one pop from triggering repeated alerts.
 

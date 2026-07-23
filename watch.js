@@ -11,8 +11,11 @@
 //   node watch.js --setup         re-run the guided setup
 //   node watch.js --log <path>    watch a specific console.log
 //   node watch.js --test          fire the alert right now to check everything
-//   node watch.js --learn        capture log lines while you queue, to find
-//                                 the exact match-found line on a new patch
+//   node watch.js --find          scan the existing console.log for likely
+//                                 match-found lines (run right after a match
+//                                 popped without an alert)
+//   node watch.js --learn        capture log lines live while you queue, to
+//                                 pinpoint the match-found line by timing
 
 const fs = require('fs');
 const os = require('os');
@@ -197,12 +200,15 @@ function ask(rl, q) {
   // Resolve with '' if stdin closes (piped input ran out) so setup still
   // completes and saves instead of silently exiting.
   return new Promise(resolve => {
+    if (rl.closed) return resolve('');
     const onClose = () => resolve('');
     rl.once('close', onClose);
-    rl.question(q, a => {
-      rl.removeListener('close', onClose);
-      resolve(a.trim());
-    });
+    try {
+      rl.question(q, a => {
+        rl.removeListener('close', onClose);
+        resolve(a.trim());
+      });
+    } catch { resolve(''); }
   });
 }
 
@@ -276,9 +282,60 @@ async function main() {
     return;
   }
 
-  if (args.includes('--setup') || (firstRun && !args.includes('--learn'))) {
+  const diagnosticMode = args.includes('--learn') || args.includes('--find');
+  if (args.includes('--setup') || (firstRun && !diagnosticMode)) {
     config = await setupWizard(firstRun ? null : config);
     if (argLog !== -1 && args[argLog + 1]) config.logPath = args[argLog + 1];
+  }
+
+  if (args.includes('--find')) {
+    const logPath = findLogPath(config);
+    if (!logPath) { console.error(noLogHelp()); process.exit(1); }
+    const stat = fs.statSync(logPath);
+    const ageMin = Math.round((Date.now() - stat.mtimeMs) / 60_000);
+    console.log(`Scanning: ${logPath}`);
+    console.log(`  size ${(stat.size / 1024 / 1024).toFixed(1)} MB, last updated ${ageMin} min ago`);
+    if (ageMin > 120) {
+      console.log('  ⚠ This file looks stale. If you played more recently than that,');
+      console.log('    the watcher is looking at the wrong file, or -condebug is not set.');
+    }
+    // Read the last 2 MB — more than enough to cover a session.
+    const start = Math.max(0, stat.size - 2 * 1024 * 1024);
+    const fd = fs.openSync(logPath, 'r');
+    const buf = Buffer.alloc(stat.size - start);
+    fs.readSync(fd, buf, 0, buf.length, start);
+    fs.closeSync(fd);
+    const interesting = /match|lobby|queue|party|connect|server.*(join|assign)|ready|accept/i;
+    // Collapse numbers/ids so repeats of the same message dedupe into one
+    // template with a count.
+    const seen = new Map();
+    for (const line of buf.toString('utf8').split('\n')) {
+      if (!interesting.test(line)) continue;
+      const template = line.replace(/\d+/g, '#').replace(/\[[0-9a-f:.#\-]+\]/gi, '[#]').trim();
+      if (!template) continue;
+      const entry = seen.get(template) || { count: 0, sample: line.trim() };
+      entry.count++;
+      seen.set(template, entry);
+    }
+    if (!seen.size) {
+      console.log('\nNo matchmaking-looking lines found at all. That usually means the');
+      console.log('game is not writing matchmaking info to this log. Double-check that');
+      console.log('-condebug is in the Steam launch options and this is the right file.');
+      return;
+    }
+    console.log(`\n${seen.size} distinct candidate lines (count × sample):\n`);
+    const rows = [...seen.values()].sort((a, b) => a.count - b.count).slice(0, 60);
+    for (const r of rows) {
+      console.log(`  ${String(r.count).padStart(4)} ×  ${r.sample.slice(0, 160)}`);
+    }
+    console.log('\nHow to read this: the match-found line usually appears exactly ONCE');
+    console.log('per match (low count) and mentions match/lobby/server assignment.');
+    console.log('Frequent lines (high counts) are background noise — ignore them.');
+    console.log('\nNext: copy a distinctive part of the right line into "patterns" in');
+    console.log(`${CONFIG_PATH}, e.g. if the line says "EventMatchMade", add:  "EventMatchMade"`);
+    console.log('Not sure which one? Run "node watch.js --learn", queue again, and press');
+    console.log('Enter the moment the match pops — that narrows it to a 20-second window.');
+    return;
   }
 
   if (args.includes('--learn')) {
@@ -309,6 +366,13 @@ async function main() {
   const patterns = config.patterns.map(p => new RegExp(p, 'i'));
   let lastAlert = 0;
   console.log(`Deadlock Match Ping — watching ${logPath}`);
+  try {
+    const ageMin = Math.round((Date.now() - fs.statSync(logPath).mtimeMs) / 60_000);
+    if (ageMin > 120) {
+      console.log(`  ⚠ Note: this log was last updated ${ageMin} min ago. If Deadlock is`);
+      console.log('    running right now, -condebug may be missing or this is the wrong file.');
+    }
+  } catch {}
   console.log(config.ntfyTopic
     ? `Phone pings: ON — topic "${config.ntfyTopic}" (share it so friends get pinged too)`
     : 'Phone pings: off — run "node watch.js --setup" to enable');
