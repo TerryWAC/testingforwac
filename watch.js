@@ -154,7 +154,12 @@ function recordQueue(seconds, hero) {
 function updateLastStat(fields) {
   const stats = loadStats();
   if (!stats.length) return;
-  Object.assign(stats[stats.length - 1], fields);
+  const last = stats[stats.length - 1];
+  // Only enrich a FRESH entry. If this pop wasn't recorded (e.g. the watcher
+  // started mid-queue), the hero/mode/duration must not smudge a previous
+  // session's match.
+  if (Date.now() - new Date(last.at).getTime() > 3 * 3600 * 1000) return;
+  Object.assign(last, fields);
   try { fs.writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2) + '\n'); } catch {}
 }
 

@@ -342,6 +342,23 @@ async function main() {
     try { process.kill(pid); } catch {}
   }
 
+  await scenario('27. Unrecorded pop cannot smudge an old stats entry', async (env, out) => {
+    // Old entry from "yesterday"; watcher starts mid-queue (no queue-start
+    // seen), so this pop records nothing — the hero assignment that follows
+    // must not be written onto the old entry.
+    const statsPath = env.config.replace(/\.json$/, '') + '.stats.json';
+    const old = { at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(), seconds: 240, hero: 'Haze' };
+    fs.writeFileSync(statsPath, JSON.stringify([old]));
+    append(env, LINES.lobbyCreated); // pop with no queue-start
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, '[Server] Loaded hero 3/hero_gigawatt');
+    await waitFor(out, t => t.includes('You got Seven'));
+    await sleep(300);
+    const stats = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+    assert(stats.length === 1 && stats[0].hero === 'Haze' && !('mode' in stats[0]),
+      'old entry untouched', JSON.stringify(stats));
+  });
+
   console.log('\n26. Discord webhook receives the Game Tracker ping');
   {
     const http = require('http');

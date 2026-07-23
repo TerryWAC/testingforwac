@@ -41,19 +41,20 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (47 checks; needs Node) |
+| `npm test` | Run the automated test suite (50 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends — one file
 
-Send a friend **just `DeadlockMatchPing.exe`** and your channel code. They double-click it, follow the built-in wizard (it explains the `-condebug` launch option, the phone app, and puts the Steam auto-start line on their clipboard), type your code into ntfy — done. No Node, no README, no other files, no accounts, no server. The exe alone is the whole product; the Steam auto-start uses its built-in `--steam` mode (`"...\DeadlockMatchPing.exe" --steam %command% -condebug`). Every push of this repo runs the 47-check test suite and rebuilds the exe via GitHub Actions.
+Send a friend **just `DeadlockMatchPing.exe`** and your channel code. They double-click it, follow the built-in wizard (it explains the `-condebug` launch option, the phone app, and puts the Steam auto-start line on their clipboard), type your code into ntfy — done. No Node, no README, no other files, no accounts, no server. The exe alone is the whole product; the Steam auto-start uses its built-in `--steam` mode (`"...\DeadlockMatchPing.exe" --steam %command% -condebug`). Every push of this repo runs the 50-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 
 Prefer Discord over a phone app? Setup asks for a **channel webhook URL** (Discord: channel → ⚙ Edit Channel → Integrations → Webhooks → New Webhook → Copy URL). Pings then arrive in that channel from a bot named **Game Tracker** — set `assets/game-tracker-avatar.png` as the webhook's avatar for the full look. Friends in the server install nothing and get notified through Discord itself:
 
-> **Game Tracker**: @everyone 🎯 Haze — MATCH FOUND — YOU HAVE A GAME — GO GO GO! You queued 4m 32s.
+> **Game Tracker**: @everyone 🎯 MATCH FOUND — YOU HAVE A GAME — GO GO GO! You queued 4m 32s.
+> **Game Tracker**: 🎮 You got Haze — Street Brawl — match is loading!
 
 `discordMention` in `config.json` controls the mention (`@everyone` by default; set `""` for silent messages or a role mention). Discord and phone pings work independently — use either or both.
 
