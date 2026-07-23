@@ -84,13 +84,20 @@ const DEFAULTS = {
     '\\[Server\\] Loaded hero \\d+/(hero_\\w+)',
     'VMDL Camera Pose Success!.*models/heroes(?:_wip|_staging)?/(\\w+)/',
   ],
+  // Lines that reveal the map/mode you loaded into (first capture group).
+  // Translated to a friendly name (Normal / Street Brawl) when recognised.
+  modePatterns: [
+    '\\[HostStateManager\\] Host activate:.*\\(([^)]+)\\)',
+    '\\[Client\\] Map:\\s+"([^"]+)"',
+  ],
   // Seconds to ignore further matches after an alert (one pop = one ping).
   cooldownSeconds: 60,
   // What the ping says — shows up in the phone push, the desktop toast, and
   // the console. {hero} becomes your selected hero's name ("🎯 Haze — MATCH
-  // FOUND"); if no hero is known yet it's cleanly dropped.
+  // FOUND"); if no hero is known yet it's cleanly dropped. {mode} works the
+  // same way (Normal / Street Brawl), {queue} is your queue time.
   alertTitle: '🎯 {hero} — MATCH FOUND',
-  alertMessage: 'Queue popped — tab in and accept!',
+  alertMessage: 'YOU HAVE A GAME — GO GO GO!',
   // PC speaker noise when the match pops: 'loud' (beep storm), 'soft'
   // (a couple of gentle beeps — the toast + phone do the shouting), or 'off'.
   pcSound: 'soft',
@@ -169,6 +176,11 @@ function printStats() {
   if (top.length) {
     console.log(`  Most played:    ${top.map(([h, n]) => `${h} ×${n}`).join(', ')}`);
   }
+  const modes = {};
+  for (const s of stats) if (s.mode) modes[s.mode] = (modes[s.mode] || 0) + 1;
+  if (Object.keys(modes).length) {
+    console.log(`  Modes:          ${Object.entries(modes).map(([m, n]) => `${m} ×${n}`).join(', ')}`);
+  }
   console.log(`  Last 7 days:    ${thisWeek} matches`);
 }
 
@@ -205,6 +217,10 @@ function loadConfig() {
       /^.+, the queue popped — tab in and accept!$/.test(user.alertMessage || '')) {
     delete user.alertTitle;
     delete user.alertMessage;
+    migrated = true;
+  }
+  if (user.alertMessage === 'Queue popped — tab in and accept!') {
+    delete user.alertMessage; // previous default → current default
     migrated = true;
   }
   if (migrated) {
@@ -361,18 +377,25 @@ function phonePush(topic, title, body) {
   });
 }
 
-// Fill {hero} into a template; with no hero known, drop the placeholder and
+// Fill {hero}/{mode} into a template; unknown values drop cleanly along with
 // any dangling separator so "🎯 {hero} — MATCH FOUND" → "🎯 MATCH FOUND".
-function formatWithHero(tpl, hero) {
-  if (!tpl.includes('{hero}')) return { text: tpl, usedHero: false };
-  if (hero) return { text: tpl.split('{hero}').join(hero), usedHero: true };
-  const text = tpl.replace(/\s*\{hero\}\s*[—–:-]*\s*/g, ' ').replace(/\s+/g, ' ').trim();
-  return { text, usedHero: true };
+function fillToken(tpl, token, value) {
+  const ph = `{${token}}`;
+  if (!tpl.includes(ph)) return { text: tpl, used: false };
+  if (value) return { text: tpl.split(ph).join(value), used: true };
+  const re = new RegExp(`\\s*\\{${token}\\}\\s*[—–:-]*\\s*`, 'g');
+  return { text: tpl.replace(re, ' ').replace(/\s+/g, ' ').trim(), used: true };
 }
 
-function fireAlert(config, line, hero, queueSeconds) {
-  const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero);
-  const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero);
+function formatWithHero(tpl, hero, mode) {
+  const h = fillToken(tpl, 'hero', hero);
+  const m = fillToken(h.text, 'mode', mode);
+  return { text: m.text, usedHero: h.used };
+}
+
+function fireAlert(config, line, hero, queueSeconds, mode) {
+  const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero, mode);
+  const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero, mode);
   const title = t.text;
   let body = b.text;
   // Custom templates without {hero} still get the hero mentioned somewhere.
@@ -410,6 +433,17 @@ function heroDisplayName(codename) {
   const key = codename.toLowerCase().replace(/^hero_/, '');
   if (HERO_NAMES[key]) return HERO_NAMES[key];
   return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+// Map/mode codename → friendly mode name. Returns null for maps that are not
+// real matches (hideout, sandbox, tutorial) or that we don't recognise —
+// better to say nothing than to guess wrong.
+function modeDisplayName(raw) {
+  const k = String(raw).toLowerCase();
+  if (k.includes('hideout') || k.includes('sandbox') || k.includes('tutorial') || k.includes('demo')) return null;
+  if (k.includes('brawl')) return 'Street Brawl';
+  if (k.includes('street_test') || k === 'dl_streets') return 'Normal';
+  return null;
 }
 
 // Deadlock log lines start with "MM/DD HH:MM:SS". Returns the line's own
@@ -494,7 +528,12 @@ async function setupWizard(existing) {
   // Step 2: phone pushes
   console.log('\nStep 2 of 4 — Phone pings (via the free ntfy app, no account needed)');
   if (!config.ntfyTopic) {
-    config.ntfyTopic = 'deadlock-' + crypto.randomBytes(4).toString('hex');
+    // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with no
+    // confusable characters (no 0/o, 1/l/i) — easy to type into the phone.
+    const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
+    let code = '';
+    for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
+    config.ntfyTopic = 'dl-' + code;
   }
   console.log(`  Your private channel:  ${config.ntfyTopic}`);
   console.log('  1. Install "ntfy" on your phone:');
@@ -693,6 +732,7 @@ async function main() {
   const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
   const ignore = (config.ignorePatterns || []).map(p => new RegExp(p, 'i'));
   const heroRes = (config.heroPatterns || DEFAULTS.heroPatterns).map(p => new RegExp(p, 'i'));
+  const modeRes = (config.modePatterns || DEFAULTS.modePatterns).map(p => new RegExp(p, 'i'));
   const matchEnd = (config.matchEndPatterns || DEFAULTS.matchEndPatterns).map(p => new RegExp(p, 'i'));
   const staleMs = (config.staleSeconds ?? DEFAULTS.staleSeconds) * 1000;
   const quietMs = (config.postMatchQuietSeconds ?? DEFAULTS.postMatchQuietSeconds) * 1000;
@@ -700,6 +740,7 @@ async function main() {
   let lastHero = null;
   let heroAnnounced = false;
   let lastMatchEnd = 0;
+  let currentMode = null;
   let queueStartedAt = 0;
   let lastMissWarn = 0;
   {
@@ -710,6 +751,19 @@ async function main() {
     }
   }
   tailFile(logPath, line => {
+    for (const re of modeRes) {
+      const m = re.exec(line);
+      if (m && m[1]) {
+        const mode = modeDisplayName(m[1]);
+        if (mode && mode !== currentMode) {
+          currentMode = mode;
+          console.log(`  · Mode: ${mode}`);
+          // Loading into a match after a pop — remember which mode it was.
+          if (lastAlert && Date.now() - lastAlert < 180_000) updateLastStat({ mode });
+        }
+        break; // a mode line is never also a hero/alert line
+      }
+    }
     for (const re of heroRes) {
       const m = re.exec(line);
       if (m && m[1]) {
@@ -722,9 +776,10 @@ async function main() {
         // loads you in, so the phone still says who you're playing.
         if (!heroAnnounced && lastAlert && Date.now() - lastAlert < 180_000 && /Loaded hero/i.test(line)) {
           heroAnnounced = true;
-          phonePush(config.ntfyTopic, `🎮 Playing ${name}`, 'Match is loading — get ready!');
-          desktopNotify(`🎮 Playing ${name}`, 'Match is loading — get ready!');
-          console.log(`  🎮 Playing ${name} — match is loading.`);
+          const what = `🎮 Playing ${name}${currentMode ? ` — ${currentMode}` : ''}`;
+          phonePush(config.ntfyTopic, what, 'Match is loading — get ready!');
+          desktopNotify(what, 'Match is loading — get ready!');
+          console.log(`  ${what} — match is loading.`);
         }
         return;
       }
@@ -732,6 +787,7 @@ async function main() {
     if (queueStart.some(re => re.test(line))) {
       inQueue = true;
       queueStartedAt = Date.now();
+      currentMode = null; // mode is only known once the new match loads
       console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
       return;
     }
@@ -802,11 +858,11 @@ async function main() {
       queueStartedAt = 0;
       const stats = recordQueue(queueSeconds, lastHero);
       const avg = avgSeconds(stats);
-      fireAlert(config, line, lastHero, queueSeconds);
+      fireAlert(config, line, lastHero, queueSeconds, currentMode);
       console.log(`    Queue time: ${fmtDuration(queueSeconds)}` +
         (avg != null && stats.length > 1 ? ` (recent average ${fmtDuration(avg)})` : ''));
     } else {
-      fireAlert(config, line, lastHero, null);
+      fireAlert(config, line, lastHero, null, currentMode);
     }
   });
 }

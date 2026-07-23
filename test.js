@@ -294,6 +294,29 @@ async function main() {
     assert(outText.includes('Average match'), 'match length average');
   }
 
+  await scenario('23. Street Brawl is named in the load-in ping and stats', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, '[HostStateManager] Host activate: GameLoop (dl_brawl_night)');
+    append(env, '[Server] Loaded hero 3/hero_gigawatt');
+    assert(await waitFor(out, t => t.includes('Playing Seven — Street Brawl')),
+      'follow-up names hero and mode');
+    const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
+    assert(stats[stats.length - 1].mode === 'Street Brawl', 'mode recorded in stats',
+      JSON.stringify(stats[stats.length - 1]));
+  });
+
+  await scenario('24. Normal mode detected from the map line', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, '[Client] Map: "street_test"');
+    assert(await waitFor(out, t => t.includes('Mode: Normal')), 'Normal mode spotted');
+    const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
+    assert(stats[stats.length - 1].mode === 'Normal', 'Normal recorded in stats');
+  });
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {

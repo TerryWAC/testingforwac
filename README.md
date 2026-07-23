@@ -2,11 +2,12 @@
 
 **Never miss a Deadlock queue pop again.** Get a phone push, desktop notification, and a beep the moment your match is found — alt-tab, watch YouTube, or leave the room during long queues without eating a low-priority penalty.
 
-> "🎯 Haze — MATCH FOUND · Queue popped — tab in and accept! You queued 4m 32s."
+> "🎯 Haze — MATCH FOUND · YOU HAVE A GAME — GO GO GO! You queued 4m 32s."
+> "🎮 Playing Haze — Street Brawl · Match is loading — get ready!"
 
 - 📱 **Phone pushes** via the free [ntfy](https://ntfy.sh) app — no account, no signup
 - 🖥️ **Desktop toasts** that pop over whatever you're doing (Windows / macOS / Linux)
-- 🦸 **Names your hero** and **how long you queued**
+- 🦸 **Names your hero, the game mode** (Normal / Street Brawl) **and how long you queued**
 - 👥 **Squad mode** — friends subscribe to your channel and get pinged too
 - 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
 - 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
@@ -36,21 +37,21 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | Command | What it does |
 |---|---|
 | `DeadlockMatchPing.exe --test` | Fire a fake alert — checks sound, toast, and phone |
-| `DeadlockMatchPing.exe --stats` | Your report card: pops, queue times, match lengths, most-played heroes |
+| `DeadlockMatchPing.exe --stats` | Your report card: pops, queue times, match lengths, heroes, modes |
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (38 checks; needs Node) |
+| `npm test` | Run the automated test suite (42 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends
 
-Send them the whole folder (or your repo link) plus your channel name — that's it. They double-click `Setup.bat`, subscribe to your channel in ntfy, done: no Node, no accounts, no server. Every push of this repo runs the 38-check test suite and rebuilds the exe via GitHub Actions.
+Send them the whole folder (or your repo link) plus your channel name — that's it. They double-click `Setup.bat`, subscribe to your channel in ntfy, done: no Node, no accounts, no server. Every push of this repo runs the 42-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Phone pings & squad mode
 
-Setup generates a private channel name (e.g. `deadlock-a1b2c3d4`). Install **ntfy** ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iPhone](https://apps.apple.com/us/app/ntfy/id1625396347)), subscribe to your channel, done.
+Setup generates a short private code (e.g. `dl-k4mq7x` — 9 characters, easy to type). Install **ntfy** ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iPhone](https://apps.apple.com/us/app/ntfy/id1625396347)), subscribe to your channel, done.
 
 **Squad mode is just sharing that channel name.** Everyone who subscribes gets the ping when your match pops; friends who run the watcher too can set the same `ntfyTopic` in their `config.json`, so whoever pops first pings everyone. The channel name is the only secret — keep it unguessable.
 
@@ -60,11 +61,11 @@ Setup generates a private channel name (e.g. `deadlock-a1b2c3d4`). Install **ntf
 
 ```json
 "alertTitle":   "🎯 {hero} — MATCH FOUND",
-"alertMessage": "Queue popped — tab in and accept!",
+"alertMessage": "YOU HAVE A GAME — GO GO GO!",
 "pcSound":      "soft"
 ```
 
-`{hero}` becomes your selected hero (with a follow-up "🎮 Playing Haze" ping at load-in if the hero wasn't known at the pop), `{queue}` your queue time (otherwise it's appended automatically). `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes **and match durations** — the watcher times each match from pop to end) lives in `queue-stats.json`; your recent queue average shows at startup and after each pop, and `--stats` prints the full report card. `cooldownSeconds` (default 60) stops one pop from double-pinging.
+`{hero}` becomes your selected hero, `{mode}` the game mode, `{queue}` your queue time (appended automatically if not placed). At load-in you get a follow-up ping naming hero and mode ("🎮 Playing Haze — Street Brawl") when they were not known at the pop. `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes **and match durations** — the watcher times each match from pop to end) lives in `queue-stats.json`; your recent queue average shows at startup and after each pop, and `--stats` prints the full report card. `cooldownSeconds` (default 60) stops one pop from double-pinging.
 
 ## How it works
 
@@ -74,7 +75,7 @@ Deadlock, launched with `-condebug`, writes its console to `game/citadel/console
 - matchmaking start/stop messages → queue tracking (`✓ Queue started`)
 - server connect while queued → backup alert if a patch renames the lobby line
 - match end, local (`loopback`) connections, stale buffered lines, and a post-match quiet window → **never** alert — extensively tested against false pings
-- hero select & load-in lines → hero name in your ping
+- hero select & load-in lines → hero name in your ping; map lines → game mode (Normal / Street Brawl)
 
 Alerts go out as a PowerShell toast + beeps on Windows (`osascript`/`notify-send` on macOS/Linux) and an HTTPS POST to `ntfy.sh/<your-topic>` for phones. `config.example.json` documents every setting.
 
