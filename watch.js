@@ -22,7 +22,7 @@ const os = require('os');
 const path = require('path');
 const https = require('https');
 const crypto = require('crypto');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
 const readline = require('readline');
 
 // Don't die if stdout goes away (e.g. output piped to a closed pager).
@@ -549,7 +549,7 @@ async function setupWizard(existing) {
   }
 
   // Step 3: make the ping yours
-  console.log('\nStep 3 of 4 — Make the ping yours (optional)');
+  console.log('\nStep 3 of 5 — Make the ping yours (optional)');
   console.log(`  Current alert:  "${config.alertTitle}"`);
   console.log('  {hero} becomes your selected hero — e.g. "🎯 Haze — MATCH FOUND".');
   const custom = await ask(rl, '  Custom alert title, {hero} allowed (Enter to keep it): ');
@@ -561,11 +561,30 @@ async function setupWizard(existing) {
   if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
   // Step 4: friends
-  console.log('\nStep 4 of 4 — Ping your friends too (optional)');
+  console.log('\nStep 4 of 5 — Ping your friends too (optional)');
   console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
-  console.log('  the same phone ping when your match pops. Just share the topic name.');
-  console.log('  (If they queue too, they can run this watcher with the same topic —');
+  console.log('  the same phone ping when your match pops. Just share the code.');
+  console.log('  (If they queue too, they can run this watcher with the same code —');
   console.log('  whoever\'s match pops first pings the whole squad.)');
+
+  // Step 5: link with Steam so the watcher starts itself with the game
+  if (process.platform === 'win32') {
+    const steamLine = IS_SEA
+      ? `"${process.execPath}" --steam %command% -condebug`
+      : `"${path.join(APP_DIR, 'steam-launch.bat')}" %command% -condebug`;
+    console.log('\nStep 5 of 5 — Auto-start with Deadlock (recommended)');
+    try {
+      const clip = spawn('clip', [], { windowsHide: true });
+      clip.stdin.end(steamLine);
+      console.log('  This line is COPIED TO YOUR CLIPBOARD:');
+    } catch {
+      console.log('  Copy this line:');
+    }
+    console.log(`\n    ${steamLine}\n`);
+    console.log('  Steam → right-click Deadlock → Properties → Launch Options:');
+    console.log('  delete what\'s there and paste (Ctrl+V). From then on the watcher');
+    console.log('  starts itself, hidden, every time you launch Deadlock.');
+  }
 
   saveConfig(config);
   console.log(`\n  ✓ Saved to ${CONFIG_PATH}. Run "node watch.js --setup" to change anything.\n`);
@@ -588,6 +607,25 @@ async function main() {
       (config.ntfyTopic ? ' + phone push' : '') + ')...');
     await fireAlert(config, null);
     setTimeout(() => process.exit(0), 3500);
+    return;
+  }
+
+  // Steam wrapper mode: Steam runs `"...exe" --steam %command% -condebug`.
+  // We relaunch ourselves hidden as the watcher, then run the game command
+  // and stay alive until the game exits (so Steam tracks it correctly).
+  if (args.includes('--steam')) {
+    const i = args.indexOf('--steam');
+    const gameCmd = args.slice(i + 1);
+    const selfArgs = [];
+    if (!IS_SEA && typeof __filename !== 'undefined') selfArgs.push(__filename);
+    selfArgs.push('--announce', '--config', CONFIG_PATH);
+    if (argLog !== -1 && args[argLog + 1]) selfArgs.push('--log', args[argLog + 1]);
+    spawn(process.execPath, selfArgs,
+      { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+    if (!gameCmd.length) return;
+    const game = spawn(gameCmd[0], gameCmd.slice(1), { stdio: 'inherit' });
+    game.on('close', code => process.exit(code ?? 0));
+    game.on('error', err => { console.error(`Could not launch the game: ${err.message}`); process.exit(1); });
     return;
   }
 

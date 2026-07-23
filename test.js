@@ -317,6 +317,24 @@ async function main() {
     assert(stats[stats.length - 1].mode === 'Normal', 'Normal recorded in stats');
   });
 
+  console.log('\n25. --steam wrapper: starts hidden watcher, runs the game, exits with it');
+  {
+    const env = makeEnv('steam-wrap');
+    const code = await new Promise(resolve => {
+      spawn(process.execPath, [WATCH, '--config', env.config, '--log', env.log,
+        '--steam', process.execPath, '-e', 'setTimeout(()=>{}, 800)'])
+        .on('close', resolve);
+    });
+    assert(code === 0, 'wrapper exited cleanly with the game', `got ${code}`);
+    await sleep(800); // hidden watcher should be up and holding the lock
+    let pid = 0;
+    try { pid = parseInt(fs.readFileSync(env.config + '.lock', 'utf8'), 10); } catch {}
+    let alive = false;
+    try { process.kill(pid, 0); alive = true; } catch {}
+    assert(alive, 'hidden watcher is running after the wrapper exits', `pid ${pid}`);
+    try { process.kill(pid); } catch {}
+  }
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {
