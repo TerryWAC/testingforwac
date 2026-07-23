@@ -57,6 +57,19 @@ const DEFAULTS = {
   // console status so you can see the watcher is really tracking your queue.
   queueStartPatterns: ['k_EMsgClientToGCStartMatchmaking'],
   queueStopPatterns: ['k_EMsgClientToGCStopMatchmaking'],
+  // Never alert on these: connections to the game's own machine (menu,
+  // practice range, local/bot servers) are not real match servers.
+  ignorePatterns: ['loopback', '127\\.0\\.0\\.1', 'localhost'],
+  // Deadlock buffers its log and can flush minutes-old lines in one burst
+  // (e.g. when the game opens or closes). Lines whose own timestamp is older
+  // than this many seconds never alert.
+  staleSeconds: 120,
+  // Lines that reveal which hero you have selected / are loading. First
+  // capture group = the hero's internal name; the ping includes it.
+  heroPatterns: [
+    '\\[Server\\] Loaded hero \\d+/(hero_\\w+)',
+    'VMDL Camera Pose Success!.*models/heroes(?:_wip|_staging)?/(\\w+)/',
+  ],
   // Seconds to ignore further matches after an alert (one pop = one ping).
   cooldownSeconds: 60,
   // What the ping says — shows up in the phone push, the desktop toast, and
@@ -200,17 +213,47 @@ function phonePush(topic, title, body) {
   });
 }
 
-function fireAlert(config, line) {
+function fireAlert(config, line, hero) {
   const title = config.alertTitle || DEFAULTS.alertTitle;
-  const body = config.alertMessage || DEFAULTS.alertMessage;
+  let body = config.alertMessage || DEFAULTS.alertMessage;
+  if (hero) body += ` Hero: ${hero}.`;
   // Phone + toast go FIRST: a Windows console stuck in selection mode blocks
   // stdout writes, and the pings must not wait behind a frozen console.
   const push = phonePush(config.ntfyTopic, title, body);
   desktopNotify(title, body);
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
+  console.log(`    ${body}`);
   if (line) console.log(`    matched line: ${line.trim()}`);
   beepLoop(8);
   return push;
+}
+
+// Deadlock's internal hero codenames → in-game names (community-documented).
+// Unknown codenames fall back to a cleaned-up version of the codename.
+const HERO_NAMES = {
+  atlas: 'Abrams', bebop: 'Bebop', nano: 'Calico', dynamo: 'Dynamo',
+  orion: 'Grey Talon', haze: 'Haze', astro: 'Holliday', inferno: 'Infernus',
+  tengu: 'Ivy', kelvin: 'Kelvin', ghost: 'Lady Geist', lash: 'Lash',
+  forge: 'McGinnis', mirage: 'Mirage', krill: 'Mo & Krill', chrono: 'Paradox',
+  synth: 'Pocket', gigawatt: 'Seven', shiv: 'Shiv', hornet: 'Vindicta',
+  viscous: 'Viscous', wraith: 'Wraith', warden: 'Warden', yamato: 'Yamato',
+  magician: 'Sinclair', slork: 'Fathom', vampirebat: 'Mina',
+};
+
+function heroDisplayName(codename) {
+  const key = codename.toLowerCase().replace(/^hero_/, '');
+  if (HERO_NAMES[key]) return HERO_NAMES[key];
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+// Deadlock log lines start with "MM/DD HH:MM:SS". Returns the line's own
+// timestamp as epoch ms, or null if the line carries none.
+function parseLogTime(line, now = new Date()) {
+  const m = /^(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2}):(\d{2})\b/.exec(line);
+  if (!m) return null;
+  let t = new Date(now.getFullYear(), m[1] - 1, m[2], m[3], m[4], m[5]).getTime();
+  if (t > now.getTime() + 24 * 3600 * 1000) t -= 365.25 * 24 * 3600 * 1000; // Dec→Jan
+  return t;
 }
 
 // ------------------------------------------------------------------- tail ---
@@ -449,8 +492,32 @@ async function main() {
   const backupPatterns = (config.backupPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStart = (config.queueStartPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
+  const ignore = (config.ignorePatterns || []).map(p => new RegExp(p, 'i'));
+  const heroRes = (config.heroPatterns || DEFAULTS.heroPatterns).map(p => new RegExp(p, 'i'));
+  const staleMs = (config.staleSeconds ?? DEFAULTS.staleSeconds) * 1000;
   let inQueue = false;
+  let lastHero = null;
+  let heroAnnounced = false;
   tailFile(logPath, line => {
+    for (const re of heroRes) {
+      const m = re.exec(line);
+      if (m && m[1]) {
+        const name = heroDisplayName(m[1]);
+        if (name !== lastHero) {
+          lastHero = name;
+          console.log(`  · Hero: ${name}`);
+        }
+        // Pop already pinged without a hero? Send one follow-up as the game
+        // loads you in, so the phone still says who you're playing.
+        if (!heroAnnounced && lastAlert && Date.now() - lastAlert < 180_000 && /Loaded hero/i.test(line)) {
+          heroAnnounced = true;
+          phonePush(config.ntfyTopic, `🎮 Playing ${name}`, 'Match is loading — get ready!');
+          desktopNotify(`🎮 Playing ${name}`, 'Match is loading — get ready!');
+          console.log(`  🎮 Playing ${name} — match is loading.`);
+        }
+        return;
+      }
+    }
     if (queueStart.some(re => re.test(line))) {
       inQueue = true;
       console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
@@ -464,10 +531,20 @@ async function main() {
     const hit = patterns.some(re => re.test(line)) ||
       (inQueue && backupPatterns.some(re => re.test(line)));
     if (!hit) return;
+    // Local self-connections (menu, practice range, bot servers) never alert.
+    if (ignore.some(re => re.test(line))) return;
+    // Lines the game flushed late (their own timestamp is old) never alert —
+    // Deadlock buffers log output and can dump minutes-old lines at once.
+    const stamped = parseLogTime(line);
+    if (stamped !== null && Date.now() - stamped > staleMs) {
+      inQueue = false; // that old queue is history, don't let it arm a backup
+      return;
+    }
     if (Date.now() - lastAlert < config.cooldownSeconds * 1000) return;
     lastAlert = Date.now();
     inQueue = false; // this queue is resolved; next connect needs a new queue
-    fireAlert(config, line);
+    heroAnnounced = Boolean(lastHero); // hero in this ping = no follow-up needed
+    fireAlert(config, line, lastHero);
   });
 }
 

@@ -147,6 +147,48 @@ async function main() {
     assert(await waitFor(out, t => t.includes('YO TERRY GAME TIME')), 'custom title in alert');
   }, { alertTitle: 'YO TERRY GAME TIME', alertMessage: 'move it' });
 
+  await scenario('12. Local connections never ping (menu/practice/bot server)', async (env, out) => {
+    append(env, LINES.queueStart);
+    await waitFor(out, t => t.includes('Queue started'));
+    append(env, "[Client] CL:  Connected to 'loopback:1'");
+    append(env, "[Client] CL:  Connected to '127.0.0.1:27015'");
+    await sleep(1500);
+    assert(alerts(out) === 0, 'no ping on loopback/127.0.0.1', `got ${alerts(out)}`);
+    append(env, LINES.serverConnect); // real remote server, still in queue
+    assert(await waitFor(out, t => alerts({ text: t }) === 1), 'remote server still pings');
+  });
+
+  await scenario('13. Stale buffered log lines never ping', async (env, out) => {
+    const stamp = d => {
+      const p = n => String(n).padStart(2, '0');
+      return `${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    };
+    const old = new Date(Date.now() - 25 * 60 * 1000); // flushed 25 min late
+    append(env, `${stamp(old)} ${LINES.queueStart}`);
+    append(env, `${stamp(old)} ${LINES.lobbyCreated}`);
+    await sleep(1500);
+    assert(alerts(out) === 0, 'no ping on 25-min-old lines', `got ${alerts(out)}`);
+    append(env, `${stamp(new Date())} Lobby 55555 for Match 44444 created`);
+    assert(await waitFor(out, t => alerts({ text: t }) === 1), 'fresh-stamped line pings');
+  });
+
+  await scenario('14. Hero selected in menu shows up in the pop ping', async (env, out) => {
+    append(env, 'VMDL Camera Pose Success! loading models/heroes/atlas/atlas_body.vmdl');
+    assert(await waitFor(out, t => t.includes('Hero: Abrams')), 'hero spotted from menu');
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(out, t => /MATCH FOUND[\s\S]*Hero: Abrams/.test(t)),
+      'ping message names the hero');
+  });
+
+  await scenario('15. Hero unknown at pop → follow-up ping at load-in', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, '[Server] Loaded hero 3/hero_gigawatt');
+    assert(await waitFor(out, t => t.includes('Playing Seven')), 'follow-up names loaded hero');
+  });
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {
