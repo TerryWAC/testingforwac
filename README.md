@@ -1,40 +1,69 @@
-# ⏳ Deadlock Match Ping
+# 🎯 Deadlock Match Ping
 
-Pings your whole party the moment your Deadlock match pops — so nobody misses the accept because they were alt-tabbed during a long queue.
+Pings **you** the moment your Deadlock match pops — so you can alt-tab, watch YouTube, or walk away during a long queue without missing the accept (and eating a low-priority penalty).
 
-## The problem
+Just you, no lobby, no server, no accounts. A tiny watcher runs on your PC, tails Deadlock's own console log, and the instant it sees the match-found line it:
 
-You party up in Deadlock, hit search, and the queue drags on. People tab out to YouTube, Discord, whatever. The match finally pops… and someone misses the accept, the match is cancelled, and you're back to the end of the queue.
+- 🔊 plays a loud beep burst
+- 🖥️ fires a desktop notification (Windows toast / macOS / Linux notify-send)
+- 📱 optionally pushes to your **phone** via [ntfy.sh](https://ntfy.sh) — free, no signup
+
+## Setup (2 minutes)
+
+1. **Turn on Deadlock's log file.** In Steam: right-click Deadlock → **Properties** → **Launch Options** → add:
+
+   ```
+   -condebug
+   ```
+
+   This makes the game write everything to `.../Steam/steamapps/common/Deadlock/game/citadel/console.log`.
+
+2. **Run the watcher** (needs Node.js 18+, nothing to install):
+
+   ```bash
+   node watch.js
+   ```
+
+   It auto-detects `console.log` in the usual Steam locations. If yours is elsewhere:
+
+   ```bash
+   node watch.js --log "D:\SteamLibrary\steamapps\common\Deadlock\game\citadel\console.log"
+   ```
+
+3. **Check the alert works** before trusting it with a queue:
+
+   ```bash
+   node watch.js --test
+   ```
+
+4. Queue up in Deadlock, alt-tab, live your life. When the match pops, you'll know.
+
+## Phone pings (optional, recommended)
+
+If you wander away from the PC entirely:
+
+1. Install the **ntfy** app ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iOS](https://apps.apple.com/us/app/ntfy/id1625396347)).
+2. In the app, subscribe to a topic with a hard-to-guess name, e.g. `terry-deadlock-x7k2p`. (The topic name is the only secret — anyone who knows it can see the pings.)
+3. Copy `config.example.json` to `config.json` and set:
+
+   ```json
+   { "ntfyTopic": "terry-deadlock-x7k2p" }
+   ```
+
+Now the match-found ping hits your phone too.
+
+## If the alert doesn't fire (or fires at the wrong time)
+
+Valve doesn't document Deadlock's log format and it can change between patches, so the watcher ships with a set of best-guess patterns for the match-found line. To nail down the exact line **your** build prints:
+
+```bash
+node watch.js --learn
+```
+
+Queue up normally; the moment the match pops, press **Enter** in the terminal. It prints every log line from the last 20 seconds — find the one that appeared at the pop, then add a matching regex to `"patterns"` in `config.json`. From then on detection is exact.
+
+`cooldownSeconds` (default 60) stops one pop from triggering repeated alerts.
 
 ## How it works
 
-1. One person opens the app and creates a party (leave the code blank to generate one).
-2. They share the 4-letter party code; everyone in the Deadlock party joins with it.
-3. Everyone hits **"I'm ready"**. When the whole party is ready, everyone gets a soft ping: *start searching in Deadlock*.
-4. Queue away — alt-tab freely. Whoever notices the match pop hits **"🎯 Match found — ping everyone"**.
-5. **Everybody gets blasted at once**: a full-screen MATCH FOUND banner, an alert sound, a browser notification (works with the tab in the background), and vibration on phones. Tab in, accept, play.
-
-## Running it
-
-No dependencies — just Node.js 18+.
-
-```bash
-npm start
-# → http://localhost:3000
-```
-
-Set `PORT` to change the port: `PORT=8080 npm start`.
-
-To use it with your party, deploy it anywhere that runs Node (Railway, Render, Fly.io, a VPS…) or expose your local server with a tunnel like `ngrok http 3000`.
-
-## Tech
-
-- **Server**: single-file Node.js (`server.js`), zero npm dependencies. In-memory parties, REST endpoints for join / ready / match-found / leave.
-- **Realtime**: Server-Sent Events (SSE) push party state, queue-start, and match-found pings to every connected player.
-- **Client**: single HTML page (`public/index.html`) styled after Deadlock's art-deco brass-and-green look. Notifications via the Notification API, sound via the Web Audio API (no audio files), vibration via the Vibration API.
-
-## Notes
-
-- Detecting the match pop automatically isn't possible — Valve doesn't expose a live matchmaking API for Deadlock — so the "match found" button is pressed by whoever sees the queue pop. Everyone else gets pinged instantly.
-- Parties live in memory and are cleaned up after ~6 hours of everyone being offline. No database needed.
-- Allow notifications when prompted so pings reach you while you're in another tab or app.
+Single file, zero npm dependencies. `watch.js` polls `console.log` every 500 ms (handles the game truncating/recreating it on restart), matches new lines against the configured regexes, and fires the alert — PowerShell toast + `[console]::beep` on Windows, `osascript`/`afplay` on macOS, `notify-send`/`paplay` on Linux, plus an HTTP POST to ntfy.sh if configured.

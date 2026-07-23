@@ -1,0 +1,13 @@
+{
+  "logPath": null,
+  "patterns": [
+    "match\\s*(ready|found|made)",
+    "party_?match",
+    "matchmaking.*(ready|found|complete)",
+    "lobby.*(ready|found)",
+    "Connect(ing)? to .*server",
+    "CCitadelLobby.*match"
+  ],
+  "cooldownSeconds": 60,
+  "ntfyTopic": null
+}
