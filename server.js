@@ -1,6 +1,7 @@
-// Game-ready ping server — zero dependencies, Node.js stdlib only.
-// Players join a lobby by code, mark themselves ready, and when everyone
-// is ready the server broadcasts a "game ready" ping to all connected clients.
+// Deadlock match ping server — zero dependencies, Node.js stdlib only.
+// The party joins a lobby by code and readies up. When everyone is ready the
+// party is "in queue"; when the match pops, anyone hits "Match found" and the
+// server pings the whole party so nobody misses the accept.
 
 const http = require('http');
 const fs = require('fs');
@@ -122,8 +123,8 @@ const server = http.createServer(async (req, res) => {
     const state = lobbyState(code);
     broadcastState(code);
     if (state.allReady) {
-      // Everyone readied up — the game is on. Ping the whole lobby.
-      broadcast(code, 'game-ready', { code, at: Date.now() });
+      // Whole party readied up — time to start searching in-game.
+      broadcast(code, 'queue-start', { code, at: Date.now() });
     }
     return json(res, 200, { state });
   }
@@ -141,15 +142,15 @@ const server = http.createServer(async (req, res) => {
     return json(res, 200, { ok: true });
   }
 
-  // --- manual ping (host yells "game's up!") ---
-  if (req.method === 'POST' && url.pathname === '/api/ping') {
+  // --- match found: the queue popped, ping the whole party to accept ---
+  if (req.method === 'POST' && url.pathname === '/api/match-found') {
     let body;
     try { body = await readBody(req); } catch { return json(res, 400, { error: 'bad request' }); }
     const code = normCode(body.code);
     const lobby = lobbies.get(code);
     const player = lobby && lobby.players.get(body.playerId);
     if (!player) return json(res, 404, { error: 'not in lobby' });
-    broadcast(code, 'game-ready', { code, at: Date.now(), from: player.name, manual: true });
+    broadcast(code, 'match-found', { code, at: Date.now(), from: player.name });
     return json(res, 200, { ok: true });
   }
 
@@ -184,5 +185,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Game-ready ping server running at http://localhost:${PORT}`);
+  console.log(`Deadlock match ping server running at http://localhost:${PORT}`);
 });

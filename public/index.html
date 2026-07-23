@@ -3,26 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Game Ready Ping</title>
+<title>Deadlock Match Ping</title>
 <style>
   :root {
-    --bg: #0f1220;
-    --panel: #1a1f35;
-    --panel2: #232a4a;
-    --text: #e8ebff;
-    --muted: #8a91b4;
-    --accent: #6c8cff;
-    --ready: #3ddc84;
-    --warn: #ffb54d;
+    --bg: #0d120e;
+    --panel: #16201a;
+    --panel2: #1f2c23;
+    --line: #35473a;
+    --text: #efe6d0;
+    --muted: #94a08f;
+    --brass: #d4a94a;
+    --brass-dark: #a8842f;
+    --ready: #7fc95e;
+    --alert: #e0703c;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     min-height: 100vh;
-    background: var(--bg);
+    background:
+      radial-gradient(ellipse at 50% -20%, #22301f 0%, var(--bg) 60%);
     color: var(--text);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: Georgia, "Times New Roman", serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,71 +33,124 @@
   }
   .card {
     background: var(--panel);
-    border: 1px solid #2b3358;
-    border-radius: 16px;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--brass);
+    border-radius: 6px;
     padding: 1.75rem;
     width: 100%;
     max-width: 26rem;
-    box-shadow: 0 10px 40px rgba(0,0,0,.4);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6);
   }
-  h1 { margin: 0 0 .25rem; font-size: 1.4rem; }
-  p.sub { margin: 0 0 1.25rem; color: var(--muted); font-size: .9rem; }
-  label { display: block; font-size: .8rem; color: var(--muted); margin: .75rem 0 .25rem; }
+  h1 {
+    margin: 0 0 .25rem;
+    font-size: 1.35rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brass);
+    text-align: center;
+  }
+  h1::after {
+    content: "";
+    display: block;
+    width: 4rem;
+    height: 2px;
+    margin: .5rem auto 0;
+    background: linear-gradient(90deg, transparent, var(--brass), transparent);
+  }
+  p.sub { margin: .75rem 0 1.25rem; color: var(--muted); font-size: .9rem; text-align: center; }
+  label {
+    display: block;
+    font-size: .72rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: .75rem 0 .25rem;
+  }
   input {
     width: 100%;
     padding: .65rem .75rem;
-    border-radius: 10px;
-    border: 1px solid #2b3358;
+    border-radius: 4px;
+    border: 1px solid var(--line);
     background: var(--panel2);
     color: var(--text);
     font-size: 1rem;
+    font-family: inherit;
   }
-  input#code { text-transform: uppercase; letter-spacing: .15em; }
+  input#code { text-transform: uppercase; letter-spacing: .2em; }
   button {
     width: 100%;
     margin-top: 1rem;
     padding: .75rem;
-    border: 0;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 600;
+    border: 1px solid var(--brass-dark);
+    border-radius: 4px;
+    font-size: .95rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-family: inherit;
     cursor: pointer;
-    background: var(--accent);
-    color: #0b0e1c;
+    background: linear-gradient(180deg, var(--brass), var(--brass-dark));
+    color: #17130a;
     transition: filter .15s;
   }
-  button:hover { filter: brightness(1.1); }
-  button.secondary { background: var(--panel2); color: var(--text); }
-  button.ready-btn.is-ready { background: var(--ready); }
+  button:hover { filter: brightness(1.12); }
+  button.secondary {
+    background: var(--panel2);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  button.alert-btn {
+    background: linear-gradient(180deg, var(--alert), #b0522a);
+    border-color: #b0522a;
+    color: #1c0f08;
+  }
+  button.ready-btn.is-ready {
+    background: linear-gradient(180deg, var(--ready), #5c9c42);
+    border-color: #5c9c42;
+  }
   .hidden { display: none !important; }
   .lobby-code {
     text-align: center;
     font-size: 2rem;
-    letter-spacing: .3em;
+    letter-spacing: .35em;
     font-weight: 700;
     margin: .5rem 0 1rem;
-    color: var(--accent);
+    color: var(--brass);
     cursor: pointer;
   }
+  .queue-status {
+    text-align: center;
+    font-size: .8rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+    padding: .5rem;
+    margin-bottom: .9rem;
+  }
+  .queue-status.searching { color: var(--brass); border-color: var(--brass-dark); animation: blink 1.6s infinite; }
+  @keyframes blink { 50% { opacity: .55; } }
   ul#players { list-style: none; margin: 0 0 .5rem; padding: 0; }
   ul#players li {
     display: flex;
     align-items: center;
     gap: .6rem;
     padding: .55rem .7rem;
-    border-radius: 10px;
+    border-radius: 4px;
     background: var(--panel2);
+    border: 1px solid var(--line);
     margin-bottom: .4rem;
   }
-  .dot { width: .6rem; height: .6rem; border-radius: 50%; background: var(--muted); flex: none; }
-  .dot.online { background: var(--accent); }
-  .status { margin-left: auto; font-size: .8rem; color: var(--muted); }
+  .dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.online { background: var(--brass); }
+  .status { margin-left: auto; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
   .status.ready { color: var(--ready); font-weight: 700; }
   .hint { font-size: .78rem; color: var(--muted); margin-top: .75rem; text-align: center; }
   #banner {
     position: fixed;
     inset: 0;
-    background: rgba(15, 18, 32, .92);
+    background: rgba(13, 18, 14, .95);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -104,38 +160,47 @@
     padding: 2rem;
     z-index: 10;
   }
-  #banner h2 { font-size: 2.2rem; margin: 0; animation: pulse 1s infinite; }
-  @keyframes pulse { 50% { transform: scale(1.08); } }
-  #banner button { max-width: 14rem; }
+  #banner h2 {
+    font-size: 2.1rem;
+    margin: 0;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--alert);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 50% { transform: scale(1.07); } }
+  #banner p { color: var(--text); }
+  #banner button { max-width: 15rem; }
 </style>
 </head>
 <body>
 
 <div class="card" id="join-view">
-  <h1>🎮 Game Ready Ping</h1>
-  <p class="sub">Join a lobby with your squad. When everyone's ready, everybody gets pinged — no more "game's up!" spam in chat.</p>
+  <h1>⏳ Deadlock Match Ping</h1>
+  <p class="sub">For the party stuck in queue. Ready up together, and when the match pops, everyone gets pinged to tab back in and accept — no more losing the queue because someone's watching YouTube.</p>
   <label for="name">Your name</label>
   <input id="name" maxlength="24" placeholder="e.g. Terry" autocomplete="nickname">
-  <label for="code">Lobby code <span style="font-weight:400">(leave blank to create one)</span></label>
+  <label for="code">Party code <span style="text-transform:none;letter-spacing:0">(leave blank to create one)</span></label>
   <input id="code" maxlength="8" placeholder="e.g. AB12">
-  <button id="join-btn">Join lobby</button>
+  <button id="join-btn">Join party</button>
 </div>
 
 <div class="card hidden" id="lobby-view">
-  <h1>Lobby</h1>
-  <p class="sub">Share this code with your squad:</p>
+  <h1>Party</h1>
+  <p class="sub">Share this code with your party:</p>
   <div class="lobby-code" id="lobby-code" title="Click to copy"></div>
+  <div class="queue-status" id="queue-status">Waiting for everyone to ready up</div>
   <ul id="players"></ul>
   <button class="ready-btn" id="ready-btn">I'm ready</button>
-  <button class="secondary" id="ping-btn">📣 Ping everyone now</button>
-  <button class="secondary" id="leave-btn">Leave lobby</button>
-  <p class="hint" id="notif-hint">Tip: allow notifications so you get pinged even when this tab is in the background.</p>
+  <button class="alert-btn" id="match-btn">🎯 Match found — ping everyone</button>
+  <button class="secondary" id="leave-btn">Leave party</button>
+  <p class="hint">When all are ready, start searching in Deadlock. Whoever sees the queue pop hits the orange button.</p>
 </div>
 
 <div id="banner" class="hidden">
-  <h2>🚨 GAME READY 🚨</h2>
-  <p id="banner-sub">Everyone's in — get to the game!</p>
-  <button id="banner-dismiss">On my way</button>
+  <h2>🎯 Match Found</h2>
+  <p id="banner-sub">Tab back into Deadlock and accept!</p>
+  <button id="banner-dismiss">I'm in</button>
 </div>
 
 <script>
@@ -145,10 +210,10 @@
   let audioCtx = null;
 
   // --- ping sound (no audio file needed) ---
-  function beep() {
+  function beep(long) {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const notes = [660, 880, 1100];
+      const notes = long ? [660, 880, 1100, 880, 1100, 1320] : [660, 880];
       notes.forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -163,22 +228,29 @@
     } catch {}
   }
 
-  function notify(text) {
+  function notify(title, text) {
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('🚨 Game ready!', { body: text, tag: 'game-ready' });
+      new Notification(title, { body: text, tag: 'deadlock-ping' });
     }
     if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
   }
 
-  function gameReadyPing(data) {
-    const text = data.manual
-      ? `${data.from} says the game is up — get in!`
-      : "Everyone's ready — get to the game!";
+  function onQueueStart() {
+    $('queue-status').textContent = 'Party ready — searching for match…';
+    $('queue-status').classList.add('searching');
+    beep(false);
+    notify('⏳ Party ready', 'Everyone is ready — start searching in Deadlock.');
+  }
+
+  function onMatchFound(data) {
+    const text = `${data.from} says the match popped — tab into Deadlock and accept!`;
     $('banner-sub').textContent = text;
     $('banner').classList.remove('hidden');
-    beep();
-    notify(text);
-    document.title = '🚨 GAME READY 🚨';
+    $('queue-status').textContent = 'Match found!';
+    $('queue-status').classList.remove('searching');
+    beep(true);
+    notify('🎯 MATCH FOUND', text);
+    document.title = '🎯 MATCH FOUND — ACCEPT!';
   }
 
   function renderState(state) {
@@ -193,7 +265,7 @@
       name.textContent = p.name + (p.id === playerId ? ' (you)' : '');
       const status = document.createElement('span');
       status.className = 'status' + (p.ready ? ' ready' : '');
-      status.textContent = p.ready ? 'READY' : 'not ready';
+      status.textContent = p.ready ? 'Ready' : 'Not ready';
       li.append(dot, name, status);
       ul.append(li);
       if (p.id === playerId) {
@@ -201,6 +273,10 @@
         $('ready-btn').textContent = p.ready ? '✓ Ready — tap to unready' : "I'm ready";
         $('ready-btn').classList.toggle('is-ready', p.ready);
       }
+    }
+    if (!state.allReady) {
+      $('queue-status').textContent = 'Waiting for everyone to ready up';
+      $('queue-status').classList.remove('searching');
     }
   }
 
@@ -218,7 +294,8 @@
     if (es) es.close();
     es = new EventSource(`/api/events?code=${lobbyCode}&playerId=${playerId}`);
     es.addEventListener('state', e => renderState(JSON.parse(e.data)));
-    es.addEventListener('game-ready', e => gameReadyPing(JSON.parse(e.data)));
+    es.addEventListener('queue-start', () => onQueueStart());
+    es.addEventListener('match-found', e => onMatchFound(JSON.parse(e.data)));
   }
 
   $('join-btn').addEventListener('click', async () => {
@@ -228,7 +305,7 @@
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-    beep(); // unlocks the AudioContext; also acts as a sound preview
+    beep(false); // unlocks the AudioContext; also acts as a sound preview
     try {
       const out = await api('/api/join', { name, code: $('code').value });
       playerId = out.playerId;
@@ -245,8 +322,8 @@
   $('ready-btn').addEventListener('click', () =>
     api('/api/ready', { code: lobbyCode, playerId, ready: !isReady }).catch(() => {}));
 
-  $('ping-btn').addEventListener('click', () =>
-    api('/api/ping', { code: lobbyCode, playerId }).catch(() => {}));
+  $('match-btn').addEventListener('click', () =>
+    api('/api/match-found', { code: lobbyCode, playerId }).catch(() => {}));
 
   $('leave-btn').addEventListener('click', async () => {
     await api('/api/leave', { code: lobbyCode, playerId }).catch(() => {});
@@ -258,7 +335,7 @@
 
   $('banner-dismiss').addEventListener('click', () => {
     $('banner').classList.add('hidden');
-    document.title = 'Game Ready Ping';
+    document.title = 'Deadlock Match Ping';
   });
 
   $('lobby-code').addEventListener('click', () => {
