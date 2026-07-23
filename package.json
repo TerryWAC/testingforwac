@@ -1,0 +1,13 @@
+{
+  "name": "game-ready-ping",
+  "version": "1.0.0",
+  "description": "Pings your squad when the game is ready to play — lobby ready-check with sound + browser notifications.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
