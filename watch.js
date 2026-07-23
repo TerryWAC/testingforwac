@@ -178,11 +178,26 @@ function saveConfig(config) {
 
 // ------------------------------------------------------- find console.log ---
 
-function candidateLogPaths() {
+const GAME_REL = ['game', 'citadel', 'console.log'];
+
+// Steam install roots: env override, the Windows registry (Steam's real
+// install path), then well-known locations.
+function steamRoots() {
   const home = os.homedir();
-  const rel = ['steamapps', 'common', 'Deadlock', 'game', 'citadel', 'console.log'];
   const roots = [];
+  if (process.env.DMP_STEAM_ROOT) roots.push(process.env.DMP_STEAM_ROOT);
   if (process.platform === 'win32') {
+    for (const args of [
+      ['query', 'HKCU\\Software\\Valve\\Steam', '/v', 'SteamPath'],
+      ['query', 'HKLM\\SOFTWARE\\WOW6432Node\\Valve\\Steam', '/v', 'InstallPath'],
+    ]) {
+      try {
+        const out = require('child_process').execFileSync('reg', args,
+          { encoding: 'utf8', windowsHide: true });
+        const m = /REG_SZ\s+(.+)/.exec(out);
+        if (m) roots.push(m[1].trim());
+      } catch {}
+    }
     roots.push(
       path.join('C:', 'Program Files (x86)', 'Steam'),
       path.join('C:', 'Program Files', 'Steam'),
@@ -198,7 +213,40 @@ function candidateLogPaths() {
       path.join(home, '.local', 'share', 'Steam'),
     );
   }
-  return roots.map(r => path.join(r, ...rel));
+  return [...new Set(roots)];
+}
+
+// Steam keeps an index of every game library (any drive) — read it so the
+// game is found no matter where it's installed.
+function steamLibraries(root) {
+  const libs = [root];
+  try {
+    const vdf = fs.readFileSync(path.join(root, 'steamapps', 'libraryfolders.vdf'), 'utf8');
+    for (const m of vdf.matchAll(/"path"\s+"([^"]+)"/g)) {
+      libs.push(m[1].replace(/\\\\/g, '\\'));
+    }
+  } catch {}
+  return libs;
+}
+
+function candidateLogPaths() {
+  const candidates = [];
+  // The app folder may have been dropped inside the Deadlock folder itself —
+  // walk up from here looking for game/citadel/console.log.
+  let dir = __dirname;
+  for (let i = 0; i < 6; i++) {
+    candidates.push(path.join(dir, ...GAME_REL));
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  // Every Steam library on every drive.
+  for (const root of steamRoots()) {
+    for (const lib of steamLibraries(root)) {
+      candidates.push(path.join(lib, 'steamapps', 'common', 'Deadlock', ...GAME_REL));
+    }
+  }
+  return candidates;
 }
 
 function findLogPath(config) {

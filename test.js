@@ -42,8 +42,11 @@ function makeEnv(name, configOverrides = {}) {
   return { log, config };
 }
 
-function startWatcher(env) {
-  const child = spawn(process.execPath, [WATCH, '--log', env.log, '--config', env.config]);
+function startWatcher(env, extraArgs = ['--log', null], extraEnv = {}) {
+  const args = extraArgs[0] === '--log' && extraArgs[1] === null
+    ? ['--log', env.log] : extraArgs;
+  const child = spawn(process.execPath, [WATCH, ...args, '--config', env.config],
+    { env: { ...process.env, ...extraEnv } });
   const out = { text: '' };
   child.stdout.on('data', d => { out.text += d; });
   child.stderr.on('data', d => { out.text += d; });
@@ -238,6 +241,26 @@ async function main() {
     append(env, LINES.lobbyCreated);
     assert(await waitFor(first.out, t => alerts({ text: t }) === 1), 'first copy still alerts');
     first.child.kill(); second.child.kill();
+  }
+
+  console.log('\n20. Finds the game via Steam\'s library index (any drive)');
+  {
+    // Fake Steam root whose libraryfolders.vdf points at a second library
+    // where "Deadlock" is installed.
+    const steamRoot = path.join(TMP, 'FakeSteam');
+    const lib2 = path.join(TMP, 'OtherDrive', 'SteamLibrary');
+    const gameDir = path.join(lib2, 'steamapps', 'common', 'Deadlock', 'game', 'citadel');
+    fs.mkdirSync(path.join(steamRoot, 'steamapps'), { recursive: true });
+    fs.mkdirSync(gameDir, { recursive: true });
+    fs.writeFileSync(path.join(gameDir, 'console.log'), '');
+    fs.writeFileSync(path.join(steamRoot, 'steamapps', 'libraryfolders.vdf'),
+      `"libraryfolders"\n{\n\t"0"\n\t{\n\t\t"path"\t\t"${lib2.replace(/\\/g, '\\\\')}"\n\t}\n}\n`);
+    const env = makeEnv('vdf-detect');
+    const { child, out } = startWatcher(env, [], { DMP_STEAM_ROOT: steamRoot });
+    await sleep(1200);
+    child.kill();
+    assert(out.text.includes(path.join('Deadlock', 'game', 'citadel', 'console.log')),
+      'located console.log through libraryfolders.vdf', out.text.split('\n')[0]);
   }
 
   // 7. Legacy config migration (no watcher needed)

@@ -1,89 +1,97 @@
 # 🎯 Deadlock Match Ping
 
-Get a **phone push, desktop notification, and loud beep** the moment your Deadlock match pops — so you can alt-tab, watch YouTube, or leave the room during a long queue without missing the accept (and eating a low-priority penalty).
+**Never miss a Deadlock queue pop again.** Get a phone push, desktop notification, and a beep the moment your match is found — alt-tab, watch YouTube, or leave the room during long queues without eating a low-priority penalty.
 
-Works for just you, and optionally your friends: anyone who subscribes to your ping channel on their phone gets the push too. No server, no accounts, nothing to sign up for.
+> "🎯 Haze — MATCH FOUND · Queue popped — tab in and accept! You queued 4m 32s."
 
-## Quick start
+- 📱 **Phone pushes** via the free [ntfy](https://ntfy.sh) app — no account, no signup
+- 🖥️ **Desktop toasts** that pop over whatever you're doing (Windows / macOS / Linux)
+- 🦸 **Names your hero** and **how long you queued**
+- 👥 **Squad mode** — friends subscribe to your channel and get pinged too
+- 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
+- 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
 
-**Windows:** install [Node.js](https://nodejs.org) if you don't have it (`winget install OpenJS.NodeJS.LTS`), then just **double-click `Start-Deadlock-Match-Ping.bat`**.
+*Community tool. Not affiliated with or endorsed by Valve. It only reads the game's own log file — no memory reading, no injection, nothing that touches the game process.*
 
-**Mac/Linux:** `node watch.js`
+## Install (Windows, ~2 minutes)
 
-**Best setup — link it to Steam (Windows):** after the first-run wizard, double-click **`Link-With-Steam.bat`**. It copies one line to your clipboard; paste it into Deadlock's Steam Launch Options (replacing what's there) and from then on **launching Deadlock auto-starts the watcher in the background** — no console window, no .bat to remember. It says hello with a notification, exits duplicates automatically, and pings your phone as usual. **`Create-Desktop-Shortcut.bat`** adds a desktop shortcut with the app's target icon (an original Deadlock-styled design in `assets/icon.ico` — regenerate or replace it with any 256px .ico you prefer).
+1. **Get Node.js** if you don't have it: `winget install OpenJS.NodeJS.LTS` (or [nodejs.org](https://nodejs.org)).
+2. **Download this folder** anywhere — Downloads, `C:\DeadlockPing`, even inside the Deadlock folder itself. It finds the game wherever it is: it reads Steam's own library index, so any drive and any Steam library works.
+3. **Double-click `Setup.bat`.** It walks you through everything:
+   - finds Deadlock's log (you add the `-condebug` launch option in Steam when prompted),
+   - sets up phone pings and **sends a test ping to your phone** on the spot,
+   - lets you customise the alert text and beep volume,
+   - offers a desktop shortcut (with the app's icon),
+   - copies the **Steam link line** to your clipboard — paste it into Deadlock's Launch Options and the watcher starts itself, hidden, every time you launch the game.
 
-The first run walks you through everything:
+That's the whole setup. Queue, walk away, get pinged.
 
-1. **Finds Deadlock's log file** — you add one launch option in Steam (right-click Deadlock → Properties → Launch Options → `-condebug`) so the game writes a `console.log` it can watch.
-2. **Sets up phone pings** — it generates a private channel name for you, points you at the free [ntfy](https://ntfy.sh) app (Android/iPhone, no account), you subscribe to your channel, and it sends a **test ping to your phone** on the spot.
-3. **Friends (optional)** — share your channel name; anyone subscribed to it in ntfy gets the same push when your match pops.
+**Mac/Linux:** `node watch.js` — same wizard, minus the Windows helpers.
 
-Then queue up and walk away. When the match is found: phone buzzes, Windows toast pops over whatever you're doing, speakers beep.
+## Everyday use
 
-Run `node watch.js --test` any time to fire a fake alert and confirm everything works. Run `node watch.js --setup` to change settings.
+If you linked it with Steam: **nothing**. Launch Deadlock like always; a notification confirms the watcher is on. Otherwise double-click `Start-Deadlock-Match-Ping.bat` (or the desktop shortcut) before you queue.
+
+While searching, the console (if visible) shows `✓ Queue started — watching for the pop...` — the live proof detection is working. Useful commands, run from the app folder:
+
+| Command | What it does |
+|---|---|
+| `node watch.js --test` | Fire a fake alert — checks sound, toast, and phone |
+| `node watch.js --setup` | Re-run the wizard (change text, volume, channel) |
+| `node watch.js --find` | Scan the log for the match-found line after a game patch |
+| `node watch.js --learn` | Pinpoint the match-found line live, by timing |
+| `npm test` | Run the automated test suite (33 checks) |
+
+## Phone pings & squad mode
+
+Setup generates a private channel name (e.g. `deadlock-a1b2c3d4`). Install **ntfy** ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iPhone](https://apps.apple.com/us/app/ntfy/id1625396347)), subscribe to your channel, done.
+
+**Squad mode is just sharing that channel name.** Everyone who subscribes gets the ping when your match pops; friends who run the watcher too can set the same `ntfyTopic` in their `config.json`, so whoever pops first pings everyone. The channel name is the only secret — keep it unguessable.
 
 ## Customising the ping
 
-By default the alert names your selected hero: **"🎯 Haze — MATCH FOUND"**. The watcher tracks which hero you have picked from the game's own log (menu selection and server load-in); if the hero isn't known when the queue pops, you get a follow-up ping ("🎮 Playing Haze") as the match loads. Set your own text in the wizard or in `config.json` — `{hero}` is replaced with the hero's name:
+`config.json` (created by setup) — the useful knobs:
 
 ```json
-"alertTitle": "🎯 {hero} — MATCH FOUND",
-"alertMessage": "Queue popped. Move.",
-"pcSound": "soft"
+"alertTitle":   "🎯 {hero} — MATCH FOUND",
+"alertMessage": "Queue popped — tab in and accept!",
+"pcSound":      "soft"
 ```
 
-`pcSound` controls the PC beeping — `"loud"`, `"soft"` (default: a couple of gentle beeps; the toast and phone do the shouting), or `"off"`. The phone push and desktop toast always fire regardless. `node watch.js --test` previews everything.
-
-## Queue stats
-
-The ping tells you how long you waited — "Queue popped — tab in and accept! You queued 4m 32s." (put `{queue}` in a custom `alertMessage` to place it yourself). The watcher keeps your last 50 queues in `queue-stats.json` and shows your recent average at startup and after each pop.
-
-## Patch insurance
-
-Valve can reword the log lines in a patch, which would silently break detection. The watcher guards against this: if you join a remote game server without it ever seeing a queue or a match pop, it warns you on every channel — phone, toast, and console — that detection may be broken, and points you at `node watch.js --find` to fix the pattern in one step. (Rate-limited to once an hour, and it never fires after a normal match or in the practice range.)
-
-## Using it with friends
-
-The ping channel **is** the squad — no lobby needed:
-
-- Everyone installs ntfy on their phone and subscribes to the same topic (e.g. `deadlock-a1b2c3d4`).
-- When the match pops on your PC, **everyone's phone gets pinged** at once.
-- If a friend also runs the watcher, they set the same `ntfyTopic` in their `config.json` — then whoever's game pops first pings the whole squad.
-
-The topic name is the only secret, so pick/keep something unguessable.
-
-## Testing
-
-`npm test` runs an automated suite (~40s) that spawns the real watcher against simulated logs using Deadlock's genuine line formats: a full queue→pop→connect match, the practice range (must NOT ping), a cancelled queue (must NOT ping), backup detection when the primary line is missing, two matches in one session, a game restart truncating the log, config migration, and the `--find`/`--test` modes.
-
-## How detection works
-
-Deadlock prints `Lobby <id> for Match <id> created` to its console log at the exact moment the queue pops — that's the line the watcher alerts on. As a safety net, `CL: Connected to` (the game joining a server) also triggers the alert, but **only while a queue is active** — otherwise entering the practice range or a custom lobby would false-ping. The watcher tracks queue state from the matchmaking start/stop messages, so while you're searching it prints `✓ Queue started — watching for the pop...` — if you see that, you know detection is live end-to-end.
-
-## If the alert doesn't fire (or fires at the wrong time)
-
-A game patch can reword the log lines. Two tools to find the new line **your** build prints:
-
-**Right after a match popped without an alert** (the evidence is already in the log):
-
-```bash
-node watch.js --find
-```
-
-This scans your existing `console.log` and lists every matchmaking-looking line with how often it appeared. The match-found line is usually one that appeared exactly **once** and mentions match/lobby/server assignment. Copy a distinctive part of it into `"patterns"` in `config.json`.
-
-**To pinpoint it by timing** (during your next queue):
-
-```bash
-node watch.js --learn
-```
-
-Queue up normally; the moment the match pops, press **Enter** in the terminal. It prints every log line from the last 20 seconds — the one that appeared at the pop is your line.
-
-Both modes also warn you if the log file looks stale — which means the watcher is looking at the wrong file, or `-condebug` isn't set in Steam.
-
-`cooldownSeconds` (default 60) stops one pop from triggering repeated alerts.
+`{hero}` becomes your selected hero (with a follow-up "🎮 Playing Haze" ping at load-in if the hero wasn't known at the pop), `{queue}` your queue time (otherwise it's appended automatically). `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes) lives in `queue-stats.json`, and your recent average shows at startup and after each pop. `cooldownSeconds` (default 60) stops one pop from double-pinging.
 
 ## How it works
 
-Single file, zero npm dependencies. `watch.js` polls `console.log` every 500 ms (handles the game truncating/recreating it on restart), matches new lines against the configured regexes, and fires the alert — PowerShell toast + `[console]::beep` on Windows, `osascript`/`afplay` on macOS, `notify-send`/`paplay` on Linux, plus an HTTPS POST to `ntfy.sh/<your-topic>` for the phone pushes. `config.example.json` shows all settings.
+Deadlock, launched with `-condebug`, writes its console to `game/citadel/console.log`. The watcher (one file, `watch.js`, zero npm dependencies, polling every 500 ms) tails that file and reacts to the game's own messages:
+
+- `Lobby <id> for Match <id> created` → **the queue popped** → alert
+- matchmaking start/stop messages → queue tracking (`✓ Queue started`)
+- server connect while queued → backup alert if a patch renames the lobby line
+- match end, local (`loopback`) connections, stale buffered lines, and a post-match quiet window → **never** alert — extensively tested against false pings
+- hero select & load-in lines → hero name in your ping
+
+Alerts go out as a PowerShell toast + beeps on Windows (`osascript`/`notify-send` on macOS/Linux) and an HTTPS POST to `ntfy.sh/<your-topic>` for phones. `config.example.json` documents every setting.
+
+**Patch insurance:** if you join a game server without the watcher ever seeing a queue — the signature of Valve rewording the log — it warns you on phone, toast, and console (at most hourly) and points you at `--find`.
+
+## Troubleshooting
+
+- **"Could not find Deadlock's console.log"** — add `-condebug` to Deadlock's Steam Launch Options and launch the game once. Still stuck? `node watch.js --log "X:\path\to\console.log"`.
+- **No phone ping, but `--test` works on the PC** — the ntfy topic on your phone must match `ntfyTopic` in `config.json` exactly. On Android, enable ntfy's instant delivery and exempt it from battery optimization.
+- **Windows console says "Select" in the title** — clicking inside the window pauses console output (a Windows quirk). Press `Esc` in it. Phone pushes fire first regardless, and the Steam-linked hidden mode has no window to click.
+- **Alert at a weird moment / no alert on a pop** — a game patch probably changed the log wording. Run `node watch.js --find` right after it happens (it lists candidate lines from your log, rarest first — the match line usually appears exactly once) and add the line it identifies to `patterns` in `config.json`. `--learn` pinpoints it live by timing instead: press Enter the moment the pop happens and it prints the last 20 seconds of log. Both warn if the log file looks stale (wrong path or missing `-condebug`).
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `watch.js` | The whole app |
+| `Setup.bat` | One-stop setup: wizard + shortcut + Steam link |
+| `Start-Deadlock-Match-Ping.bat` | Run with a visible console |
+| `Link-With-Steam.bat` / `steam-launch.bat` / `run-hidden.vbs` | Steam auto-start, hidden |
+| `Create-Desktop-Shortcut.bat` | Desktop shortcut with the app icon |
+| `assets/icon.ico` | Original Deadlock-styled icon (`tools/gen-icon.js` regenerates it) |
+| `config.example.json` | Every setting, documented by example |
+| `test.js` | Automated end-to-end suite (`npm test`) |
+
+MIT licensed — see `LICENSE`.
