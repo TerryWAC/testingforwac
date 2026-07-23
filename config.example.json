@@ -7,10 +7,10 @@
     "\\[Client\\] CL:\\s+Connected to"
   ],
   "queueStartPatterns": [
-    "k_EMsgClientToGCStartMatchmaking"
+    "Send msg \\d+ \\(k_EMsgClientToGCStartMatchmaking\\)"
   ],
   "queueStopPatterns": [
-    "k_EMsgClientToGCStopMatchmaking"
+    "Send msg \\d+ \\(k_EMsgClientToGCStopMatchmaking\\)"
   ],
   "matchEndPatterns": [
     "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+destroyed",
