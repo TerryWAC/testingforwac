@@ -225,6 +225,21 @@ async function main() {
     assert(alerts(out) === 0, 'warning is not a match ping', `got ${alerts(out)}`);
   });
 
+  console.log('\n19. Second instance on the same config exits by itself');
+  {
+    const env = makeEnv('single-instance');
+    const first = startWatcher(env);
+    await sleep(800);
+    const second = startWatcher(env);
+    await sleep(800);
+    assert(await waitFor(second.out, t => t.includes('Already running')),
+      'second copy detected the first and exited');
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(first.out, t => alerts({ text: t }) === 1), 'first copy still alerts');
+    first.child.kill(); second.child.kill();
+  }
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {

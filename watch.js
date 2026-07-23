@@ -463,7 +463,12 @@ async function main() {
   }
 
   const diagnosticMode = args.includes('--learn') || args.includes('--find');
-  if (args.includes('--setup') || (firstRun && !diagnosticMode)) {
+  if (firstRun && args.includes('--announce')) {
+    // Hidden launch (Steam) with no config: the interactive wizard would hang
+    // invisibly. Run on defaults and point at setup via a toast instead.
+    desktopNotify('Deadlock Match Ping: setup needed',
+      'Running with defaults (no phone pings). Double-click Start-Deadlock-Match-Ping.bat once to set up.', 'off');
+  } else if (args.includes('--setup') || (firstRun && !diagnosticMode)) {
     config = await setupWizard(firstRun ? null : config);
     if (argLog !== -1 && args[argLog + 1]) config.logPath = args[argLog + 1];
   }
@@ -543,9 +548,38 @@ async function main() {
 
   const logPath = findLogPath(config);
   if (!logPath) { console.error(noLogHelp()); process.exit(1); }
+
+  // Single instance per config: Steam launching the game repeatedly must not
+  // stack duplicate watchers (each would ping separately).
+  const LOCK_PATH = CONFIG_PATH + '.lock';
+  try {
+    const pid = parseInt(fs.readFileSync(LOCK_PATH, 'utf8'), 10);
+    if (pid && pid !== process.pid) {
+      try {
+        process.kill(pid, 0); // throws if that process is gone
+        console.log(`Already running (pid ${pid}) — this copy will exit.`);
+        return;
+      } catch {} // stale lock from a crash — take over
+    }
+  } catch {}
+  fs.writeFileSync(LOCK_PATH, String(process.pid));
+  const releaseLock = () => {
+    try {
+      if (parseInt(fs.readFileSync(LOCK_PATH, 'utf8'), 10) === process.pid) fs.unlinkSync(LOCK_PATH);
+    } catch {}
+  };
+  process.on('exit', releaseLock);
+  process.on('SIGINT', () => process.exit(0));
+  process.on('SIGTERM', () => process.exit(0));
+
   const patterns = config.patterns.map(p => new RegExp(p, 'i'));
   let lastAlert = 0;
   console.log(`Deadlock Match Ping — watching ${logPath}`);
+  if (args.includes('--announce')) {
+    // Launched hidden (e.g. by Steam) — say hello via a toast since there is
+    // no console to look at.
+    desktopNotify('🎯 Deadlock Match Ping is on', 'Watching for your match. Queue away.', 'off');
+  }
   try {
     const ageMin = Math.round((Date.now() - fs.statSync(logPath).mtimeMs) / 60_000);
     if (ageMin > 120) {

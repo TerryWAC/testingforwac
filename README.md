@@ -10,6 +10,8 @@ Works for just you, and optionally your friends: anyone who subscribes to your p
 
 **Mac/Linux:** `node watch.js`
 
+**Best setup — link it to Steam (Windows):** after the first-run wizard, double-click **`Link-With-Steam.bat`**. It copies one line to your clipboard; paste it into Deadlock's Steam Launch Options (replacing what's there) and from then on **launching Deadlock auto-starts the watcher in the background** — no console window, no .bat to remember. It says hello with a notification, exits duplicates automatically, and pings your phone as usual. **`Create-Desktop-Shortcut.bat`** adds a desktop shortcut with the app's target icon (an original Deadlock-styled design in `assets/icon.ico` — regenerate or replace it with any 256px .ico you prefer).
+
 The first run walks you through everything:
 
 1. **Finds Deadlock's log file** — you add one launch option in Steam (right-click Deadlock → Properties → Launch Options → `-condebug`) so the game writes a `console.log` it can watch.
