@@ -1,0 +1,41 @@
+name: Test & Build EXE
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+
+  build-exe:
+    runs-on: windows-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build single-executable
+        shell: pwsh
+        run: |
+          '{ "main": "watch.js", "output": "sea-prep.blob", "disableExperimentalSEAWarning": true }' | Out-File sea-config.json -Encoding ascii
+          node --experimental-sea-config sea-config.json
+          node -e "require('fs').copyFileSync(process.execPath, 'DeadlockMatchPing.exe')"
+          npx -y postject DeadlockMatchPing.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+      - name: Smoke-test the exe
+        shell: pwsh
+        run: |
+          .\DeadlockMatchPing.exe --stats
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DeadlockMatchPing-exe
+          path: DeadlockMatchPing.exe

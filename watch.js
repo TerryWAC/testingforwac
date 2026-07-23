@@ -30,11 +30,19 @@ process.stdout.on('error', () => {});
 
 // ---------------------------------------------------------------- config ---
 
+// When running as a compiled .exe (Node SEA), "next to the app" means next
+// to the executable, not inside the bundled snapshot.
+let IS_SEA = false;
+try { IS_SEA = require('node:sea').isSea(); } catch {}
+const APP_DIR = (!IS_SEA && typeof __dirname !== 'undefined')
+  ? __dirname
+  : path.dirname(process.execPath);
+
 const argv = process.argv.slice(2);
 const argConfig = argv.indexOf('--config');
 const CONFIG_PATH = argConfig !== -1 && argv[argConfig + 1]
   ? path.resolve(argv[argConfig + 1])
-  : path.join(__dirname, 'config.json');
+  : path.join(APP_DIR, 'config.json');
 const DEFAULTS = {
   // Path to Deadlock's console.log. null = try the common Steam locations.
   logPath: null,
@@ -128,6 +136,40 @@ function recordQueue(seconds, hero) {
   while (stats.length > 50) stats.shift();
   try { fs.writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2) + '\n'); } catch {}
   return stats;
+}
+
+function updateLastStat(fields) {
+  const stats = loadStats();
+  if (!stats.length) return;
+  Object.assign(stats[stats.length - 1], fields);
+  try { fs.writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2) + '\n'); } catch {}
+}
+
+function printStats() {
+  const stats = loadStats();
+  if (!stats.length) {
+    console.log('No queues recorded yet — stats appear after your first match pop.');
+    return;
+  }
+  const queues = stats.map(s => s.seconds);
+  const matches = stats.filter(s => s.matchSeconds != null);
+  const heroes = {};
+  for (const s of stats) if (s.hero) heroes[s.hero] = (heroes[s.hero] || 0) + 1;
+  const top = Object.entries(heroes).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
+  const thisWeek = stats.filter(s => new Date(s.at).getTime() > weekAgo).length;
+  console.log('Deadlock Match Ping — your stats');
+  console.log(`  Queues popped:  ${stats.length}`);
+  console.log(`  Average queue:  ${fmtDuration(queues.reduce((a, b) => a + b, 0) / queues.length)}` +
+    `   Longest: ${fmtDuration(Math.max(...queues))}`);
+  if (matches.length) {
+    console.log(`  Average match:  ${fmtDuration(matches.reduce((a, s) => a + s.matchSeconds, 0) / matches.length)}` +
+      ` (${matches.length} tracked)`);
+  }
+  if (top.length) {
+    console.log(`  Most played:    ${top.map(([h, n]) => `${h} ×${n}`).join(', ')}`);
+  }
+  console.log(`  Last 7 days:    ${thisWeek} matches`);
 }
 
 function avgSeconds(stats, lastN = 20) {
@@ -233,7 +275,7 @@ function candidateLogPaths() {
   const candidates = [];
   // The app folder may have been dropped inside the Deadlock folder itself —
   // walk up from here looking for game/citadel/console.log.
-  let dir = __dirname;
+  let dir = APP_DIR;
   for (let i = 0; i < 6; i++) {
     candidates.push(path.join(dir, ...GAME_REL));
     const parent = path.dirname(dir);
@@ -510,6 +552,8 @@ async function main() {
     return;
   }
 
+  if (args.includes('--stats')) { printStats(); return; }
+
   const diagnosticMode = args.includes('--learn') || args.includes('--find');
   if (firstRun && args.includes('--announce')) {
     // Hidden launch (Steam) with no config: the interactive wizard would hang
@@ -697,6 +741,13 @@ async function main() {
       return;
     }
     if (matchEnd.some(re => re.test(line))) {
+      // First end-line after a pop: record how long the match ran (pop → end;
+      // anything under a few seconds was a failed start, not a match).
+      if (lastAlert > lastMatchEnd && Date.now() - lastAlert > 3000) {
+        const secs = (Date.now() - lastAlert) / 1000;
+        updateLastStat({ matchSeconds: Math.round(secs) });
+        console.log(`  · Match over after ${fmtDuration(secs)} (${new Date().toLocaleTimeString()}).`);
+      }
       // Match over — go quiet. Only a fresh queue start re-arms alerts, so
       // whatever the game logs while wrapping up can't ping.
       inQueue = false;

@@ -263,6 +263,37 @@ async function main() {
       'located console.log through libraryfolders.vdf', out.text.split('\n')[0]);
   }
 
+  await scenario('21. Match duration is tracked when the match ends', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    await sleep(3500); // "play" the match
+    append(env, LINES.lobbyDestroyed);
+    assert(await waitFor(out, t => t.includes('Match over after')), 'match end logged');
+    const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
+    assert(stats[stats.length - 1].matchSeconds >= 3, 'duration recorded in stats',
+      JSON.stringify(stats[stats.length - 1]));
+  });
+
+  console.log('\n22. --stats prints the report card');
+  {
+    const env = makeEnv('stats-report');
+    fs.writeFileSync(env.config.replace(/\.json$/, '') + '.stats.json', JSON.stringify([
+      { at: new Date().toISOString(), seconds: 120, hero: 'Haze', matchSeconds: 1800 },
+      { at: new Date().toISOString(), seconds: 300, hero: 'Haze', matchSeconds: 2400 },
+      { at: new Date().toISOString(), seconds: 60, hero: 'Abrams' },
+    ]));
+    const outText = await new Promise(resolve => {
+      const c = spawn(process.execPath, [WATCH, '--stats', '--config', env.config]);
+      let t = '';
+      c.stdout.on('data', d => { t += d; });
+      c.on('close', () => resolve(t));
+    });
+    assert(outText.includes('Queues popped:  3'), 'pop count', outText);
+    assert(outText.includes('Haze ×2'), 'hero leaderboard');
+    assert(outText.includes('Average match'), 'match length average');
+  }
+
   // 7. Legacy config migration (no watcher needed)
   console.log('\n7. Legacy config auto-upgrades, keeping the ntfy topic');
   {

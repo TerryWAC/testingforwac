@@ -4,4 +4,8 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 dir = fso.GetParentFolderName(WScript.ScriptFullName)
 Set sh = CreateObject("WScript.Shell")
 sh.CurrentDirectory = dir
-sh.Run "cmd /c node """ & dir & "\watch.js"" --announce", 0, False
+If fso.FileExists(dir & "\DeadlockMatchPing.exe") Then
+  sh.Run """" & dir & "\DeadlockMatchPing.exe"" --announce", 0, False
+Else
+  sh.Run "cmd /c node """ & dir & "\watch.js"" --announce", 0, False
+End If

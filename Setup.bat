@@ -2,6 +2,10 @@
 title Deadlock Match Ping — Setup
 cd /d "%~dp0"
 
+if exist "%~dp0DeadlockMatchPing.exe" (
+  "%~dp0DeadlockMatchPing.exe" --setup
+  goto :extras
+)
 where node >nul 2>nul
 if errorlevel 1 (
   echo Node.js is not installed. Install it with one command:
@@ -12,8 +16,8 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-
 node watch.js --setup
+:extras
 
 echo.
 echo ----------------------------------------------------------------------

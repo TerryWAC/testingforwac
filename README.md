@@ -13,11 +13,10 @@
 
 *Community tool. Not affiliated with or endorsed by Valve. It only reads the game's own log file — no memory reading, no injection, nothing that touches the game process.*
 
-## Install (Windows, ~2 minutes)
+## Install (Windows, ~2 minutes — nothing else to install)
 
-1. **Get Node.js** if you don't have it: `winget install OpenJS.NodeJS.LTS` (or [nodejs.org](https://nodejs.org)).
-2. **Download this folder** anywhere — Downloads, `C:\DeadlockPing`, even inside the Deadlock folder itself. It finds the game wherever it is: it reads Steam's own library index, so any drive and any Steam library works.
-3. **Double-click `Setup.bat`.** It walks you through everything:
+1. **Download this folder** anywhere — Downloads, `C:\DeadlockPing`, even inside the Deadlock folder itself. It finds the game wherever it is: it reads Steam's own library index, so any drive and any Steam library works. The folder includes **`DeadlockMatchPing.exe`** — a standalone build, so you do **not** need Node.js or anything else. (Windows SmartScreen may warn on first run because the exe is unsigned — choose "More info → Run anyway"; the code is open in this repo. Prefer auditable? Delete the exe, install Node.js, and every script uses `watch.js` instead automatically.)
+2. **Double-click `Setup.bat`.** It walks you through everything:
    - finds Deadlock's log (you add the `-condebug` launch option in Steam when prompted),
    - sets up phone pings and **sends a test ping to your phone** on the spot,
    - lets you customise the alert text and beep volume,
@@ -36,11 +35,18 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 
 | Command | What it does |
 |---|---|
-| `node watch.js --test` | Fire a fake alert — checks sound, toast, and phone |
-| `node watch.js --setup` | Re-run the wizard (change text, volume, channel) |
-| `node watch.js --find` | Scan the log for the match-found line after a game patch |
-| `node watch.js --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (33 checks) |
+| `DeadlockMatchPing.exe --test` | Fire a fake alert — checks sound, toast, and phone |
+| `DeadlockMatchPing.exe --stats` | Your report card: pops, queue times, match lengths, most-played heroes |
+| `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
+| `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
+| `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
+| `npm test` | Run the automated test suite (38 checks; needs Node) |
+
+(No exe? Use `node watch.js --test` etc. — identical.)
+
+## Sharing with friends
+
+Send them the whole folder (or your repo link) plus your channel name — that's it. They double-click `Setup.bat`, subscribe to your channel in ntfy, done: no Node, no accounts, no server. Every push of this repo runs the 38-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Phone pings & squad mode
 
@@ -58,7 +64,7 @@ Setup generates a private channel name (e.g. `deadlock-a1b2c3d4`). Install **ntf
 "pcSound":      "soft"
 ```
 
-`{hero}` becomes your selected hero (with a follow-up "🎮 Playing Haze" ping at load-in if the hero wasn't known at the pop), `{queue}` your queue time (otherwise it's appended automatically). `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes) lives in `queue-stats.json`, and your recent average shows at startup and after each pop. `cooldownSeconds` (default 60) stops one pop from double-pinging.
+`{hero}` becomes your selected hero (with a follow-up "🎮 Playing Haze" ping at load-in if the hero wasn't known at the pop), `{queue}` your queue time (otherwise it's appended automatically). `pcSound` is `"loud"`, `"soft"`, or `"off"` — phone and toast always fire regardless. Queue history (last 50 pops, with heroes **and match durations** — the watcher times each match from pop to end) lives in `queue-stats.json`; your recent queue average shows at startup and after each pop, and `--stats` prints the full report card. `cooldownSeconds` (default 60) stops one pop from double-pinging.
 
 ## How it works
 
@@ -85,7 +91,8 @@ Alerts go out as a PowerShell toast + beeps on Windows (`osascript`/`notify-send
 
 | File | Purpose |
 |---|---|
-| `watch.js` | The whole app |
+| `DeadlockMatchPing.exe` | Standalone Windows build — no Node.js needed |
+| `watch.js` | The whole app (source; the exe is this file compiled in) |
 | `Setup.bat` | One-stop setup: wizard + shortcut + Steam link |
 | `Start-Deadlock-Match-Ping.bat` | Run with a visible console |
 | `Link-With-Steam.bat` / `steam-launch.bat` / `run-hidden.vbs` | Steam auto-start, hidden |
