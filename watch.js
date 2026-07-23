@@ -557,43 +557,67 @@ async function setupWizard(existing) {
     if (p) config.logPath = p;
   }
 
-  // Step 2: phone pushes
+  // Step 2: phone pushes — your choice
   console.log('\nStep 2 of 6 — Phone pings (via the free ntfy app, no account needed)');
-  if (!config.ntfyTopic) {
-    // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with no
-    // confusable characters (no 0/o, 1/l/i) — easy to type into the phone.
-    const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
-    let code = '';
-    for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
-    config.ntfyTopic = 'dl-' + code;
-  }
-  console.log(`  Your private channel:  ${config.ntfyTopic}`);
-  console.log('  1. Install "ntfy" on your phone:');
-  console.log('       Android: https://play.google.com/store/apps/details?id=io.heckel.ntfy');
-  console.log('       iPhone:  https://apps.apple.com/us/app/ntfy/id1625396347');
-  console.log(`  2. In the app: + Subscribe to topic → type:  ${config.ntfyTopic}`);
-  const send = await ask(rl, '  Press Enter to send a test ping to check it (or type "skip"): ');
-  if (send.toLowerCase() !== 'skip') {
-    const ok = await phonePush(config.ntfyTopic, '🎯 Deadlock Match Ping',
-      'Test ping — you are all set!');
-    console.log(ok ? '  ✓ Test ping sent — check your phone!'
-                   : '  ✗ Could not reach ntfy.sh — check your internet, or run --test later.');
+  if (config.ntfyTopic) {
+    const keep = await ask(rl, `  Phone pings are ON (code: ${config.ntfyTopic}). Keep them? (Y/n): `);
+    if (keep.toLowerCase().startsWith('n')) {
+      config.ntfyTopic = null;
+      console.log('  Phone pings turned off.');
+    }
+  } else {
+    const wantPhone = await ask(rl, '  Would you like pings on your phone? (Y/n): ');
+    if (wantPhone.toLowerCase().startsWith('n')) {
+      console.log('  Skipped — add them any time with --setup.');
+    } else {
+      // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with no
+      // confusable characters (no 0/o, 1/l/i) — easy to type into the phone.
+      const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
+      let code = '';
+      for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
+      config.ntfyTopic = 'dl-' + code;
+      console.log(`  Your private channel:  ${config.ntfyTopic}`);
+      console.log('  1. Install "ntfy" on your phone:');
+      console.log('       Android: https://play.google.com/store/apps/details?id=io.heckel.ntfy');
+      console.log('       iPhone:  https://apps.apple.com/us/app/ntfy/id1625396347');
+      console.log(`  2. In the app: + Subscribe to topic → type:  ${config.ntfyTopic}`);
+      const send = await ask(rl, '  Press Enter to send a test ping to check it (or type "skip"): ');
+      if (send.toLowerCase() !== 'skip') {
+        const ok = await phonePush(config.ntfyTopic, '🎯 Deadlock Match Ping',
+          'Test ping — you are all set!');
+        console.log(ok ? '  ✓ Test ping sent — check your phone!'
+                       : '  ✗ Could not reach ntfy.sh — check your internet, or run --test later.');
+      }
+    }
   }
 
   // Step 3: Discord — pings arrive from a "Game Tracker" bot, zero installs
-  console.log('\nStep 3 of 6 — Discord pings (optional, great for squads)');
-  console.log('  Pings arrive in a channel from a bot named "Game Tracker" — friends');
-  console.log('  in the server need to install NOTHING.');
-  console.log('  In Discord: your channel → ⚙ Edit Channel → Integrations → Webhooks →');
-  console.log('  New Webhook → name it Game Tracker → Copy Webhook URL.');
-  const hook = await ask(rl, '  Paste the webhook URL (Enter to skip): ');
-  if (hook && /^https:\/\/(\w+\.)?discord(app)?\.com\/api\/webhooks\//.test(hook)) {
-    config.discordWebhook = hook;
-    const ok = await discordPush(hook, '🎯 Game Tracker is connected — test ping!');
-    console.log(ok ? '  ✓ Test message sent — check the channel!'
-                   : '  ✗ Discord did not accept it — double-check the URL, or re-run --setup later.');
-  } else if (hook) {
-    console.log('  ✗ That does not look like a Discord webhook URL — skipped (re-run --setup to retry).');
+  console.log('\nStep 3 of 6 — Discord pings (bot named "Game Tracker")');
+  if (config.discordWebhook) {
+    const keep = await ask(rl, '  Discord pings are ON. Keep them? (Y/n): ');
+    if (keep.toLowerCase().startsWith('n')) {
+      config.discordWebhook = null;
+      console.log('  Discord pings turned off.');
+    }
+  } else {
+    const wantDiscord = await ask(rl,
+      '  Would you like pings on Discord too (or instead)? Friends in the server\n  need to install NOTHING. (y/N): ');
+    if (wantDiscord.toLowerCase().startsWith('y')) {
+      console.log('  In Discord: your channel → ⚙ Edit Channel → Integrations → Webhooks →');
+      console.log('  New Webhook → name it Game Tracker → Copy Webhook URL.');
+      const hook = await ask(rl, '  Paste the webhook URL (Enter to skip): ');
+      if (hook && /^https:\/\/(\w+\.)?discord(app)?\.com\/api\/webhooks\//.test(hook)) {
+        config.discordWebhook = hook;
+        const ok = await discordPush(hook, '🎯 Game Tracker is connected — test ping!');
+        console.log(ok ? '  ✓ Test message sent — check the channel!'
+                       : '  ✗ Discord did not accept it — double-check the URL, or re-run --setup later.');
+      } else if (hook) {
+        console.log('  ✗ That does not look like a Discord webhook URL — skipped (re-run --setup to retry).');
+      }
+    }
+  }
+  if (!config.ntfyTopic && !config.discordWebhook) {
+    console.log('  Note: no phone or Discord pings — you\'ll get desktop toasts and beeps only.');
   }
 
   // Step 4: make the ping yours
