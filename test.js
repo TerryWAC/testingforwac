@@ -359,6 +359,66 @@ async function main() {
       'old entry untouched', JSON.stringify(stats));
   });
 
+  await scenario('28. Disconnect while queued (leaving practice range) keeps the queue armed', async (env, out) => {
+    append(env, LINES.queueStart);
+    await waitFor(out, t => t.includes('Queue started'));
+    append(env, LINES.serverDisconnect); // player leaves the range, still queued
+    await sleep(700);
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(out, t => alerts({ text: t }) === 1),
+      'pop still pings after mid-queue disconnect', `got ${alerts(out)}`);
+  });
+
+  await scenario('29. A NEW match inside the cooldown still pings; same match stays deduped', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated); // match A
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, 'Lobby 999 for Match 111 created'); // match B, well inside 2s cooldown
+    assert(await waitFor(out, t => alerts({ text: t }) === 2), 'new match ID bypasses cooldown');
+    append(env, 'Lobby 999 for Match 111 created'); // match B flushed again
+    await sleep(1200);
+    assert(alerts(out) === 2, 'repeat of same match stays deduped', `got ${alerts(out)}`);
+  });
+
+  await scenario('30. Stale flushed queue-start cannot arm a false connect ping', async (env, out) => {
+    const d = new Date(Date.now() - 30 * 60 * 1000);
+    const p = n => String(n).padStart(2, '0');
+    const stamp = `${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    append(env, `${stamp} ${LINES.queueStart}`); // old session's buffered tail
+    await sleep(700);
+    append(env, LINES.serverConnect); // joining a friend's custom lobby, fresh
+    await sleep(1200);
+    assert(alerts(out) === 0, 'no false ping from stale queue-start', `got ${alerts(out)}`);
+  });
+
+  console.log('\n31. Corrupt config never blocks the game launch (--steam)');
+  {
+    const config = path.join(TMP, 'corrupt-config.json');
+    fs.writeFileSync(config, '{ this is not json');
+    const code = await new Promise(resolve => {
+      spawn(process.execPath, [WATCH, '--config', config,
+        '--steam', process.execPath, '-e', '0'])
+        .on('close', resolve);
+    });
+    assert(code === 0, 'game command ran despite corrupt config', `got ${code}`);
+    assert(fs.existsSync(config + '.bad'), 'corrupt config moved aside');
+  }
+
+  console.log('\n32. Stale lock with a recycled PID is taken over');
+  {
+    // pid 1 is alive (init) — simulates Windows recycling a crashed
+    // watcher's PID — but the ancient lock mtime proves the holder is gone.
+    const env = makeEnv('stale-lock');
+    fs.writeFileSync(env.config + '.lock', '1');
+    const old = new Date(Date.now() - 60 * 60 * 1000);
+    fs.utimesSync(env.config + '.lock', old, old);
+    const { child, out } = startWatcher(env);
+    await sleep(1000);
+    child.kill();
+    assert(out.text.includes('watching') && !out.text.includes('Already running'),
+      'stale lock ignored, watcher runs', out.text.split('\n')[0]);
+  }
+
   console.log('\n26. Discord webhook receives the Game Tracker ping');
   {
     const http = require('http');

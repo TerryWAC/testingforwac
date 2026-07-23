@@ -41,13 +41,13 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (50 checks; needs Node) |
+| `npm test` | Run the automated test suite (57 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends — one file
 
-Send a friend **just `DeadlockMatchPing.exe`** and your channel code. They double-click it, follow the built-in wizard (it explains the `-condebug` launch option, the phone app, and puts the Steam auto-start line on their clipboard), type your code into ntfy — done. No Node, no README, no other files, no accounts, no server. The exe alone is the whole product; the Steam auto-start uses its built-in `--steam` mode (`"...\DeadlockMatchPing.exe" --steam %command% -condebug`). Every push of this repo runs the 50-check test suite and rebuilds the exe via GitHub Actions.
+Send a friend **just `DeadlockMatchPing.exe`** and your channel code. They double-click it, follow the built-in wizard (it explains the `-condebug` launch option, the phone app, and puts the Steam auto-start line on their clipboard), type your code into ntfy — done. No Node, no README, no other files, no accounts, no server. The exe alone is the whole product; the Steam auto-start uses its built-in `--steam` mode (`"...\DeadlockMatchPing.exe" --steam %command% -condebug`). Every push of this repo runs the 57-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 

@@ -63,8 +63,9 @@ const DEFAULTS = {
   ],
   // Lines that mark entering/leaving the matchmaking queue — used only for
   // console status so you can see the watcher is really tracking your queue.
-  queueStartPatterns: ['k_EMsgClientToGCStartMatchmaking'],
-  queueStopPatterns: ['k_EMsgClientToGCStopMatchmaking'],
+  // Anchored to the Send-msg shape so GC *response* lines can't double-fire.
+  queueStartPatterns: ['Send msg \\d+ \\(k_EMsgClientToGCStartMatchmaking\\)'],
+  queueStopPatterns: ['Send msg \\d+ \\(k_EMsgClientToGCStopMatchmaking\\)'],
   // Never alert on these: connections to the game's own machine (menu,
   // practice range, local/bot servers) are not real match servers.
   ignorePatterns: ['loopback', '127\\.0\\.0\\.1', 'localhost'],
@@ -211,8 +212,11 @@ function loadConfig() {
   try { user = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); }
   catch (e) {
     if (e.code !== 'ENOENT') {
-      console.error(`Could not parse ${CONFIG_PATH}: ${e.message}`);
-      process.exit(1);
+      // Never hard-exit here: in --steam mode that would stop the GAME from
+      // launching. Move the corrupt file aside and start fresh instead.
+      console.error(`Warning: ${CONFIG_PATH} is unreadable (${e.message}) — ` +
+        'moving it to config.json.bad and starting fresh.');
+      try { fs.renameSync(CONFIG_PATH, CONFIG_PATH + '.bad'); } catch {}
     }
     return null; // no config yet — triggers the setup wizard
   }
@@ -232,6 +236,14 @@ function loadConfig() {
   }
   if (user.alertMessage === 'Queue popped — tab in and accept!') {
     delete user.alertMessage; // previous default → current default
+    migrated = true;
+  }
+  if (JSON.stringify(user.queueStartPatterns) === '["k_EMsgClientToGCStartMatchmaking"]') {
+    delete user.queueStartPatterns; // unanchored → anchored default
+    migrated = true;
+  }
+  if (JSON.stringify(user.queueStopPatterns) === '["k_EMsgClientToGCStopMatchmaking"]') {
+    delete user.queueStopPatterns;
     migrated = true;
   }
   if (migrated) {
@@ -329,6 +341,7 @@ function findLogPath(config) {
 // ----------------------------------------------------------------- alerts ---
 
 function beepLoop(times) {
+  if (times <= 0) return;
   // Terminal bell burst — audible in most terminals even in the background.
   let i = 0;
   const t = setInterval(() => {
@@ -489,7 +502,11 @@ function parseLogTime(line, now = new Date()) {
   const m = /^(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2}):(\d{2})\b/.exec(line);
   if (!m) return null;
   let t = new Date(now.getFullYear(), m[1] - 1, m[2], m[3], m[4], m[5]).getTime();
-  if (t > now.getTime() + 24 * 3600 * 1000) t -= 365.25 * 24 * 3600 * 1000; // Dec→Jan
+  // A Dec 31 line read on Jan 1 first parses as ~a year in the future —
+  // rebuild it with last year (calendar-correct, unlike subtracting days).
+  if (t > now.getTime() + 24 * 3600 * 1000) {
+    t = new Date(now.getFullYear() - 1, m[1] - 1, m[2], m[3], m[4], m[5]).getTime();
+  }
   return t;
 }
 
@@ -500,26 +517,33 @@ function tailFile(logPath, onLine) {
   // game restart (size shrink = start over from 0). Reads are serialized —
   // a tick is skipped while the previous read is still in flight, so lines
   // from a burst of log output can't interleave out of order.
+  const { StringDecoder } = require('string_decoder');
   let pos = fs.existsSync(logPath) ? fs.statSync(logPath).size : 0;
   let buf = '';
+  let decoder = new StringDecoder('utf8'); // multi-byte chars can straddle chunks
   let reading = false;
   setInterval(() => {
     if (reading) return;
     let stat;
     try { stat = fs.statSync(logPath); } catch { return; }
-    if (stat.size < pos) { pos = 0; buf = ''; }
+    if (stat.size < pos) { pos = 0; buf = ''; decoder = new StringDecoder('utf8'); }
     if (stat.size === pos) return;
     reading = true;
+    const startPos = pos;
     const stream = fs.createReadStream(logPath, { start: pos, end: stat.size - 1 });
     pos = stat.size;
     stream.on('data', chunk => {
-      buf += chunk.toString('utf8');
+      buf += decoder.write(chunk);
       const lines = buf.split('\n');
       buf = lines.pop();
       lines.forEach(onLine);
     });
     stream.on('close', () => { reading = false; });
-    stream.on('error', () => { reading = false; });
+    stream.on('error', () => {
+      // Re-read this window next tick rather than silently skipping it — a
+      // duplicate line is harmless (dedup guards), a dropped pop is not.
+      pos = startPos; buf = ''; decoder = new StringDecoder('utf8'); reading = false;
+    });
   }, 500);
 }
 
@@ -642,10 +666,16 @@ async function setupWizard(existing) {
 
   // Step 5: friends
   console.log('\nStep 5 of 6 — Ping your friends too (optional)');
-  console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
-  console.log('  the same phone ping when your match pops. Just share the code.');
-  console.log('  (If they queue too, they can run this watcher with the same code —');
-  console.log('  whoever\'s match pops first pings the whole squad.)');
+  if (config.ntfyTopic) {
+    console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
+    console.log('  the same phone ping when your match pops. Just share the code.');
+    console.log('  (If they queue too, they can run this watcher with the same code —');
+    console.log('  whoever\'s match pops first pings the whole squad.)');
+  } else if (config.discordWebhook) {
+    console.log('  Everyone in your Discord channel already gets the pings — done.');
+  } else {
+    console.log('  (Add phone or Discord pings with --setup to ping friends too.)');
+  }
 
   // Step 5: link with Steam so the watcher starts itself with the game
   if (process.platform === 'win32') {
@@ -655,6 +685,8 @@ async function setupWizard(existing) {
     console.log('\nStep 6 of 6 — Auto-start with Deadlock (recommended)');
     try {
       const clip = spawn('clip', [], { windowsHide: true });
+      clip.on('error', () => {});         // async spawn failures must not kill
+      clip.stdin.on('error', () => {});   // the wizard before config is saved
       clip.stdin.end(steamLine);
       console.log('  This line is COPIED TO YOUR CLIPBOARD:');
     } catch {
@@ -803,7 +835,11 @@ async function main() {
   const LOCK_PATH = CONFIG_PATH + '.lock';
   try {
     const pid = parseInt(fs.readFileSync(LOCK_PATH, 'utf8'), 10);
-    if (pid && pid !== process.pid) {
+    // A live watcher touches its lock every minute, so a stale mtime means
+    // the holder died (crash/reboot) even if Windows recycled its PID for an
+    // unrelated process — BOTH checks must pass to treat it as running.
+    const fresh = Date.now() - fs.statSync(LOCK_PATH).mtimeMs < 5 * 60_000;
+    if (pid && pid !== process.pid && fresh) {
       try {
         process.kill(pid, 0); // throws if that process is gone
         console.log(`Already running (pid ${pid}) — this copy will exit.`);
@@ -812,6 +848,9 @@ async function main() {
     }
   } catch {}
   fs.writeFileSync(LOCK_PATH, String(process.pid));
+  setInterval(() => {
+    try { fs.utimesSync(LOCK_PATH, new Date(), new Date()); } catch {}
+  }, 60_000).unref();
   const releaseLock = () => {
     try {
       if (parseInt(fs.readFileSync(LOCK_PATH, 'utf8'), 10) === process.pid) fs.unlinkSync(LOCK_PATH);
@@ -855,6 +894,7 @@ async function main() {
   const staleMs = (config.staleSeconds ?? DEFAULTS.staleSeconds) * 1000;
   const quietMs = (config.postMatchQuietSeconds ?? DEFAULTS.postMatchQuietSeconds) * 1000;
   let inQueue = false;
+  let lastMatchId = null;
   let lastHero = null;
   let heroAnnounced = false;
   let lastMatchEnd = 0;
@@ -906,6 +946,11 @@ async function main() {
       }
     }
     if (queueStart.some(re => re.test(line))) {
+      // A stale flushed queue-start (buffered tail of an old session) must
+      // not arm the backup pattern — it would false-ping on the next
+      // non-match server join.
+      const ts = parseLogTime(line);
+      if (ts !== null && Date.now() - ts > staleMs) return;
       inQueue = true;
       queueStartedAt = Date.now();
       currentMode = null; // mode is only known once the new match loads
@@ -918,11 +963,19 @@ async function main() {
       return;
     }
     if (queueStop.some(re => re.test(line))) {
+      const ts = parseLogTime(line);
+      if (ts !== null && Date.now() - ts > staleMs) return;
       inQueue = false;
+      queueStartedAt = 0; // an abandoned start must not pollute queue timing
       console.log(`  · Queue stopped (${new Date().toLocaleTimeString()}).`);
       return;
     }
     if (matchEnd.some(re => re.test(line))) {
+      // While QUEUED, a disconnect just means leaving the practice range or
+      // hideout — wiping the queue here would swallow the upcoming pop.
+      if (inQueue) return;
+      const ts = parseLogTime(line);
+      if (ts !== null && Date.now() - ts > staleMs) return;
       // First end-line after a pop: record how long the match ran (pop → end;
       // anything under a few seconds was a failed start, not a match).
       if (lastAlert > lastMatchEnd && Date.now() - lastAlert > 3000) {
@@ -974,11 +1027,21 @@ async function main() {
       inQueue = false; // that old queue is history, don't let it arm a backup
       return;
     }
-    if (Date.now() - lastAlert < config.cooldownSeconds * 1000) return;
+    // Dedup by match ID when the line carries one: repeats of the SAME match
+    // stay suppressed, but a genuinely NEW match (failed form → instant
+    // re-pop) pings even inside the time cooldown.
+    const idm = /Lobby\s+\d+\s+for\s+Match\s+(\d+)/i.exec(line);
+    const matchId = idm ? idm[1] : null;
+    if (Date.now() - lastAlert < config.cooldownSeconds * 1000 &&
+        (!matchId || matchId === lastMatchId)) return;
+    if (matchId) lastMatchId = matchId;
     lastAlert = Date.now();
     inQueue = false; // this queue is resolved; next connect needs a new queue
     heroAnnounced = false; // the assigned hero is revealed at load-in
     let queueSeconds = null;
+    // Sanity-cap: an hours-old orphaned start would make the ping claim a
+    // ridiculous queue time and pollute the stats.
+    if (queueStartedAt && Date.now() - queueStartedAt > 2 * 3600 * 1000) queueStartedAt = 0;
     if (queueStartedAt) {
       queueSeconds = (Date.now() - queueStartedAt) / 1000;
       queueStartedAt = 0;
