@@ -115,6 +115,13 @@ const DEFAULTS = {
   // Prepended to the Discord match-found message so people actually get
   // notified. Set to "" for a silent message, or e.g. "<@&ROLE_ID>".
   discordMention: '@everyone',
+  // Any webhook→notification service (e.g. Hark on iOS: hark.ryan.ceo).
+  // The body template is POSTed as JSON with {title}/{message}/{image}/{link}
+  // filled in — adjust the field names to whatever your service expects.
+  customWebhookUrl: null,
+  customWebhookBody: '{"title":"{title}","body":"{message}","image":"{image}","url":"{link}"}',
+  customWebhookImage: 'https://github.com/TerryWAC/testingforwac/raw/main/assets/game-tracker-avatar.png',
+  customWebhookLink: 'steam://run/1422450',
 };
 
 // Pattern lists shipped by earlier versions — configs still carrying one of
@@ -441,6 +448,36 @@ function discordPush(webhook, content) {
   });
 }
 
+function customPush(config, title, message) {
+  return new Promise(resolve => {
+    const url = config.customWebhookUrl;
+    if (!url) return resolve(false);
+    let u;
+    try { u = new URL(url); } catch { return resolve(false); }
+    const esc = s => JSON.stringify(String(s)).slice(1, -1); // JSON-safe fill
+    const payload = (config.customWebhookBody || DEFAULTS.customWebhookBody)
+      .split('{title}').join(esc(title))
+      .split('{message}').join(esc(message))
+      .split('{image}').join(esc(config.customWebhookImage ?? DEFAULTS.customWebhookImage))
+      .split('{link}').join(esc(config.customWebhookLink ?? DEFAULTS.customWebhookLink));
+    const mod = u.protocol === 'http:' ? require('http') : https; // http only ever used by tests
+    const req = mod.request({
+      hostname: u.hostname,
+      port: u.port || undefined,
+      path: u.pathname + u.search,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10_000,
+    }, res => { res.resume(); resolve(res.statusCode >= 200 && res.statusCode < 300); });
+    req.on('error', err => {
+      console.error(`  (custom webhook failed: ${err.message})`);
+      resolve(false);
+    });
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.end(payload);
+  });
+}
+
 function fireAlert(config, line, hero, queueSeconds, mode) {
   const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero, mode);
   const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero, mode);
@@ -459,6 +496,7 @@ function fireAlert(config, line, hero, queueSeconds, mode) {
   const push = phonePush(config.ntfyTopic, title, body);
   const mention = config.discordMention ?? DEFAULTS.discordMention;
   discordPush(config.discordWebhook, `${mention ? mention + ' ' : ''}${title} — ${body}`);
+  customPush(config, title, body);
   desktopNotify(title, body, pcSound);
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
   console.log(`    ${body}`);
@@ -939,6 +977,7 @@ async function main() {
           const what = `🎮 You got ${name}${currentMode ? ` — ${currentMode}` : ''}`;
           phonePush(config.ntfyTopic, what, 'Match is loading — get ready!');
           discordPush(config.discordWebhook, `${what} — match is loading!`);
+          customPush(config, what, 'Match is loading — get ready!');
           desktopNotify(what, 'Match is loading — get ready!');
           console.log(`  ${what} — match is loading.`);
         }
