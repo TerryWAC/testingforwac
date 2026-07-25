@@ -449,6 +449,19 @@ async function main() {
     assert(parsed && parsed.url === 'steam://run/1422450', 'click link launches Deadlock');
   }
 
+  console.log('\n34. --share prints a squad invite with the code and download link');
+  {
+    const env = makeEnv('share', { ntfyTopic: 'dl-test99' });
+    const outText = await new Promise(resolve => {
+      const c = spawn(process.execPath, [WATCH, '--share', '--config', env.config]);
+      let t = '';
+      c.stdout.on('data', d => { t += d; });
+      c.on('close', () => resolve(t));
+    });
+    assert(outText.includes('dl-test99'), 'invite contains the squad code', outText);
+    assert(outText.includes('DeadlockMatchPing.exe'), 'invite contains the download link');
+  }
+
   console.log('\n26. Discord webhook receives the Game Tracker ping');
   {
     const http = require('http');

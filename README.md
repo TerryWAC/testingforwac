@@ -37,17 +37,18 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | Command | What it does |
 |---|---|
 | `DeadlockMatchPing.exe --test` | Fire a fake alert — checks sound, toast, and phone |
+| `DeadlockMatchPing.exe --share` | Print the squad invite to forward to friends |
 | `DeadlockMatchPing.exe --stats` | Your report card: pops, queue times, match lengths, heroes, modes |
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (61 checks; needs Node) |
+| `npm test` | Run the automated test suite (62 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
-## Sharing with friends — one file
+## Sharing with friends — one message
 
-Send a friend **just `DeadlockMatchPing.exe`** and your channel code. They double-click it, follow the built-in wizard (it explains the `-condebug` launch option, the phone app, and puts the Steam auto-start line on their clipboard), type your code into ntfy — done. No Node, no README, no other files, no accounts, no server. The exe alone is the whole product; the Steam auto-start uses its built-in `--steam` mode (`"...\DeadlockMatchPing.exe" --steam %command% -condebug`). Every push of this repo runs the 61-check test suite and rebuilds the exe via GitHub Actions.
+After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): download link, the squad code, and the three steps. Friends paste your **squad code** when their wizard asks — that one answer wires them into the squad channel; when anyone's match pops, everyone gets pinged. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 62-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 
