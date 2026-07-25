@@ -612,7 +612,7 @@ async function setupWizard(existing) {
   console.log('  ╚═══════════════════════════════════════╝');
 
   // Step 1: the game log
-  console.log('\nStep 1 of 6 — Deadlock\'s log file');
+  console.log('\nStep 1 of 7 — Deadlock\'s log file');
   let logPath = findLogPath(config);
   if (logPath) {
     console.log(`  ✓ Found it: ${logPath}`);
@@ -625,7 +625,7 @@ async function setupWizard(existing) {
   }
 
   // Step 2: phone pushes — your choice
-  console.log('\nStep 2 of 6 — Phone pings (via the free ntfy app, no account needed)');
+  console.log('\nStep 2 of 7 — Phone pings (via the free ntfy app, no account needed)');
   if (config.ntfyTopic) {
     const keep = await ask(rl, `  Phone pings are ON (code: ${config.ntfyTopic}). Keep them? (Y/n): `);
     if (keep.toLowerCase().startsWith('n')) {
@@ -659,7 +659,7 @@ async function setupWizard(existing) {
   }
 
   // Step 3: Discord — pings arrive from a "Game Tracker" bot, zero installs
-  console.log('\nStep 3 of 6 — Discord pings (bot named "Game Tracker")');
+  console.log('\nStep 3 of 7 — Discord pings (bot named "Game Tracker")');
   if (config.discordWebhook) {
     const keep = await ask(rl, '  Discord pings are ON. Keep them? (Y/n): ');
     if (keep.toLowerCase().startsWith('n')) {
@@ -683,12 +683,37 @@ async function setupWizard(existing) {
       }
     }
   }
-  if (!config.ntfyTopic && !config.discordWebhook) {
-    console.log('  Note: no phone or Discord pings — you\'ll get desktop toasts and beeps only.');
+  // Step 4: branded iOS pings via a webhook-notification app (e.g. Hark)
+  console.log('\nStep 4 of 7 — Branded iPhone pings via Hark (optional)');
+  if (config.customWebhookUrl) {
+    const keep = await ask(rl, '  Custom webhook pings are ON. Keep them? (Y/n): ');
+    if (keep.toLowerCase().startsWith('n')) {
+      config.customWebhookUrl = null;
+      console.log('  Custom webhook pings turned off.');
+    }
+  } else {
+    console.log('  Hark (hark.ryan.ceo) turns a webhook into a fully branded iPhone');
+    console.log('  notification — Game Tracker icon, tap to launch Deadlock.');
+    console.log('  On your iPhone: open hark.ryan.ceo, follow its steps, copy the');
+    console.log('  webhook URL it gives you.');
+    const hark = await ask(rl, '  Paste that webhook URL (Enter to skip): ');
+    if (hark && /^https?:\/\//.test(hark)) {
+      config.customWebhookUrl = hark;
+      const ok = await customPush(config, '🎯 Game Tracker connected', 'Test ping — you are all set!');
+      console.log(ok ? '  ✓ Test sent — check your iPhone! (If it arrived blank, the service'
+                     : '  ✗ The service did not accept it — check the URL, or re-run --setup.');
+      if (ok) console.log('  may want different field names — see customWebhookBody in config.json.)');
+    } else if (hark) {
+      console.log('  ✗ That does not look like a URL — skipped (re-run --setup to retry).');
+    }
   }
 
-  // Step 4: make the ping yours
-  console.log('\nStep 4 of 6 — Make the ping yours (optional)');
+  if (!config.ntfyTopic && !config.discordWebhook && !config.customWebhookUrl) {
+    console.log('  Note: no phone/Discord/webhook pings — desktop toasts and beeps only.');
+  }
+
+  // Step 5: make the ping yours
+  console.log('\nStep 5 of 7 — Make the ping yours (optional)');
   console.log(`  Current alert:  "${config.alertTitle}"`);
   console.log('  Deadlock assigns one of your 3 hero picks when the match is made, so');
   console.log('  the pop ping fires instantly and a follow-up seconds later reveals it:');
@@ -703,7 +728,7 @@ async function setupWizard(existing) {
   if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
   // Step 5: friends
-  console.log('\nStep 5 of 6 — Ping your friends too (optional)');
+  console.log('\nStep 6 of 7 — Ping your friends too (optional)');
   if (config.ntfyTopic) {
     console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
     console.log('  the same phone ping when your match pops. Just share the code.');
@@ -720,7 +745,7 @@ async function setupWizard(existing) {
     const steamLine = IS_SEA
       ? `"${process.execPath}" --steam %command% -condebug`
       : `"${path.join(APP_DIR, 'steam-launch.bat')}" %command% -condebug`;
-    console.log('\nStep 6 of 6 — Auto-start with Deadlock (recommended)');
+    console.log('\nStep 7 of 7 — Auto-start with Deadlock (recommended)');
     try {
       const clip = spawn('clip', [], { windowsHide: true });
       clip.on('error', () => {});         // async spawn failures must not kill
