@@ -34,5 +34,9 @@
   "pcSound": "soft",
   "ntfyTopic": null,
   "discordWebhook": null,
-  "discordMention": "@everyone"
+  "discordMention": "@everyone",
+  "customWebhookUrl": null,
+  "customWebhookBody": "{\"title\":\"{title}\",\"body\":\"{message}\",\"image\":\"{image}\",\"url\":\"{link}\"}",
+  "customWebhookImage": "https://github.com/TerryWAC/testingforwac/raw/main/assets/game-tracker-avatar.png",
+  "customWebhookLink": "steam://run/1422450"
 }
