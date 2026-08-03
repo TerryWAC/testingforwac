@@ -115,7 +115,37 @@ const DEFAULTS = {
   // Prepended to the Discord match-found message so people actually get
   // notified. Set to "" for a silent message, or e.g. "<@&ROLE_ID>".
   discordMention: '@everyone',
+  // Any webhook→notification service (e.g. Hark on iOS: hark.ryan.ceo).
+  // The body template is POSTed as JSON with {title}/{message}/{image}/{link}
+  // filled in — adjust the field names to whatever your service expects.
+  customWebhookUrl: null,
+  customWebhookBody: '{"title":"{title}","body":"{message}","image":"{image}","url":"{link}"}',
+  customWebhookImage: 'https://github.com/TerryWAC/testingforwac/raw/main/assets/game-tracker-avatar.png',
+  customWebhookLink: 'steam://run/1422450',
+  // Download link used in the generated share-with-friends message.
+  shareDownloadUrl: 'https://github.com/TerryWAC/testingforwac/raw/main/DeadlockMatchPing.exe',
 };
+
+function buildShareMessage(config) {
+  const lines = [
+    "Yo — I set up match pings for Deadlock. When one of us gets a game, everyone gets pinged. Takes 2 minutes:",
+    '',
+    `1. Download this on your PC: ${config.shareDownloadUrl || DEFAULTS.shareDownloadUrl}`,
+    '   (Windows warns once because it\'s unsigned — click "More info" then "Run anyway".)',
+    '2. Double-click it and follow the steps on screen.',
+  ];
+  if (config.ntfyTopic) {
+    lines.push(`   When it asks for a squad code, type:  ${config.ntfyTopic}`);
+    lines.push('3. Install the free "ntfy" app on your phone and subscribe to that same code.');
+  }
+  if (config.discordWebhook) {
+    lines.push(config.ntfyTopic
+      ? '   (Or skip the phone app — our Discord channel gets the pings too.)'
+      : '3. Just stay in our Discord channel — the pings arrive there.');
+  }
+  lines.push('', "That's it. Alt-tab all you want — you'll never miss a queue pop again.");
+  return lines.join('\n');
+}
 
 // Pattern lists shipped by earlier versions — configs still carrying one of
 // these verbatim are auto-upgraded to the current verified defaults.
@@ -441,6 +471,36 @@ function discordPush(webhook, content) {
   });
 }
 
+function customPush(config, title, message) {
+  return new Promise(resolve => {
+    const url = config.customWebhookUrl;
+    if (!url) return resolve(false);
+    let u;
+    try { u = new URL(url); } catch { return resolve(false); }
+    const esc = s => JSON.stringify(String(s)).slice(1, -1); // JSON-safe fill
+    const payload = (config.customWebhookBody || DEFAULTS.customWebhookBody)
+      .split('{title}').join(esc(title))
+      .split('{message}').join(esc(message))
+      .split('{image}').join(esc(config.customWebhookImage ?? DEFAULTS.customWebhookImage))
+      .split('{link}').join(esc(config.customWebhookLink ?? DEFAULTS.customWebhookLink));
+    const mod = u.protocol === 'http:' ? require('http') : https; // http only ever used by tests
+    const req = mod.request({
+      hostname: u.hostname,
+      port: u.port || undefined,
+      path: u.pathname + u.search,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10_000,
+    }, res => { res.resume(); resolve(res.statusCode >= 200 && res.statusCode < 300); });
+    req.on('error', err => {
+      console.error(`  (custom webhook failed: ${err.message})`);
+      resolve(false);
+    });
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.end(payload);
+  });
+}
+
 function fireAlert(config, line, hero, queueSeconds, mode) {
   const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero, mode);
   const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero, mode);
@@ -459,6 +519,7 @@ function fireAlert(config, line, hero, queueSeconds, mode) {
   const push = phonePush(config.ntfyTopic, title, body);
   const mention = config.discordMention ?? DEFAULTS.discordMention;
   discordPush(config.discordWebhook, `${mention ? mention + ' ' : ''}${title} — ${body}`);
+  customPush(config, title, body);
   desktopNotify(title, body, pcSound);
   console.log(`\n=== ${title} — ${new Date().toLocaleTimeString()} ===`);
   console.log(`    ${body}`);
@@ -574,7 +635,7 @@ async function setupWizard(existing) {
   console.log('  ╚═══════════════════════════════════════╝');
 
   // Step 1: the game log
-  console.log('\nStep 1 of 6 — Deadlock\'s log file');
+  console.log('\nStep 1 of 7 — Deadlock\'s log file');
   let logPath = findLogPath(config);
   if (logPath) {
     console.log(`  ✓ Found it: ${logPath}`);
@@ -587,7 +648,7 @@ async function setupWizard(existing) {
   }
 
   // Step 2: phone pushes — your choice
-  console.log('\nStep 2 of 6 — Phone pings (via the free ntfy app, no account needed)');
+  console.log('\nStep 2 of 7 — Phone pings (via the free ntfy app, no account needed)');
   if (config.ntfyTopic) {
     const keep = await ask(rl, `  Phone pings are ON (code: ${config.ntfyTopic}). Keep them? (Y/n): `);
     if (keep.toLowerCase().startsWith('n')) {
@@ -595,17 +656,25 @@ async function setupWizard(existing) {
       console.log('  Phone pings turned off.');
     }
   } else {
-    const wantPhone = await ask(rl, '  Would you like pings on your phone? (Y/n): ');
+    const friendCode = await ask(rl,
+      '  Did a friend give you a squad code (like dl-abc123)?\n  Paste it here, or press Enter to create your own: ');
+    const wantPhone = friendCode ? 'y'
+      : await ask(rl, '  Would you like pings on your phone? (Y/n): ');
     if (wantPhone.toLowerCase().startsWith('n')) {
       console.log('  Skipped — add them any time with --setup.');
     } else {
-      // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with no
-      // confusable characters (no 0/o, 1/l/i) — easy to type into the phone.
-      const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
-      let code = '';
-      for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
-      config.ntfyTopic = 'dl-' + code;
-      console.log(`  Your private channel:  ${config.ntfyTopic}`);
+      if (friendCode && /^[a-z0-9_-]{3,64}$/i.test(friendCode)) {
+        config.ntfyTopic = friendCode.toLowerCase();
+        console.log(`  ✓ Joined the squad channel:  ${config.ntfyTopic}`);
+      } else {
+        // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with
+        // no confusable characters (no 0/o, 1/l/i) — easy to type.
+        const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
+        let code = '';
+        for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
+        config.ntfyTopic = 'dl-' + code;
+      }
+      console.log(`  Your squad code:  ${config.ntfyTopic}`);
       console.log('  1. Install "ntfy" on your phone:');
       console.log('       Android: https://play.google.com/store/apps/details?id=io.heckel.ntfy');
       console.log('       iPhone:  https://apps.apple.com/us/app/ntfy/id1625396347');
@@ -621,7 +690,7 @@ async function setupWizard(existing) {
   }
 
   // Step 3: Discord — pings arrive from a "Game Tracker" bot, zero installs
-  console.log('\nStep 3 of 6 — Discord pings (bot named "Game Tracker")');
+  console.log('\nStep 3 of 7 — Discord pings (bot named "Game Tracker")');
   if (config.discordWebhook) {
     const keep = await ask(rl, '  Discord pings are ON. Keep them? (Y/n): ');
     if (keep.toLowerCase().startsWith('n')) {
@@ -645,12 +714,37 @@ async function setupWizard(existing) {
       }
     }
   }
-  if (!config.ntfyTopic && !config.discordWebhook) {
-    console.log('  Note: no phone or Discord pings — you\'ll get desktop toasts and beeps only.');
+  // Step 4: branded iOS pings via a webhook-notification app (e.g. Hark)
+  console.log('\nStep 4 of 7 — Branded iPhone pings via Hark (optional)');
+  if (config.customWebhookUrl) {
+    const keep = await ask(rl, '  Custom webhook pings are ON. Keep them? (Y/n): ');
+    if (keep.toLowerCase().startsWith('n')) {
+      config.customWebhookUrl = null;
+      console.log('  Custom webhook pings turned off.');
+    }
+  } else {
+    console.log('  Hark (hark.ryan.ceo) turns a webhook into a fully branded iPhone');
+    console.log('  notification — Game Tracker icon, tap to launch Deadlock.');
+    console.log('  On your iPhone: open hark.ryan.ceo, follow its steps, copy the');
+    console.log('  webhook URL it gives you.');
+    const hark = await ask(rl, '  Paste that webhook URL (Enter to skip): ');
+    if (hark && /^https?:\/\//.test(hark)) {
+      config.customWebhookUrl = hark;
+      const ok = await customPush(config, '🎯 Game Tracker connected', 'Test ping — you are all set!');
+      console.log(ok ? '  ✓ Test sent — check your iPhone! (If it arrived blank, the service'
+                     : '  ✗ The service did not accept it — check the URL, or re-run --setup.');
+      if (ok) console.log('  may want different field names — see customWebhookBody in config.json.)');
+    } else if (hark) {
+      console.log('  ✗ That does not look like a URL — skipped (re-run --setup to retry).');
+    }
   }
 
-  // Step 4: make the ping yours
-  console.log('\nStep 4 of 6 — Make the ping yours (optional)');
+  if (!config.ntfyTopic && !config.discordWebhook && !config.customWebhookUrl) {
+    console.log('  Note: no phone/Discord/webhook pings — desktop toasts and beeps only.');
+  }
+
+  // Step 5: make the ping yours
+  console.log('\nStep 5 of 7 — Make the ping yours (optional)');
   console.log(`  Current alert:  "${config.alertTitle}"`);
   console.log('  Deadlock assigns one of your 3 hero picks when the match is made, so');
   console.log('  the pop ping fires instantly and a follow-up seconds later reveals it:');
@@ -665,7 +759,7 @@ async function setupWizard(existing) {
   if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
   // Step 5: friends
-  console.log('\nStep 5 of 6 — Ping your friends too (optional)');
+  console.log('\nStep 6 of 7 — Ping your friends too (optional)');
   if (config.ntfyTopic) {
     console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
     console.log('  the same phone ping when your match pops. Just share the code.');
@@ -682,7 +776,7 @@ async function setupWizard(existing) {
     const steamLine = IS_SEA
       ? `"${process.execPath}" --steam %command% -condebug`
       : `"${path.join(APP_DIR, 'steam-launch.bat')}" %command% -condebug`;
-    console.log('\nStep 6 of 6 — Auto-start with Deadlock (recommended)');
+    console.log('\nStep 7 of 7 — Auto-start with Deadlock (recommended)');
     try {
       const clip = spawn('clip', [], { windowsHide: true });
       clip.on('error', () => {});         // async spawn failures must not kill
@@ -699,7 +793,20 @@ async function setupWizard(existing) {
   }
 
   saveConfig(config);
-  console.log(`\n  ✓ Saved to ${CONFIG_PATH}. Run "node watch.js --setup" to change anything.\n`);
+  console.log(`\n  ✓ Saved to ${CONFIG_PATH}. Run "node watch.js --setup" to change anything.`);
+
+  // Ready-to-forward squad invite — zero thinking required to share.
+  if (config.ntfyTopic || config.discordWebhook) {
+    const msg = buildShareMessage(config);
+    const sharePath = path.join(path.dirname(CONFIG_PATH), 'share-with-friends.txt');
+    try { fs.writeFileSync(sharePath, msg + '\n'); } catch {}
+    console.log('\n  ───── COPY-PASTE THIS TO YOUR FRIENDS ─────');
+    console.log(msg.split('\n').map(l => '  ' + l).join('\n'));
+    console.log('  ───────────────────────────────────────────');
+    console.log(`  (Also saved to ${sharePath} — reprint any time with --share.)\n`);
+  } else {
+    console.log('');
+  }
   rl.close();
   return config;
 }
@@ -742,6 +849,15 @@ async function main() {
   }
 
   if (args.includes('--stats')) { printStats(); return; }
+
+  if (args.includes('--share')) {
+    if (!config.ntfyTopic && !config.discordWebhook) {
+      console.log('Run setup first (--setup) — the invite needs your squad code.');
+      return;
+    }
+    console.log(buildShareMessage(config));
+    return;
+  }
 
   const diagnosticMode = args.includes('--learn') || args.includes('--find');
   if (firstRun && args.includes('--announce')) {
@@ -939,6 +1055,7 @@ async function main() {
           const what = `🎮 You got ${name}${currentMode ? ` — ${currentMode}` : ''}`;
           phonePush(config.ntfyTopic, what, 'Match is loading — get ready!');
           discordPush(config.discordWebhook, `${what} — match is loading!`);
+          customPush(config, what, 'Match is loading — get ready!');
           desktopNotify(what, 'Match is loading — get ready!');
           console.log(`  ${what} — match is loading.`);
         }

@@ -419,6 +419,49 @@ async function main() {
       'stale lock ignored, watcher runs', out.text.split('\n')[0]);
   }
 
+  console.log('\n33. Custom webhook (Hark-style) receives templated JSON');
+  {
+    const http = require('http');
+    const received = [];
+    const server = http.createServer((req, res) => {
+      let b = '';
+      req.on('data', d => { b += d; });
+      req.on('end', () => { received.push(b); res.writeHead(200); res.end(); });
+    });
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const port = server.address().port;
+    const env = makeEnv('customhook', {
+      customWebhookUrl: `http://127.0.0.1:${port}/hook`,
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(800);
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    await sleep(600);
+    child.kill();
+    server.close();
+    assert(received.length === 1, 'exactly one custom webhook POST', `got ${received.length}`);
+    let parsed = null;
+    try { parsed = JSON.parse(received[0] || '{}'); } catch {}
+    assert(parsed && parsed.title.includes('MATCH FOUND'), 'valid JSON with title', received[0]);
+    assert(parsed && parsed.image.includes('game-tracker-avatar'), 'image link filled');
+    assert(parsed && parsed.url === 'steam://run/1422450', 'click link launches Deadlock');
+  }
+
+  console.log('\n34. --share prints a squad invite with the code and download link');
+  {
+    const env = makeEnv('share', { ntfyTopic: 'dl-test99' });
+    const outText = await new Promise(resolve => {
+      const c = spawn(process.execPath, [WATCH, '--share', '--config', env.config]);
+      let t = '';
+      c.stdout.on('data', d => { t += d; });
+      c.on('close', () => resolve(t));
+    });
+    assert(outText.includes('dl-test99'), 'invite contains the squad code', outText);
+    assert(outText.includes('DeadlockMatchPing.exe'), 'invite contains the download link');
+  }
+
   console.log('\n26. Discord webhook receives the Game Tracker ping');
   {
     const http = require('http');
