@@ -1,7 +1,7 @@
 {
   "name": "deadlock-match-ping",
-  "version": "2.0.0",
-  "description": "Pings you when your Deadlock match pops — tails the game's console.log and fires sound, desktop notification, and optional phone push.",
+  "version": "3.0.0",
+  "description": "Pings you when your Deadlock match pops \u2014 tails the game's console.log and fires sound, desktop notification, and optional phone push.",
   "main": "watch.js",
   "scripts": {
     "start": "node watch.js",

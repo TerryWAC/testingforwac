@@ -28,6 +28,8 @@ const readline = require('readline');
 // Don't die if stdout goes away (e.g. output piped to a closed pager).
 process.stdout.on('error', () => {});
 
+const APP_VERSION = '3.0';
+
 // ---------------------------------------------------------------- config ---
 
 // When running as a compiled .exe (Node SEA), "next to the app" means next
@@ -126,7 +128,92 @@ const DEFAULTS = {
   customWebhookLink: 'steam://run/1422450',
   // Download link used in the generated share-with-friends message.
   shareDownloadUrl: 'https://github.com/TerryWAC/testingforwac/raw/main/DeadlockMatchPing.exe',
+  // Self-healing: at startup the watcher fetches this small file from the
+  // repo. When a Deadlock patch rewords the log, the repo file is updated
+  // and every copy heals itself on next launch — no re-downloads. It also
+  // carries the latest app version for the update notice. Set to null (or
+  // patternUpdates: false) to disable.
+  patternUpdates: true,
+  patternsUrl: 'https://raw.githubusercontent.com/TerryWAC/testingforwac/main/patterns.json',
+  // AFK escalation: if the pop pinged but no sign of you loading into the
+  // match appears within this many seconds, a second, angrier ping fires on
+  // every channel. 0 disables.
+  afkSeconds: 45,
 };
+
+// Pattern-shaped keys a fetched patterns.json may override (nothing else —
+// remote data must never touch webhooks, topics, or alert text).
+const OTA_KEYS = ['patterns', 'backupPatterns', 'queueStartPatterns', 'queueStopPatterns',
+  'matchEndPatterns', 'ignorePatterns', 'modePatterns', 'heroPatterns'];
+
+function httpGetJson(url, timeoutMs = 4000, redirects = 2) {
+  return new Promise(resolve => {
+    let u;
+    try { u = new URL(url); } catch { return resolve(null); }
+    const mod = u.protocol === 'http:' ? require('http') : https; // http only ever used by tests
+    const req = mod.get(u, { timeout: timeoutMs }, res => {
+      if (res.statusCode >= 301 && res.statusCode <= 308 && res.headers.location && redirects > 0) {
+        res.resume();
+        return resolve(httpGetJson(res.headers.location, timeoutMs, redirects - 1));
+      }
+      if (res.statusCode !== 200) { res.resume(); return resolve(null); }
+      let body = '';
+      res.on('data', d => { body += d; });
+      res.on('end', () => {
+        try { resolve(JSON.parse(body)); } catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+  });
+}
+
+function verNewer(remote, local) {
+  const a = String(remote).split('.').map(Number);
+  const b = String(local).split('.').map(Number);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const x = a[i] || 0, y = b[i] || 0;
+    if (x !== y) return x > y;
+  }
+  return false;
+}
+
+// Fetch remote patterns (falling back to the last cached copy when offline),
+// apply them over the config, and surface an update notice if a newer app
+// version exists. Returns quietly on any failure — built-ins always work.
+async function applyRemotePatterns(config) {
+  if (config.patternUpdates === false || !config.patternsUrl) return;
+  const cachePath = path.basename(CONFIG_PATH) === 'config.json'
+    ? path.join(path.dirname(CONFIG_PATH), 'patterns-cache.json')
+    : CONFIG_PATH.replace(/\.json$/, '') + '.pcache.json';
+  let remote = await httpGetJson(config.patternsUrl);
+  if (remote) {
+    try { fs.writeFileSync(cachePath, JSON.stringify(remote, null, 2) + '\n'); } catch {}
+  } else {
+    try { remote = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch {}
+  }
+  if (!remote || typeof remote !== 'object') return;
+  let applied = 0;
+  for (const key of OTA_KEYS) {
+    if (Array.isArray(remote[key]) && remote[key].every(p => typeof p === 'string')) {
+      try {
+        remote[key].forEach(p => new RegExp(p)); // reject broken regexes whole
+        config[key] = remote[key];
+        applied++;
+      } catch {}
+    }
+  }
+  if (applied) {
+    console.log(`· Detection patterns: up to date (v${remote.version ?? '?'} from the repo).`);
+  }
+  if (remote.latestVersion && verNewer(remote.latestVersion, APP_VERSION)) {
+    const note = remote.updateNote ? ` ${remote.updateNote}` : '';
+    console.log(`· Update available: v${remote.latestVersion} (you have v${APP_VERSION}).${note}`);
+    console.log(`  Re-download: ${config.shareDownloadUrl || DEFAULTS.shareDownloadUrl}`);
+    desktopNotify(`Deadlock Match Ping v${remote.latestVersion} available`,
+      'Re-download the exe from your usual link — settings survive.', 'off');
+  }
+}
 
 function buildShareMessage(config) {
   const lines = [
@@ -993,9 +1080,10 @@ async function main() {
   process.on('SIGINT', () => process.exit(0));
   process.on('SIGTERM', () => process.exit(0));
 
+  await applyRemotePatterns(config); // self-heal detection before compiling
   const patterns = config.patterns.map(p => new RegExp(p, 'i'));
   let lastAlert = 0;
-  console.log(`Deadlock Match Ping — watching ${logPath}`);
+  console.log(`Deadlock Match Ping v${APP_VERSION} — watching ${logPath}`);
   if (args.includes('--announce')) {
     // Launched hidden (e.g. by Steam) — say hello via a toast since there is
     // no console to look at.
@@ -1034,6 +1122,27 @@ async function main() {
   let currentMode = null;
   let queueStartedAt = 0;
   let lastMissWarn = 0;
+  let escalateTimer = null;
+  const clearEscalation = () => {
+    if (escalateTimer) { clearTimeout(escalateTimer); escalateTimer = null; }
+  };
+  const armEscalation = () => {
+    clearEscalation();
+    const secs = config.afkSeconds ?? DEFAULTS.afkSeconds;
+    if (!secs) return;
+    escalateTimer = setTimeout(() => {
+      escalateTimer = null;
+      const title = '⚠ YOU ARE MISSING THE MATCH';
+      const body = 'The game found your match and you are still not in — GET IN NOW!';
+      phonePush(config.ntfyTopic, title, body);
+      discordPush(config.discordWebhook,
+        `${config.discordMention ?? DEFAULTS.discordMention} ${title} — ${body}`.trim());
+      customPush(config, title, body);
+      desktopNotify(title, body, 'loud');
+      console.log(`\n  ${title} — ${body}`);
+      beepLoop(8);
+    }, secs * 1000);
+  };
   {
     const stats = loadStats();
     const avg = avgSeconds(stats);
@@ -1042,6 +1151,14 @@ async function main() {
     }
   }
   tailFile(logPath, line => {
+    // Any sign of life after a pop — joining a server (even a local one),
+    // hero/mode loading, a new queue — means you made it: stand down.
+    if (escalateTimer && (backupPatterns.some(re => re.test(line)) ||
+        heroRes.some(re => re.test(line)) || modeRes.some(re => re.test(line)) ||
+        queueStart.some(re => re.test(line)) || matchEnd.some(re => re.test(line)))) {
+      clearEscalation();
+      console.log('  ✓ You made it in — escalation cancelled.');
+    }
     for (const re of modeRes) {
       const m = re.exec(line);
       if (m && m[1]) {
@@ -1178,6 +1295,7 @@ async function main() {
     lastAlert = Date.now();
     inQueue = false; // this queue is resolved; next connect needs a new queue
     heroAnnounced = false; // the assigned hero is revealed at load-in
+    armEscalation(); // second, angrier ping unless you show up in the match
     let queueSeconds = null;
     // Sanity-cap: an hours-old orphaned start would make the ping claim a
     // ridiculous queue time and pollute the stats.

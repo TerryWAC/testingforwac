@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "latestVersion": "3.0",
+  "updateNote": "",
+  "patterns": [
+    "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created"
+  ],
+  "backupPatterns": [
+    "\\[Client\\] CL:\\s+Connected to"
+  ],
+  "queueStartPatterns": [
+    "Send msg \\d+ \\(k_EMsgClientToGCStart\\w*Matchmaking\\w*\\)"
+  ],
+  "queueStopPatterns": [
+    "Send msg \\d+ \\(k_EMsgClientToGCStop\\w*Matchmaking\\w*\\)"
+  ],
+  "matchEndPatterns": [
+    "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+destroyed",
+    "Disconnecting from server",
+    "Server shutting down"
+  ],
+  "ignorePatterns": [
+    "loopback",
+    "127\\.0\\.0\\.1",
+    "localhost"
+  ],
+  "modePatterns": [
+    "\\[HostStateManager\\] Host activate:.*\\(([^)]+)\\)",
+    "\\[Client\\] Map:\\s+\"([^\"]+)\""
+  ],
+  "heroPatterns": [
+    "\\[Server\\] Loaded hero \\d+/(hero_\\w+)",
+    "VMDL Camera Pose Success!.*models/heroes(?:_wip|_staging)?/(\\w+)/"
+  ]
+}
