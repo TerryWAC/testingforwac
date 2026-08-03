@@ -39,3 +39,41 @@ jobs:
         with:
           name: DeadlockMatchPing-exe
           path: DeadlockMatchPing.exe
+
+  release:
+    # Rolling "latest" release on main: Windows exe, a ~65%-smaller zip of it,
+    # and a Linux build for Deadlock-under-Proton players. The permanent link
+    # .../releases/latest/download/DeadlockMatchPing.exe always serves the
+    # newest build without growing the git repo.
+    if: github.ref == 'refs/heads/main'
+    needs: [test, build-exe]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build & smoke-test Linux binary
+        run: |
+          printf '{ "main": "watch.js", "output": "sea-prep.blob", "disableExperimentalSEAWarning": true }' > sea-config.json
+          node --experimental-sea-config sea-config.json
+          cp "$(command -v node)" DeadlockMatchPing-linux
+          npx -y postject DeadlockMatchPing-linux NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+          chmod +x DeadlockMatchPing-linux
+          ./DeadlockMatchPing-linux --stats
+      - uses: actions/download-artifact@v4
+        with:
+          name: DeadlockMatchPing-exe
+      - name: Zip the Windows exe (smaller download)
+        run: zip -9 DeadlockMatchPing.zip DeadlockMatchPing.exe
+      - name: Publish rolling latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest \
+            DeadlockMatchPing.exe DeadlockMatchPing.zip DeadlockMatchPing-linux \
+            --title "Deadlock Match Ping — latest" \
+            --notes "Always the newest build. **DeadlockMatchPing.exe** — Windows, just run it. **DeadlockMatchPing.zip** — the same exe, ~65% smaller download (unzip first). **DeadlockMatchPing-linux** — for Deadlock under Proton (chmod +x, then run)."
