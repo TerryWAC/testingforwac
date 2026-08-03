@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AppNav } from "@/components/AppNav";
+import { Attribution } from "@/components/Attribution";
 import { LETTERBOXD_FILM_URL, type TasteSnapshot } from "@/lib/types";
 
 export interface FriendSummary {
@@ -555,6 +556,7 @@ export function ProfileClient({
             </div>
           </div>
         </section>
+        <Attribution className="mt-10" />
       </main>
     </div>
   );

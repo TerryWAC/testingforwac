@@ -39,7 +39,8 @@ export async function POST() {
       return NextResponse.json({ sessionId: session.id, joinCode: session.join_code });
     }
     if (error && !error.message.includes("duplicate")) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("session create failed", error);
+      return NextResponse.json({ error: "Could not create a session" }, { status: 500 });
     }
   }
   return NextResponse.json({ error: "Could not create session" }, { status: 500 });

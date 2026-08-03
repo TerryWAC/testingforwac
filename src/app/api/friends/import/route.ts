@@ -4,6 +4,7 @@ import { z } from "zod";
 import { replaceCsvFilms } from "@/lib/db";
 import { parseExportZip } from "@/lib/import";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const limited = rateLimit("friend-import", user.id, LIMITS.upload);
+  if (limited) return limited;
 
   let form: FormData;
   try {

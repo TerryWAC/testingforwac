@@ -32,7 +32,10 @@ export async function POST(request: Request) {
     .from("profiles")
     .update({ avatar_url: parsed.data.dataUrl })
     .eq("user_id", user.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("avatar update failed", error);
+    return NextResponse.json({ error: "Could not save that photo" }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

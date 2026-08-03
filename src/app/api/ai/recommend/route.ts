@@ -22,6 +22,7 @@ import {
 } from "@/lib/recommend";
 import { recommendRequestSchema } from "@/lib/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 import type { FilmRow, RecommendResponse } from "@/lib/types";
 
@@ -74,6 +75,9 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const limited = rateLimit("recommend", user.id, LIMITS.browse);
+  if (limited) return limited;
 
   let body: unknown;
   try {

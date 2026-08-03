@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { syncProfileFromRss } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -24,6 +25,9 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const limited = rateLimit("friend-sync", user.id, LIMITS.feed);
+  if (limited) return limited;
 
   const admin = createAdminClient();
   const { data: friendRows } = await admin

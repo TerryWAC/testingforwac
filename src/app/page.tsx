@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { Attribution } from "@/components/Attribution";
 import { LoginForm } from "@/components/LoginForm";
 import { safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
@@ -42,6 +43,7 @@ export default async function LoginPage({
         One-time import of your official Letterboxd export — then it stays up to date by itself.
         No scraping, no passwords.
       </p>
+      <Attribution className="mt-6" />
     </main>
   );
 }

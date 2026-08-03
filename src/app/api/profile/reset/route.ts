@@ -22,7 +22,10 @@ export async function POST() {
 
   const admin = createAdminClient();
   const { error } = await admin.from("films").delete().eq("profile_id", profile.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("library reset failed", error);
+    return NextResponse.json({ error: "Could not clear your library" }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

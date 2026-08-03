@@ -59,7 +59,10 @@ export async function POST(request: Request) {
     const { error } = await admin
       .from("session_profiles")
       .insert({ session_id: session.id, profile_id: profile.id });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("session join failed", error);
+      return NextResponse.json({ error: "Could not join that session" }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ sessionId: session.id });

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { syncProfileFromRss } from "@/lib/db";
 import { usernameSchema } from "@/lib/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 import { LETTERBOXD_RSS_URL } from "@/lib/types";
 
@@ -22,6 +23,9 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const limited = rateLimit("friend-add", user.id, LIMITS.feed);
+  if (limited) return limited;
 
   const parsed = z
     .object({ username: usernameSchema })
@@ -106,7 +110,10 @@ export async function DELETE(request: Request) {
 
   // Deleting the guest profile cascades to films and the friends row.
   const { error } = await admin.from("profiles").delete().eq("id", friend.profile_id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("friend removal failed", error);
+    return NextResponse.json({ error: "Could not remove that friend" }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }
