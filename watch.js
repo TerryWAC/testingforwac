@@ -63,9 +63,11 @@ const DEFAULTS = {
   ],
   // Lines that mark entering/leaving the matchmaking queue — used only for
   // console status so you can see the watcher is really tracking your queue.
-  // Anchored to the Send-msg shape so GC *response* lines can't double-fire.
-  queueStartPatterns: ['Send msg \\d+ \\(k_EMsgClientToGCStartMatchmaking\\)'],
-  queueStopPatterns: ['Send msg \\d+ \\(k_EMsgClientToGCStopMatchmaking\\)'],
+  // Anchored to the Send-msg shape so GC *response* lines can't double-fire;
+  // the \w* wildcards catch mode variants (Ranked/Standard) the matchmaking
+  // update may use, e.g. k_EMsgClientToGCStartRankedMatchmaking.
+  queueStartPatterns: ['Send msg \\d+ \\(k_EMsgClientToGCStart\\w*Matchmaking\\w*\\)'],
+  queueStopPatterns: ['Send msg \\d+ \\(k_EMsgClientToGCStop\\w*Matchmaking\\w*\\)'],
   // Never alert on these: connections to the game's own machine (menu,
   // practice range, local/bot servers) are not real match servers.
   ignorePatterns: ['loopback', '127\\.0\\.0\\.1', 'localhost'],
@@ -174,9 +176,9 @@ function loadStats() {
   catch { return []; }
 }
 
-function recordQueue(seconds, hero) {
+function recordQueue(seconds, hero, mode) {
   const stats = loadStats();
-  stats.push({ at: new Date().toISOString(), seconds, hero: hero || null });
+  stats.push({ at: new Date().toISOString(), seconds, hero: hero || null, ...(mode ? { mode } : {}) });
   while (stats.length > 50) stats.shift();
   try { fs.writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2) + '\n'); } catch {}
   return stats;
@@ -268,13 +270,16 @@ function loadConfig() {
     delete user.alertMessage; // previous default → current default
     migrated = true;
   }
-  if (JSON.stringify(user.queueStartPatterns) === '["k_EMsgClientToGCStartMatchmaking"]') {
-    delete user.queueStartPatterns; // unanchored → anchored default
-    migrated = true;
-  }
-  if (JSON.stringify(user.queueStopPatterns) === '["k_EMsgClientToGCStopMatchmaking"]') {
-    delete user.queueStopPatterns;
-    migrated = true;
+  for (const [key, legacy] of [
+    ['queueStartPatterns', ['["k_EMsgClientToGCStartMatchmaking"]',
+      '["Send msg \\\\d+ \\\\(k_EMsgClientToGCStartMatchmaking\\\\)"]']],
+    ['queueStopPatterns', ['["k_EMsgClientToGCStopMatchmaking"]',
+      '["Send msg \\\\d+ \\\\(k_EMsgClientToGCStopMatchmaking\\\\)"]']],
+  ]) {
+    if (legacy.includes(JSON.stringify(user[key]))) {
+      delete user[key]; // older shapes → current ranked-aware default
+      migrated = true;
+    }
   }
   if (migrated) {
     saveConfig({ ...DEFAULTS, ...user });
@@ -554,7 +559,18 @@ function modeDisplayName(raw) {
   const k = String(raw).toLowerCase();
   if (k.includes('hideout') || k.includes('sandbox') || k.includes('tutorial') || k.includes('demo')) return null;
   if (k.includes('brawl')) return 'Street Brawl';
+  if (k.includes('ranked')) return 'Ranked';
+  if (k.includes('unranked') || k.includes('standard')) return 'Standard';
   if (k.includes('street_test') || k === 'dl_streets') return 'Normal';
+  return null;
+}
+
+// Ranked and Standard play on the same map, so the map name alone can't tell
+// them apart — but the queue-start GC message can (e.g. ...StartRanked
+// Matchmaking). Returns the mode implied by a queue-start line, or null.
+function queueModeFromLine(line) {
+  if (/rank/i.test(line) && !/unranked/i.test(line)) return 'Ranked';
+  if (/unranked|standard/i.test(line)) return 'Standard';
   return null;
 }
 
@@ -1030,6 +1046,9 @@ async function main() {
       const m = re.exec(line);
       if (m && m[1]) {
         const mode = modeDisplayName(m[1]);
+        // The generic map ('Normal') must not overwrite a queue-derived
+        // Ranked/Standard — they share that map. Specific modes still win.
+        if (mode === 'Normal' && currentMode && currentMode !== 'Normal') break;
         if (mode && mode !== currentMode) {
           currentMode = mode;
           console.log(`  · Mode: ${mode}`);
@@ -1071,7 +1090,10 @@ async function main() {
       if (ts !== null && Date.now() - ts > staleMs) return;
       inQueue = true;
       queueStartedAt = Date.now();
-      currentMode = null; // mode is only known once the new match loads
+      // Ranked/Standard can be read off the queue message itself; the map
+      // name later can't tell them apart. Otherwise mode waits for load-in.
+      currentMode = queueModeFromLine(line);
+      if (currentMode) console.log(`  · Mode: ${currentMode}`);
       // Deadlock assigns you ONE of your (up to 3) selected heroes when the
       // match is made — so at queue time the hero is unknowable. Forget any
       // menu-hover sightings; the real assignment is announced at load-in.
@@ -1163,7 +1185,7 @@ async function main() {
     if (queueStartedAt) {
       queueSeconds = (Date.now() - queueStartedAt) / 1000;
       queueStartedAt = 0;
-      const stats = recordQueue(queueSeconds, null); // hero assigned at load-in
+      const stats = recordQueue(queueSeconds, null, currentMode); // hero assigned at load-in
       const avg = avgSeconds(stats);
       fireAlert(config, line, null, queueSeconds, currentMode);
       console.log(`    Queue time: ${fmtDuration(queueSeconds)}` +

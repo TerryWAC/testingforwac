@@ -7,7 +7,7 @@
 
 - 📱 **Phone pushes** via the free [ntfy](https://ntfy.sh) app — no account, no signup
 - 🖥️ **Desktop toasts** that pop over whatever you're doing (Windows / macOS / Linux)
-- 🦸 **Reveals which of your 3 hero picks you got**, the **game mode** (Normal / Street Brawl), and **how long you queued**
+- 🦸 **Reveals which of your 3 hero picks you got**, the **game mode** (Ranked / Standard / Street Brawl), and **how long you queued**
 - 👥 **Squad mode** — friends subscribe to your channel and get pinged too
 - 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
 - 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
@@ -42,13 +42,13 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (63 checks; needs Node) |
+| `npm test` | Run the automated test suite (70 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends — one message
 
-After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): download link, the squad code, and the three steps. Friends paste your **squad code** when their wizard asks — that one answer wires them into the squad channel; when anyone's match pops, everyone gets pinged. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 63-check test suite and rebuilds the exe via GitHub Actions.
+After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): download link, the squad code, and the three steps. Friends paste your **squad code** when their wizard asks — that one answer wires them into the squad channel; when anyone's match pops, everyone gets pinged. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 70-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 
@@ -89,7 +89,7 @@ Deadlock, launched with `-condebug`, writes its console to `game/citadel/console
 - matchmaking start/stop messages → queue tracking (`✓ Queue started`)
 - server connect while queued → backup alert if a patch renames the lobby line
 - match end, local (`loopback`) connections, stale buffered lines, and a post-match quiet window → **never** alert — extensively tested against false pings
-- load-in lines → which of your 3 hero picks the game assigned; map lines → game mode (Normal / Street Brawl)
+- load-in lines → which of your 3 hero picks the game assigned; queue + map lines → game mode (Ranked / Standard / Street Brawl — Ranked is read from the queue message itself, since it shares a map with Standard)
 
 Alerts go out as a PowerShell toast + beeps on Windows (`osascript`/`notify-send` on macOS/Linux) and an HTTPS POST to `ntfy.sh/<your-topic>` for phones. `config.example.json` documents every setting.
 

@@ -449,6 +449,29 @@ async function main() {
     assert(parsed && parsed.url === 'steam://run/1422450', 'click link launches Deadlock');
   }
 
+  await scenario('35. Ranked queue: detected, mode named, map cannot downgrade it', async (env, out) => {
+    append(env, '[GCClient] Send msg 9210 (k_EMsgClientToGCStartRankedMatchmaking)');
+    assert(await waitFor(out, t => t.includes('Queue started')), 'ranked queue message detected');
+    assert(await waitFor(out, t => t.includes('Mode: Ranked')), 'mode read from queue line');
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, '[Client] Map: "street_test"'); // shared map must not say Normal
+    append(env, '[Server] Loaded hero 3/hero_gigawatt');
+    assert(await waitFor(out, t => t.includes('You got Seven — Ranked')),
+      'reveal keeps Ranked despite generic map');
+    await sleep(300);
+    const stats = JSON.parse(fs.readFileSync(env.config.replace(/\.json$/, '') + '.stats.json', 'utf8'));
+    assert(stats[stats.length - 1].mode === 'Ranked', 'Ranked recorded in stats');
+  });
+
+  await scenario('36. Standard queue variant is detected and named', async (env, out) => {
+    append(env, '[GCClient] Send msg 9211 (k_EMsgClientToGCStartMatchmakingUnranked)');
+    assert(await waitFor(out, t => t.includes('Queue started')), 'standard queue message detected');
+    assert(await waitFor(out, t => t.includes('Mode: Standard')), 'Standard mode named');
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(out, t => alerts({ text: t }) === 1), 'pop pings in standard queue');
+  });
+
   console.log('\n34. --share prints a squad invite with the code and download link');
   {
     const env = makeEnv('share', { ntfyTopic: 'dl-test99' });
