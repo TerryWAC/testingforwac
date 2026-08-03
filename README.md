@@ -11,7 +11,7 @@
 - 👥 **Friends welcome** — everyone runs their own copy and gets their own pings; optionally hear each other's pops too
 - 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
 - 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
-- 🎮 **Multi-game** — Deadlock (full support: hero, mode, ranked) and **CS2** (queue-pop pings; setup asks which game to watch)
+- 🎮 **Multi-game** — Deadlock (full support: hero, mode, ranked) and **CS2**. Setup asks per game — watch either or **both at once** (each ping names its game); opt in or out any time with `--setup`
 
 *Community tool. Not affiliated with or endorsed by Valve. It only reads the game's own log file — no memory reading, no injection, nothing that touches the game process.*
 
@@ -53,13 +53,13 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (82 checks; needs Node) |
+| `npm test` | Run the automated test suite (92 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends — one message
 
-After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): the download link and "follow the steps on screen". That's the entire pitch — each friend runs their own copy, the wizard gives them their own code, and their own games ping their own phone. Nothing to coordinate, nothing to exchange. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 82-check test suite and rebuilds the exe via GitHub Actions.
+After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): the download link and "follow the steps on screen". That's the entire pitch — each friend runs their own copy, the wizard gives them their own code, and their own games ping their own phone. Nothing to coordinate, nothing to exchange. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 92-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 

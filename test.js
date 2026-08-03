@@ -415,7 +415,7 @@ async function main() {
     const { child, out } = startWatcher(env);
     await sleep(1000);
     child.kill();
-    assert(out.text.includes('watching') && !out.text.includes('Already running'),
+    assert(out.text.includes('Watching') && !out.text.includes('Already running'),
       'stale lock ignored, watcher runs', out.text.split('\n')[0]);
   }
 
@@ -632,6 +632,35 @@ async function main() {
     server.close();
     assert(!leaked, 'Deadlock top-level patterns did not leak into CS2');
     assert(ok, 'cs2 OTA section applied and detects');
+  }
+
+  console.log('\n47. Watching BOTH games at once — each pings with its game named');
+  {
+    const steamRoot = path.join(TMP, 'MultiSteam');
+    const lib = path.join(TMP, 'MultiLib');
+    const dlDir = path.join(lib, 'steamapps', 'common', 'Deadlock', 'game', 'citadel');
+    const csDir = path.join(lib, 'steamapps', 'common', 'Counter-Strike Global Offensive', 'game', 'csgo');
+    fs.mkdirSync(path.join(steamRoot, 'steamapps'), { recursive: true });
+    fs.mkdirSync(dlDir, { recursive: true });
+    fs.mkdirSync(csDir, { recursive: true });
+    const dlLog = path.join(dlDir, 'console.log');
+    const csLog = path.join(csDir, 'console.log');
+    fs.writeFileSync(dlLog, '');
+    fs.writeFileSync(csLog, '');
+    fs.writeFileSync(path.join(steamRoot, 'steamapps', 'libraryfolders.vdf'),
+      `"libraryfolders"\n{\n\t"0"\n\t{\n\t\t"path"\t\t"${lib.replace(/\\/g, '\\\\')}"\n\t}\n}\n`);
+    const env = makeEnv('multigame', { games: ['deadlock', 'cs2'] });
+    const { child, out } = startWatcher(env, [], { DMP_STEAM_ROOT: steamRoot });
+    await sleep(1500);
+    assert(out.text.includes('Deadlock + Counter-Strike 2'), 'both games announced',
+      out.text.split('\n')[0]);
+    fs.appendFileSync(dlLog, LINES.lobbyCreated + '\n');
+    assert(await waitFor(out, t => alerts({ text: t }) === 1), 'Deadlock pop pings');
+    assert(await waitFor(out, t => t.includes('MATCH FOUND — Deadlock')), 'ping names Deadlock');
+    fs.appendFileSync(csLog, 'Matchmaking successful\n');
+    assert(await waitFor(out, t => alerts({ text: t }) === 2), 'CS2 pop pings independently');
+    assert(out.text.includes('MATCH FOUND — Counter-Strike 2'), 'ping names CS2');
+    child.kill();
   }
 
   console.log('\n34. --share prints a universal invite (no personal codes leaked)');
