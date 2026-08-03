@@ -1,15 +1,15 @@
 <!--
-  Letterboxd Night — Confirm signup
-  Paste into: Supabase → Authentication → Emails → Confirm signup
-  Subject:     Welcome to Letterboxd Night
+  Letterboxd Night — Change Email Address
+  Paste into: Supabase → Authentication → Emails → Change Email Address
+  Subject:     Confirm your new email address
 
-  This is the template a brand-new address gets. Returning users get Magic
-  Link instead — style only one and half your users see the stock email.
-  Same construction notes as magic-link.html.
+  Only fires if an account's email is changed. The app has no UI for that
+  today, so this is here so the stock template never leaks through if you add
+  one — or if you change an address from the Supabase dashboard.
 -->
 
 <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#0d1117;opacity:0;">
-  Confirm your email and you'll be picking films in about a minute.
+  Confirm the new address on your Letterboxd Night account.
   &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
 </div>
 
@@ -40,15 +40,14 @@
 
               <tr>
                 <td style="padding:36px 36px 0 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                  <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;color:#00c030;mso-line-height-rule:exactly;">
-                    Welcome in
-                  </p>
-                  <h1 style="margin:12px 0 0 0;font-size:28px;line-height:34px;font-weight:800;color:#ffffff;letter-spacing:-0.6px;mso-line-height-rule:exactly;">
-                    Never argue about what to watch again
+                  <h1 style="margin:0;font-size:26px;line-height:32px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;mso-line-height-rule:exactly;">
+                    Confirm your new address
                   </h1>
                   <p style="margin:14px 0 0 0;font-size:15px;line-height:23px;color:#8899aa;mso-line-height-rule:exactly;">
-                    Confirm your email and you're in. Bring your Letterboxd export when you get
-                    there — you only ever import it once, and the app keeps itself current after that.
+                    Your Letterboxd Night account is moving from
+                    <span style="color:#c3cdd8;">{{ .Email }}</span> to
+                    <span style="color:#ffffff;font-weight:600;">{{ .NewEmail }}</span>.
+                    Confirm below and future sign-in links go to the new address.
                   </p>
                 </td>
               </tr>
@@ -59,7 +58,7 @@
                   <!--[if mso]>
                   <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ .ConfirmationURL }}" style="height:52px;v-text-anchor:middle;width:408px;" arcsize="25%" stroke="f" fillcolor="#00c030">
                     <w:anchorlock/>
-                    <center style="color:#0d1117;font-family:Segoe UI,Arial,sans-serif;font-size:16px;font-weight:bold;">Confirm and get started</center>
+                    <center style="color:#0d1117;font-family:Segoe UI,Arial,sans-serif;font-size:16px;font-weight:bold;">Confirm this change</center>
                   </v:roundrect>
                   <![endif]-->
                   <!--[if !mso]><!-- -->
@@ -68,7 +67,7 @@
                       <td align="center" bgcolor="#00c030" style="background-color:#00c030;border-radius:13px;">
                         <a href="{{ .ConfirmationURL }}"
                            style="display:block;padding:16px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#0d1117;text-decoration:none;mso-line-height-rule:exactly;">
-                          Confirm and get started
+                          Confirm this change
                         </a>
                       </td>
                     </tr>
@@ -95,50 +94,13 @@
                 </td>
               </tr>
 
-              <!-- What's inside -->
-              <tr>
-                <td style="padding:30px 36px 0 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-                  <div style="height:1px;background-color:#2a3644;line-height:1px;font-size:0;">&nbsp;</div>
-                  <p style="margin:22px 0 14px 0;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#8899aa;mso-line-height-rule:exactly;">
-                    What's waiting
-                  </p>
-
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                      <td valign="top" style="padding:0 10px 12px 0;width:14px;color:#00c030;font-size:14px;line-height:21px;font-weight:700;mso-line-height-rule:exactly;">&#9656;</td>
-                      <td valign="top" style="padding:0 0 12px 0;font-size:13px;line-height:21px;color:#8899aa;mso-line-height-rule:exactly;">
-                        <span style="color:#ffffff;font-weight:600;">Recommend</span> — eight picks tuned to your mood, runtime and era, drawn from your watchlist and beyond it
-                      </td>
-                    </tr>
-                    <tr>
-                      <td valign="top" style="padding:0 10px 12px 0;width:14px;color:#00c030;font-size:14px;line-height:21px;font-weight:700;mso-line-height-rule:exactly;">&#9656;</td>
-                      <td valign="top" style="padding:0 0 12px 0;font-size:13px;line-height:21px;color:#8899aa;mso-line-height-rule:exactly;">
-                        <span style="color:#ffffff;font-weight:600;">Nine ways to decide</span> — knockout tournaments, veto drafts, a spinning wheel, swipe decks, coin flips
-                      </td>
-                    </tr>
-                    <tr>
-                      <td valign="top" style="padding:0 10px 12px 0;width:14px;color:#00c030;font-size:14px;line-height:21px;font-weight:700;mso-line-height-rule:exactly;">&#9656;</td>
-                      <td valign="top" style="padding:0 0 12px 0;font-size:13px;line-height:21px;color:#8899aa;mso-line-height-rule:exactly;">
-                        <span style="color:#ffffff;font-weight:600;">Compare</span> — share a code and find what everyone actually wants to watch
-                      </td>
-                    </tr>
-                    <tr>
-                      <td valign="top" style="padding:0 10px 0 0;width:14px;color:#00c030;font-size:14px;line-height:21px;font-weight:700;mso-line-height-rule:exactly;">&#9656;</td>
-                      <td valign="top" style="padding:0;font-size:13px;line-height:21px;color:#8899aa;mso-line-height-rule:exactly;">
-                        <span style="color:#ffffff;font-weight:600;">Wrapped &amp; Stats</span> — your year in film, and the build your taste says you're running
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-
               <!-- Footer -->
               <tr>
                 <td style="padding:26px 36px 34px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
                   <div style="height:1px;background-color:#2a3644;line-height:1px;font-size:0;">&nbsp;</div>
                   <p style="margin:20px 0 0 0;font-size:11px;line-height:18px;color:#8899aa;mso-line-height-rule:exactly;">
-                    If you didn't sign up for Letterboxd Night, ignore this email and nothing
-                    further will happen.
+                    If you didn't ask to change your email, don't tap the button — and check that
+                    you still control the original address. Nothing changes until this is confirmed.
                   </p>
                 </td>
               </tr>
