@@ -18,18 +18,27 @@ interface Props {
   firstFilm: { title: string; date: string } | null;
   lastFilm: { title: string; date: string } | null;
   streak: number;
+  minutesWatched: number;
   busiestMonth: string | null;
 }
 
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
+function formatWatchTime(mins: number): string {
+  const days = Math.floor(mins / 1440);
+  const hours = Math.floor((mins % 1440) / 60);
+  if (days > 0) return `${days} ${days === 1 ? "day" : "days"} ${hours} hrs`;
+  const m = mins % 60;
+  return hours > 0 ? `${hours} hrs ${m} min` : `${m} min`;
+}
+
 export function WrappedClient(props: Props) {
-  const { year, years, total, monthCounts, avgRating, topDecade, topRated, firstFilm, lastFilm, streak, busiestMonth } = props;
+  const { year, years, total, monthCounts, avgRating, topDecade, topRated, firstFilm, lastFilm, streak, minutesWatched, busiestMonth } = props;
   const [copied, setCopied] = useState(false);
   const maxMonth = Math.max(1, ...monthCounts);
 
   async function share() {
-    const text = `My ${year} in film: ${total} films watched, ${avgRating ?? "-"}★ average, top decade ${topDecade ?? "-"}, longest streak ${streak} days. 🎬`;
+    const text = `My ${year} in film: ${total} films, ${formatWatchTime(minutesWatched)} of watching, ${avgRating ?? "-"}★ average, top decade ${topDecade ?? "-"}, longest streak ${streak} days. 🎬`;
     try {
       if (navigator.share) {
         await navigator.share({ text });
@@ -76,6 +85,22 @@ export function WrappedClient(props: Props) {
               <p className="mt-1 text-sm font-semibold text-slate-300">films watched</p>
             </section>
 
+            {/* Time watched */}
+            {minutesWatched > 0 && (
+              <section
+                className="card animate-fade-up bg-gradient-to-br from-accent-blue/10 via-night-900 to-night-900 py-6 text-center"
+                style={{ animationDelay: "90ms" }}
+              >
+                <p className="text-4xl font-black text-accent-blue">
+                  {formatWatchTime(minutesWatched)}
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-300">
+                  in front of films this year
+                </p>
+                <p className="mt-0.5 text-[10px] text-night-400">estimated from real runtimes</p>
+              </section>
+            )}
+
             {/* Months */}
             <section className="card animate-fade-up" style={{ animationDelay: "120ms" }}>
               <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-night-400">
@@ -83,10 +108,11 @@ export function WrappedClient(props: Props) {
               </h2>
               <div className="flex h-24 items-end gap-1">
                 {monthCounts.map((c, i) => (
-                  <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                  <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+                    {/* Pixel heights: % of an auto-height flex child collapses to 0 */}
                     <div
                       className="w-full rounded-t bg-gradient-to-t from-accent/50 to-accent"
-                      style={{ height: `${Math.max(3, (c / maxMonth) * 100)}%` }}
+                      style={{ height: `${Math.max(3, Math.round((c / maxMonth) * 74))}px` }}
                     />
                     <span className="text-[9px] text-night-400">{MONTHS[i]}</span>
                   </div>

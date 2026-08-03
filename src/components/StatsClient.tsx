@@ -131,11 +131,12 @@ export function StatsClient({ heatmap, histogram, decades, streak, buff }: Props
           </h2>
           <div className="flex h-32 items-end gap-1.5">
             {histogram.map((count, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center gap-1">
+              <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                 <span className="text-[10px] tabular-nums text-night-400">{count > 0 ? count : ""}</span>
+                {/* Pixel heights: % of an auto-height flex child collapses to 0 */}
                 <div
                   className="w-full rounded-t bg-gradient-to-t from-accent/50 to-accent transition-all"
-                  style={{ height: `${Math.max(2, (count / maxHist) * 100)}%` }}
+                  style={{ height: `${Math.max(2, Math.round((count / maxHist) * 84))}px` }}
                 />
                 <span className="text-[10px] text-night-400">{(i + 1) / 2}</span>
               </div>
