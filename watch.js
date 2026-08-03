@@ -28,7 +28,43 @@ const readline = require('readline');
 // Don't die if stdout goes away (e.g. output piped to a closed pager).
 process.stdout.on('error', () => {});
 
-const APP_VERSION = '3.0';
+const APP_VERSION = '3.1';
+
+// ------------------------------------------------------------ game profiles ---
+// Each profile: where the game lives, its console.log, and the log patterns
+// that differ from the Deadlock defaults. Everything else (pings, escalation,
+// self-healing, stats) is shared machinery.
+const GAME_PROFILES = {
+  deadlock: {
+    title: 'Deadlock',
+    appid: 1422450,
+    folder: 'Deadlock',
+    logRel: ['game', 'citadel', 'console.log'],
+    overrides: {}, // the DEFAULTS below ARE the Deadlock patterns
+  },
+  cs2: {
+    title: 'Counter-Strike 2',
+    appid: 730,
+    folder: 'Counter-Strike Global Offensive',
+    logRel: ['game', 'csgo', 'console.log'],
+    overrides: {
+      // Starter set from community knowledge — verified on first real queue
+      // (watch for '✓ Queue started'); --find calibrates and the self-healing
+      // patterns.json ships corrections to everyone.
+      patterns: ['Matchmaking successful', 'Match confirmed'],
+      backupPatterns: ['Connect(ing|ed)? to \\S+'],
+      queueStartPatterns: ['Searching for a match'],
+      queueStopPatterns: ['(Stopp|Cancell)ed match ?making|Match search cancelled'],
+      matchEndPatterns: ['Disconnect(ing)? from server', 'Server shutting down'],
+      modePatterns: [],   // no mode/hero reveal for CS2 (different concepts)
+      heroPatterns: [],
+    },
+  },
+};
+
+function gameProfile(config) {
+  return GAME_PROFILES[config && config.game] || GAME_PROFILES.deadlock;
+}
 
 // ---------------------------------------------------------------- config ---
 
@@ -46,7 +82,9 @@ const CONFIG_PATH = argConfig !== -1 && argv[argConfig + 1]
   ? path.resolve(argv[argConfig + 1])
   : path.join(APP_DIR, 'config.json');
 const DEFAULTS = {
-  // Path to Deadlock's console.log. null = try the common Steam locations.
+  // Which game to watch: 'deadlock' or 'cs2' (see GAME_PROFILES).
+  game: 'deadlock',
+  // Path to the game's console.log. null = try the common Steam locations.
   logPath: null,
   // Case-insensitive regexes. If ANY matches a new log line, the alert fires.
   // "Lobby N for Match N created" is the line Deadlock prints the moment the
@@ -206,17 +244,26 @@ async function applyRemotePatterns(config) {
     try { remote = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch {}
   }
   if (!remote || typeof remote !== 'object') return;
+  // Per-game sections: patterns.json may carry { games: { cs2: {...} } };
+  // the top level stays the Deadlock set for older clients. For a non-
+  // Deadlock game with no matching section, apply NOTHING — Deadlock
+  // patterns must never overwrite another game's profile.
+  const src = (!config.game || config.game === 'deadlock')
+    ? remote
+    : (remote.games && typeof remote.games === 'object' && remote.games[config.game]) || null;
   let applied = 0;
-  for (const key of OTA_KEYS) {
-    // Non-empty required: an empty array would wipe detection or the
-    // loopback safety guard across every install from one bad repo commit.
-    if (Array.isArray(remote[key]) && remote[key].length > 0 &&
-        remote[key].every(p => typeof p === 'string')) {
-      try {
-        remote[key].forEach(p => new RegExp(p)); // reject broken regexes whole
-        config[key] = remote[key];
-        applied++;
-      } catch {}
+  if (src && typeof src === 'object') {
+    for (const key of OTA_KEYS) {
+      // Non-empty required: an empty array would wipe detection or the
+      // loopback safety guard across every install from one bad repo commit.
+      if (Array.isArray(src[key]) && src[key].length > 0 &&
+          src[key].every(p => typeof p === 'string')) {
+        try {
+          src[key].forEach(p => new RegExp(p)); // reject broken regexes whole
+          config[key] = src[key];
+          applied++;
+        } catch {}
+      }
     }
   }
   if (applied) {
@@ -385,7 +432,10 @@ function loadConfig() {
     saveConfig({ ...DEFAULTS, ...user });
     console.log('(Updated config.json to the latest defaults.)');
   }
-  return { ...DEFAULTS, ...user };
+  // Resolution order: built-in Deadlock defaults → the selected game's
+  // profile overrides → whatever the user explicitly set.
+  const profileOverrides = (GAME_PROFILES[user.game] || GAME_PROFILES.deadlock).overrides;
+  return { ...DEFAULTS, ...profileOverrides, ...user };
 }
 
 function saveConfig(config) {
@@ -394,7 +444,18 @@ function saveConfig(config) {
 
 // ------------------------------------------------------- find console.log ---
 
-const GAME_REL = ['game', 'citadel', 'console.log'];
+// Which of the supported games are installed in any Steam library?
+function detectInstalledGames() {
+  const found = [];
+  const libs = steamRoots().flatMap(r => steamLibraries(r));
+  for (const [key, prof] of Object.entries(GAME_PROFILES)) {
+    if (libs.some(lib => {
+      try { return fs.existsSync(path.join(lib, 'steamapps', 'common', prof.folder)); }
+      catch { return false; }
+    })) found.push(key);
+  }
+  return found;
+}
 
 // Steam install roots: env override, the Windows registry (Steam's real
 // install path), then well-known locations.
@@ -445,13 +506,13 @@ function steamLibraries(root) {
   return libs;
 }
 
-function candidateLogPaths() {
+function candidateLogPaths(profile = GAME_PROFILES.deadlock) {
   const candidates = [];
-  // The app folder may have been dropped inside the Deadlock folder itself —
-  // walk up from here looking for game/citadel/console.log.
+  // The app folder may have been dropped inside the game's folder itself —
+  // walk up from here looking for its console.log.
   let dir = APP_DIR;
   for (let i = 0; i < 6; i++) {
-    candidates.push(path.join(dir, ...GAME_REL));
+    candidates.push(path.join(dir, ...profile.logRel));
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;
@@ -459,7 +520,7 @@ function candidateLogPaths() {
   // Every Steam library on every drive.
   for (const root of steamRoots()) {
     for (const lib of steamLibraries(root)) {
-      candidates.push(path.join(lib, 'steamapps', 'common', 'Deadlock', ...GAME_REL));
+      candidates.push(path.join(lib, 'steamapps', 'common', profile.folder, ...profile.logRel));
     }
   }
   return candidates;
@@ -467,7 +528,7 @@ function candidateLogPaths() {
 
 function findLogPath(config) {
   if (config.logPath) return config.logPath;
-  for (const p of candidateLogPaths()) {
+  for (const p of candidateLogPaths(gameProfile(config))) {
     if (fs.existsSync(p)) return p;
   }
   return null;
@@ -752,17 +813,45 @@ async function setupWizard(existing) {
   console.log('  ║   🎯  DEADLOCK MATCH PING — SETUP     ║');
   console.log('  ╚═══════════════════════════════════════╝');
 
-  // Step 1: the game log
-  console.log(`\nStep 1 of ${STEPS} — Deadlock\'s log file`);
-  let logPath = findLogPath(config);
-  if (logPath) {
-    console.log(`  ✓ Found it: ${logPath}`);
-  } else {
-    console.log('  Deadlock needs one launch option so it writes a log file:');
-    console.log('    Steam → right-click Deadlock → Properties → Launch Options → add:  -condebug');
-    console.log('  Then launch Deadlock once. (You can finish this setup first.)');
-    const p = await ask(rl, '  Path to console.log if you know it (Enter to auto-detect later): ');
-    if (p) config.logPath = p;
+  // Step 1: which game, and its log file
+  console.log(`\nStep 1 of ${STEPS} — Your game & its log file`);
+  {
+    const installed = detectInstalledGames();
+    const keys = Object.keys(GAME_PROFILES);
+    let chosen = config.game || 'deadlock';
+    if (installed.length === 1 && !config.game) {
+      chosen = installed[0];
+      console.log(`  ✓ Found ${GAME_PROFILES[chosen].title} installed.`);
+    } else if (installed.length > 1 || (installed.length === 0 && keys.length > 1)) {
+      keys.forEach((k, i) => {
+        const tag = installed.includes(k) ? ' (installed)' : '';
+        console.log(`    ${i + 1}. ${GAME_PROFILES[k].title}${tag}`);
+      });
+      const pick = await ask(rl,
+        `  Which game should I watch? (1-${keys.length}, Enter = ${GAME_PROFILES[chosen].title}): `);
+      const byNum = keys[parseInt(pick, 10) - 1];
+      const byName = keys.find(k => k === pick.toLowerCase() ||
+        GAME_PROFILES[k].title.toLowerCase().includes(pick.toLowerCase()));
+      if (pick && (byNum || byName)) chosen = byNum || byName;
+    }
+    if (chosen !== (config.game || 'deadlock')) config.logPath = null; // different game, different log
+    config.game = chosen;
+    const prof = GAME_PROFILES[chosen];
+    // Selecting a game locks in its patterns and tap-to-launch link.
+    for (const key of OTA_KEYS) config[key] = prof.overrides[key] ?? DEFAULTS[key];
+    config.customWebhookLink = `steam://run/${prof.appid}`;
+    console.log(`  Watching for: ${prof.title}`);
+
+    const logPath = findLogPath(config);
+    if (logPath) {
+      console.log(`  ✓ Found its log: ${logPath}`);
+    } else {
+      console.log(`  ${prof.title} needs one launch option so it writes a log file:`);
+      console.log(`    Steam → right-click ${prof.title} → Properties → Launch Options → add:  -condebug`);
+      console.log(`  Then launch ${prof.title} once. (You can finish this setup first.)`);
+      const p = await ask(rl, '  Path to console.log if you know it (Enter to auto-detect later): ');
+      if (p) config.logPath = p;
+    }
   }
 
   // Step 2: phone pushes — your choice
@@ -834,7 +923,7 @@ async function setupWizard(existing) {
     }
   } else {
     console.log('  Hark (hark.ryan.ceo) turns a webhook into a fully branded iPhone');
-    console.log('  notification — Game Tracker icon, tap to launch Deadlock.');
+    console.log('  notification — Game Tracker icon, tap to launch your game.');
     console.log('  On your iPhone: open hark.ryan.ceo, follow its steps, copy the');
     console.log('  webhook URL it gives you.');
     const hark = await ask(rl, '  Paste that webhook URL (Enter to skip): ');
@@ -893,9 +982,10 @@ async function setupWizard(existing) {
       console.log('  Copy this line:');
     }
     console.log(`\n    ${steamLine}\n`);
-    console.log('  Steam → right-click Deadlock → Properties → Launch Options:');
+    const gp = gameProfile(config);
+    console.log(`  Steam → right-click ${gp.title} → Properties → Launch Options:`);
     console.log('  delete what\'s there and paste (Ctrl+V). From then on the watcher');
-    console.log('  starts itself, hidden, every time you launch Deadlock.');
+    console.log(`  starts itself, hidden, every time you launch ${gp.title}.`);
   }
 
   saveConfig(config);
@@ -1079,7 +1169,7 @@ async function main() {
   await applyRemotePatterns(config); // self-heal detection before compiling
   const patterns = config.patterns.map(p => new RegExp(p, 'i'));
   let lastAlert = 0;
-  console.log(`Deadlock Match Ping v${APP_VERSION} — watching ${logPath}`);
+  console.log(`Game Tracker v${APP_VERSION} (${gameProfile(config).title}) — watching ${logPath}`);
   if (args.includes('--announce')) {
     // Launched hidden (e.g. by Steam) — say hello via a toast since there is
     // no console to look at.

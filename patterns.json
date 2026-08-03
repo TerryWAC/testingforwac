@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "latestVersion": "3.0",
+  "latestVersion": "3.1",
   "updateNote": "",
   "patterns": [
     "Lobby\\s+\\d+\\s+for\\s+Match\\s+\\d+\\s+created"
@@ -31,5 +31,26 @@
   "heroPatterns": [
     "\\[Server\\] Loaded hero \\d+/(hero_\\w+)",
     "VMDL Camera Pose Success!.*models/heroes(?:_wip|_staging)?/(\\w+)/"
-  ]
+  ],
+  "games": {
+    "cs2": {
+      "patterns": [
+        "Matchmaking successful",
+        "Match confirmed"
+      ],
+      "backupPatterns": [
+        "Connect(ing|ed)? to \\S+"
+      ],
+      "queueStartPatterns": [
+        "Searching for a match"
+      ],
+      "queueStopPatterns": [
+        "(Stopp|Cancell)ed match ?making|Match search cancelled"
+      ],
+      "matchEndPatterns": [
+        "Disconnect(ing)? from server",
+        "Server shutting down"
+      ]
+    }
+  }
 }
