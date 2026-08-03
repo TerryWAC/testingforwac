@@ -531,6 +531,70 @@ async function main() {
     assert(out.text.includes('escalation cancelled'), 'cancellation logged');
   }, { afkSeconds: 1 });
 
+  await scenario('41. Bad patterns URL protocol cannot crash startup', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    assert(await waitFor(out, t => alerts({ text: t }) === 1),
+      'watcher survives ftp:// patterns URL and still detects');
+  }, { patternUpdates: true, patternsUrl: 'ftp://bad.example/patterns.json' });
+
+  console.log('\n42. Redirect to a non-http URL cannot crash startup');
+  {
+    const http = require('http');
+    const server = http.createServer((req, res) => {
+      res.writeHead(302, { Location: 'file:///etc/passwd' });
+      res.end();
+    });
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const env = makeEnv('ota-badredir', {
+      patternUpdates: true,
+      patternsUrl: `http://127.0.0.1:${server.address().port}/p.json`,
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(1200);
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    const ok = await waitFor(out, t => alerts({ text: t }) === 1);
+    child.kill();
+    server.close();
+    assert(ok, 'watcher survives hostile redirect and still detects');
+  }
+
+  console.log('\n43. Empty pattern arrays from OTA are rejected (built-ins keep working)');
+  {
+    const http = require('http');
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ version: 9, patterns: [], ignorePatterns: [] }));
+    });
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const env = makeEnv('ota-empty', {
+      patternUpdates: true,
+      patternsUrl: `http://127.0.0.1:${server.address().port}/p.json`,
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(1200);
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    const ok = await waitFor(out, t => alerts({ text: t }) === 1);
+    child.kill();
+    server.close();
+    assert(ok, 'empty remote arrays ignored, detection intact');
+  }
+
+  await scenario('44. Stale buffered lines cannot silence the AFK escalation', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    // Buffer flush replays an old-stamped map line right after the pop —
+    // that is NOT the player loading in.
+    const d = new Date(Date.now() - 30 * 60 * 1000);
+    const pd = n => String(n).padStart(2, '0');
+    append(env, `${pd(d.getMonth() + 1)}/${pd(d.getDate())} ${pd(d.getHours())}:${pd(d.getMinutes())}:${pd(d.getSeconds())} [Client] Map: "street_test"`);
+    assert(await waitFor(out, t => t.includes('YOU ARE MISSING THE MATCH'), 4000),
+      'escalation still fires despite stale replay');
+  }, { afkSeconds: 1 });
+
   console.log('\n34. --share prints a universal invite (no personal codes leaked)');
   {
     const env = makeEnv('share', { ntfyTopic: 'dl-test99' });

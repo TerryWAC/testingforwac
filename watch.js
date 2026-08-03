@@ -150,21 +150,34 @@ function httpGetJson(url, timeoutMs = 4000, redirects = 2) {
   return new Promise(resolve => {
     let u;
     try { u = new URL(url); } catch { return resolve(null); }
+    // Only http(s): anything else (including a redirect Location pointing at
+    // ftp:/file:) would make mod.get throw SYNCHRONOUSLY and crash startup.
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return resolve(null);
     const mod = u.protocol === 'http:' ? require('http') : https; // http only ever used by tests
-    const req = mod.get(u, { timeout: timeoutMs }, res => {
-      if (res.statusCode >= 301 && res.statusCode <= 308 && res.headers.location && redirects > 0) {
-        res.resume();
-        return resolve(httpGetJson(res.headers.location, timeoutMs, redirects - 1));
-      }
-      if (res.statusCode !== 200) { res.resume(); return resolve(null); }
-      let body = '';
-      res.on('data', d => { body += d; });
-      res.on('end', () => {
-        try { resolve(JSON.parse(body)); } catch { resolve(null); }
+    let req = null;
+    // Hard deadline: the socket timeout only fires on INACTIVITY — a host
+    // dripping bytes could otherwise stall startup forever.
+    const deadline = setTimeout(() => { try { req.destroy(); } catch {} resolve(null); }, timeoutMs * 2);
+    const done = v => { clearTimeout(deadline); resolve(v); };
+    try {
+      req = mod.get(u, { timeout: timeoutMs }, res => {
+        if (res.statusCode >= 301 && res.statusCode <= 308 && res.headers.location && redirects > 0) {
+          res.resume();
+          return done(httpGetJson(res.headers.location, timeoutMs, redirects - 1));
+        }
+        if (res.statusCode !== 200) { res.resume(); return done(null); }
+        let body = '';
+        res.on('data', d => {
+          body += d;
+          if (body.length > 512 * 1024) { req.destroy(); done(null); } // size cap
+        });
+        res.on('end', () => {
+          try { done(JSON.parse(body)); } catch { done(null); }
+        });
       });
-    });
-    req.on('error', () => resolve(null));
-    req.on('timeout', () => { req.destroy(); resolve(null); });
+    } catch { return done(null); }
+    req.on('error', () => done(null));
+    req.on('timeout', () => { req.destroy(); done(null); });
   });
 }
 
@@ -195,7 +208,10 @@ async function applyRemotePatterns(config) {
   if (!remote || typeof remote !== 'object') return;
   let applied = 0;
   for (const key of OTA_KEYS) {
-    if (Array.isArray(remote[key]) && remote[key].every(p => typeof p === 'string')) {
+    // Non-empty required: an empty array would wipe detection or the
+    // loopback safety guard across every install from one bad repo commit.
+    if (Array.isArray(remote[key]) && remote[key].length > 0 &&
+        remote[key].every(p => typeof p === 'string')) {
       try {
         remote[key].forEach(p => new RegExp(p)); // reject broken regexes whole
         config[key] = remote[key];
@@ -730,13 +746,14 @@ function ask(rl, q) {
 async function setupWizard(existing) {
   const config = { ...DEFAULTS, ...(existing || {}) };
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const STEPS = process.platform === 'win32' ? 7 : 6; // Steam step is Windows-only
   console.log('');
   console.log('  ╔═══════════════════════════════════════╗');
   console.log('  ║   🎯  DEADLOCK MATCH PING — SETUP     ║');
   console.log('  ╚═══════════════════════════════════════╝');
 
   // Step 1: the game log
-  console.log('\nStep 1 of 7 — Deadlock\'s log file');
+  console.log(`\nStep 1 of ${STEPS} — Deadlock\'s log file`);
   let logPath = findLogPath(config);
   if (logPath) {
     console.log(`  ✓ Found it: ${logPath}`);
@@ -749,7 +766,7 @@ async function setupWizard(existing) {
   }
 
   // Step 2: phone pushes — your choice
-  console.log('\nStep 2 of 7 — Phone pings (via the free ntfy app, no account needed)');
+  console.log(`\nStep 2 of ${STEPS} — Phone pings (via the free ntfy app, no account needed)`);
   if (config.ntfyTopic) {
     const keep = await ask(rl, `  Phone pings are ON (code: ${config.ntfyTopic}). Keep them? (Y/n): `);
     if (keep.toLowerCase().startsWith('n')) {
@@ -783,7 +800,7 @@ async function setupWizard(existing) {
   }
 
   // Step 3: Discord — pings arrive from a "Game Tracker" bot, zero installs
-  console.log('\nStep 3 of 7 — Discord pings (bot named "Game Tracker")');
+  console.log(`\nStep 3 of ${STEPS} — Discord pings (bot named "Game Tracker")`);
   if (config.discordWebhook) {
     const keep = await ask(rl, '  Discord pings are ON. Keep them? (Y/n): ');
     if (keep.toLowerCase().startsWith('n')) {
@@ -808,7 +825,7 @@ async function setupWizard(existing) {
     }
   }
   // Step 4: branded iOS pings via a webhook-notification app (e.g. Hark)
-  console.log('\nStep 4 of 7 — Branded iPhone pings via Hark (optional)');
+  console.log(`\nStep 4 of ${STEPS} — Branded iPhone pings via Hark (optional)`);
   if (config.customWebhookUrl) {
     const keep = await ask(rl, '  Custom webhook pings are ON. Keep them? (Y/n): ');
     if (keep.toLowerCase().startsWith('n')) {
@@ -837,7 +854,7 @@ async function setupWizard(existing) {
   }
 
   // Step 5: make the ping yours
-  console.log('\nStep 5 of 7 — Make the ping yours (optional)');
+  console.log(`\nStep 5 of ${STEPS} — Make the ping yours (optional)`);
   console.log(`  Current alert:  "${config.alertTitle}"`);
   console.log('  Deadlock assigns one of your 3 hero picks when the match is made, so');
   console.log('  the pop ping fires instantly and a follow-up seconds later reveals it:');
@@ -852,7 +869,7 @@ async function setupWizard(existing) {
   if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
   // Step 6: friends
-  console.log('\nStep 6 of 7 — Your friends (optional)');
+  console.log(`\nStep 6 of ${STEPS} — Your friends (optional)`);
   console.log('  Send them the download link (printed at the end) — each of them gets');
   console.log('  their own pings for their own games, zero coordination needed.');
   if (config.ntfyTopic) {
@@ -860,12 +877,12 @@ async function setupWizard(existing) {
     console.log('  their ntfy app hears when YOUR matches pop — nice for party queues.');
   }
 
-  // Step 5: link with Steam so the watcher starts itself with the game
+  // Step 7 (Windows only): link with Steam so the watcher starts itself with the game
   if (process.platform === 'win32') {
     const steamLine = IS_SEA
       ? `"${process.execPath}" --steam %command% -condebug`
       : `"${path.join(APP_DIR, 'steam-launch.bat')}" %command% -condebug`;
-    console.log('\nStep 7 of 7 — Auto-start with Deadlock (recommended)');
+    console.log(`\nStep 7 of ${STEPS} — Auto-start with Deadlock (recommended)`);
     try {
       const clip = spawn('clip', [], { windowsHide: true });
       clip.on('error', () => {});         // async spawn failures must not kill
@@ -1130,13 +1147,17 @@ async function main() {
     }
   }
   tailFile(logPath, line => {
-    // Any sign of life after a pop — joining a server (even a local one),
-    // hero/mode loading, a new queue — means you made it: stand down.
+    // Any FRESH sign of life after a pop — joining a server (even a local
+    // one), hero/mode loading, a new queue — means you made it: stand down.
+    // Stale buffered replays must not silence the escalation.
     if (escalateTimer && (backupPatterns.some(re => re.test(line)) ||
         heroRes.some(re => re.test(line)) || modeRes.some(re => re.test(line)) ||
         queueStart.some(re => re.test(line)) || matchEnd.some(re => re.test(line)))) {
-      clearEscalation();
-      console.log('  ✓ You made it in — escalation cancelled.');
+      const ts = parseLogTime(line);
+      if (ts === null || Date.now() - ts <= staleMs) {
+        clearEscalation();
+        console.log('  ✓ You made it in — escalation cancelled.');
+      }
     }
     for (const re of modeRes) {
       const m = re.exec(line);
