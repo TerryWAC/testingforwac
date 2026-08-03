@@ -531,7 +531,7 @@ async function main() {
     assert(out.text.includes('escalation cancelled'), 'cancellation logged');
   }, { afkSeconds: 1 });
 
-  console.log('\n34. --share prints a squad invite with the code and download link');
+  console.log('\n34. --share prints a universal invite (no personal codes leaked)');
   {
     const env = makeEnv('share', { ntfyTopic: 'dl-test99' });
     const outText = await new Promise(resolve => {
@@ -540,8 +540,9 @@ async function main() {
       c.stdout.on('data', d => { t += d; });
       c.on('close', () => resolve(t));
     });
-    assert(outText.includes('dl-test99'), 'invite contains the squad code', outText);
-    assert(outText.includes('DeadlockMatchPing.exe'), 'invite contains the download link');
+    assert(outText.includes('DeadlockMatchPing.exe'), 'invite contains the download link', outText);
+    assert(outText.includes('follow the steps'), 'invite says friends just follow the wizard');
+    assert(!outText.includes('dl-test99'), 'personal code is NOT in the shareable invite');
   }
 
   console.log('\n26. Discord webhook receives the Game Tracker ping');
