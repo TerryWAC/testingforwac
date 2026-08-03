@@ -393,7 +393,8 @@ function desktopNotify(title, body, pcSound = 'soft') {
       $x = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02);
       $x.GetElementsByTagName('text').Item(0).InnerText = '${title.replace(/'/g, "''")}';
       $x.GetElementsByTagName('text').Item(1).InnerText = '${body.replace(/'/g, "''")}';
-      [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Deadlock Match Ping').Show([Windows.UI.Notifications.ToastNotification]::new($x));
+      $aumid = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\WindowsPowerShell\\v1.0\\powershell.exe';
+      [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($aumid).Show([Windows.UI.Notifications.ToastNotification]::new($x));
       ${beepPs}
     `;
     execFile('powershell', ['-NoProfile', '-Command', ps], opts, () => {});
