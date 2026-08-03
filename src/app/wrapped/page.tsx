@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { WrappedClient } from "@/components/WrappedClient";
 import { getFilmsForProfile } from "@/lib/db";
+import { getFilmMeta } from "@/lib/filmMeta";
 import { longestStreak } from "@/lib/stats";
 import { createClient } from "@/lib/supabase/server";
 
@@ -66,6 +67,30 @@ export default async function WrappedPage({
   const streak = longestStreak(inYear.map((f) => f.watched_date!));
   const busiestMonthIdx = monthCounts.indexOf(Math.max(...monthCounts));
 
+  // Total time in front of films: known runtimes from the metadata cache,
+  // unknowns estimated at the year's own average (or 105 min).
+  const uniqueYearFilms = new Map<string, { slug: string; title: string; year: number | null }>();
+  for (const f of inYear) {
+    uniqueYearFilms.set(f.film_slug, { slug: f.film_slug, title: f.title, year: f.year });
+  }
+  let minutesWatched = 0;
+  let runtimeCoverage = 0;
+  try {
+    const metaMap = await getFilmMeta([...uniqueYearFilms.values()], 12);
+    let knownMins = 0;
+    for (const film of uniqueYearFilms.values()) {
+      const rt = metaMap.get(film.slug)?.runtime;
+      if (rt) {
+        runtimeCoverage++;
+        knownMins += rt;
+      }
+    }
+    const avg = runtimeCoverage > 0 ? knownMins / runtimeCoverage : 105;
+    minutesWatched = Math.round(knownMins + (uniqueYearFilms.size - runtimeCoverage) * avg);
+  } catch {
+    minutesWatched = uniqueYearFilms.size * 105;
+  }
+
   return (
     <WrappedClient
       username={profile.letterboxd_username}
@@ -79,6 +104,7 @@ export default async function WrappedPage({
       firstFilm={firstFilm}
       lastFilm={lastFilm}
       streak={streak}
+      minutesWatched={minutesWatched}
       busiestMonth={
         monthCounts[busiestMonthIdx] > 0
           ? new Date(year, busiestMonthIdx, 1).toLocaleDateString(undefined, { month: "long" })

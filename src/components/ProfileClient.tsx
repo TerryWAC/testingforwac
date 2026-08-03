@@ -140,26 +140,43 @@ export function ProfileClient({
     if (!file) return;
     setBusy("avatar");
     setError(null);
+    let objectUrl: string | null = null;
     try {
       // Crop to a square and shrink client-side so the stored image is tiny.
-      const bitmap = await createImageBitmap(file);
+      // createImageBitmap rejects some formats (e.g. HEIC on many browsers),
+      // so fall back to an <img> decode before giving up.
+      let source: CanvasImageSource;
+      let width: number;
+      let height: number;
+      try {
+        const bitmap = await createImageBitmap(file);
+        source = bitmap;
+        width = bitmap.width;
+        height = bitmap.height;
+      } catch {
+        objectUrl = URL.createObjectURL(file);
+        const img = document.createElement("img");
+        img.src = objectUrl;
+        try {
+          await img.decode();
+        } catch {
+          throw new Error(
+            "That image format isn't supported by your browser — try a JPG or PNG (screenshots work great)."
+          );
+        }
+        source = img;
+        width = img.naturalWidth;
+        height = img.naturalHeight;
+      }
+      if (!width || !height) throw new Error("Couldn't read that image — try a different photo.");
+
       const size = 192;
       const canvas = document.createElement("canvas");
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext("2d")!;
-      const side = Math.min(bitmap.width, bitmap.height);
-      ctx.drawImage(
-        bitmap,
-        (bitmap.width - side) / 2,
-        (bitmap.height - side) / 2,
-        side,
-        side,
-        0,
-        0,
-        size,
-        size
-      );
+      const side = Math.min(width, height);
+      ctx.drawImage(source, (width - side) / 2, (height - side) / 2, side, side, 0, 0, size, size);
       const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
       const res = await fetch("/api/profile/avatar", {
         method: "POST",
@@ -172,6 +189,7 @@ export function ProfileClient({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save photo");
     } finally {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
       setBusy(null);
     }
   }
