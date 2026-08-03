@@ -217,22 +217,19 @@ async function applyRemotePatterns(config) {
 
 function buildShareMessage(config) {
   const lines = [
-    "Yo — I set up match pings for Deadlock. When one of us gets a game, everyone gets pinged. Takes 2 minutes:",
+    'Yo — get this. It pings your phone the SECOND your Deadlock match pops, so you can alt-tab in queue without ever missing a game. Takes 2 minutes:',
     '',
-    `1. Download this on your PC: ${config.shareDownloadUrl || DEFAULTS.shareDownloadUrl}`,
+    `1. Download on your PC: ${config.shareDownloadUrl || DEFAULTS.shareDownloadUrl}`,
     '   (Windows warns once because it\'s unsigned — click "More info" then "Run anyway".)',
-    '2. Double-click it and follow the steps on screen.',
+    '2. Double-click it and follow the steps on screen — it sets everything up',
+    '   and gives you your own code for the free ntfy phone app.',
+    '',
+    'It says which hero you got, the mode, your queue time — and yells louder if you don\'t tab back in.',
   ];
-  if (config.ntfyTopic) {
-    lines.push(`   When it asks for a squad code, type:  ${config.ntfyTopic}`);
-    lines.push('3. Install the free "ntfy" app on your phone and subscribe to that same code.');
-  }
   if (config.discordWebhook) {
-    lines.push(config.ntfyTopic
-      ? '   (Or skip the phone app — our Discord channel gets the pings too.)'
-      : '3. Just stay in our Discord channel — the pings arrive there.');
+    lines.push('(My pings also land in our Discord channel if you just want those.)');
   }
-  lines.push('', "That's it. Alt-tab all you want — you'll never miss a queue pop again.");
+  lines.push('', "That's it. Never miss a queue pop again.");
   return lines.join('\n');
 }
 
@@ -760,25 +757,17 @@ async function setupWizard(existing) {
       console.log('  Phone pings turned off.');
     }
   } else {
-    const friendCode = await ask(rl,
-      '  Did a friend give you a squad code (like dl-abc123)?\n  Paste it here, or press Enter to create your own: ');
-    const wantPhone = friendCode ? 'y'
-      : await ask(rl, '  Would you like pings on your phone? (Y/n): ');
+    const wantPhone = await ask(rl, '  Would you like pings on your phone? (Y/n): ');
     if (wantPhone.toLowerCase().startsWith('n')) {
       console.log('  Skipped — add them any time with --setup.');
     } else {
-      if (friendCode && /^[a-z0-9_-]{3,64}$/i.test(friendCode)) {
-        config.ntfyTopic = friendCode.toLowerCase();
-        console.log(`  ✓ Joined the squad channel:  ${config.ntfyTopic}`);
-      } else {
-        // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with
-        // no confusable characters (no 0/o, 1/l/i) — easy to type.
-        const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
-        let code = '';
-        for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
-        config.ntfyTopic = 'dl-' + code;
-      }
-      console.log(`  Your squad code:  ${config.ntfyTopic}`);
+      // Short but unguessable-enough: "dl-" + 6 chars from an alphabet with
+      // no confusable characters (no 0/o, 1/l/i) — easy to type.
+      const alpha = 'abcdefghjkmnpqrstuvwxyz23456789';
+      let code = '';
+      for (const byte of crypto.randomBytes(6)) code += alpha[byte % alpha.length];
+      config.ntfyTopic = 'dl-' + code;
+      console.log(`  Your personal code:  ${config.ntfyTopic}`);
       console.log('  1. Install "ntfy" on your phone:');
       console.log('       Android: https://play.google.com/store/apps/details?id=io.heckel.ntfy');
       console.log('       iPhone:  https://apps.apple.com/us/app/ntfy/id1625396347');
@@ -862,17 +851,13 @@ async function setupWizard(existing) {
   const vol = await ask(rl, '  PC beep volume — loud / soft / off (Enter = soft): ');
   if (['loud', 'soft', 'off'].includes(vol.toLowerCase())) config.pcSound = vol.toLowerCase();
 
-  // Step 5: friends
-  console.log('\nStep 6 of 7 — Ping your friends too (optional)');
+  // Step 6: friends
+  console.log('\nStep 6 of 7 — Your friends (optional)');
+  console.log('  Send them the download link (printed at the end) — each of them gets');
+  console.log('  their own pings for their own games, zero coordination needed.');
   if (config.ntfyTopic) {
-    console.log(`  Anyone who subscribes to "${config.ntfyTopic}" in their ntfy app gets`);
-    console.log('  the same phone ping when your match pops. Just share the code.');
-    console.log('  (If they queue too, they can run this watcher with the same code —');
-    console.log('  whoever\'s match pops first pings the whole squad.)');
-  } else if (config.discordWebhook) {
-    console.log('  Everyone in your Discord channel already gets the pings — done.');
-  } else {
-    console.log('  (Add phone or Discord pings with --setup to ping friends too.)');
+    console.log(`  Bonus: anyone who also subscribes to YOUR code (${config.ntfyTopic}) in`);
+    console.log('  their ntfy app hears when YOUR matches pop — nice for party queues.');
   }
 
   // Step 5: link with Steam so the watcher starts itself with the game
@@ -899,8 +884,8 @@ async function setupWizard(existing) {
   saveConfig(config);
   console.log(`\n  ✓ Saved to ${CONFIG_PATH}. Run "node watch.js --setup" to change anything.`);
 
-  // Ready-to-forward squad invite — zero thinking required to share.
-  if (config.ntfyTopic || config.discordWebhook) {
+  // Ready-to-forward invite — zero thinking required to share.
+  {
     const msg = buildShareMessage(config);
     const sharePath = path.join(path.dirname(CONFIG_PATH), 'share-with-friends.txt');
     try { fs.writeFileSync(sharePath, msg + '\n'); } catch {}
@@ -908,8 +893,6 @@ async function setupWizard(existing) {
     console.log(msg.split('\n').map(l => '  ' + l).join('\n'));
     console.log('  ───────────────────────────────────────────');
     console.log(`  (Also saved to ${sharePath} — reprint any time with --share.)\n`);
-  } else {
-    console.log('');
   }
   rl.close();
   return config;
@@ -955,10 +938,6 @@ async function main() {
   if (args.includes('--stats')) { printStats(); return; }
 
   if (args.includes('--share')) {
-    if (!config.ntfyTopic && !config.discordWebhook) {
-      console.log('Run setup first (--setup) — the invite needs your squad code.');
-      return;
-    }
     console.log(buildShareMessage(config));
     return;
   }

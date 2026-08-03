@@ -8,7 +8,7 @@
 - 📱 **Phone pushes** via the free [ntfy](https://ntfy.sh) app — no account, no signup
 - 🖥️ **Desktop toasts** that pop over whatever you're doing (Windows / macOS / Linux)
 - 🦸 **Reveals which of your 3 hero picks you got**, the **game mode** (Ranked / Standard / Street Brawl), and **how long you queued**
-- 👥 **Squad mode** — friends subscribe to your channel and get pinged too
+- 👥 **Friends welcome** — everyone runs their own copy and gets their own pings; optionally hear each other's pops too
 - 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
 - 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
 
@@ -42,13 +42,13 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (77 checks; needs Node) |
+| `npm test` | Run the automated test suite (78 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends — one message
 
-After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): download link, the squad code, and the three steps. Friends paste your **squad code** when their wizard asks — that one answer wires them into the squad channel; when anyone's match pops, everyone gets pinged. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 77-check test suite and rebuilds the exe via GitHub Actions.
+After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): the download link and "follow the steps on screen". That's the entire pitch — each friend runs their own copy, the wizard gives them their own code, and their own games ping their own phone. Nothing to coordinate, nothing to exchange. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 78-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 
@@ -67,7 +67,7 @@ Services like [Hark](https://hark.ryan.ceo/) turn a webhook into a fully branded
 
 Setup generates a short private code (e.g. `dl-k4mq7x` — 9 characters, easy to type). Install **ntfy** ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iPhone](https://apps.apple.com/us/app/ntfy/id1625396347)), subscribe to your channel, done.
 
-**Squad mode is just sharing that channel name.** Everyone who subscribes gets the ping when your match pops; friends who run the watcher too can set the same `ntfyTopic` in their `config.json`, so whoever pops first pings everyone. The channel name is the only secret — keep it unguessable.
+**Want to hear each other's pops (party queues)?** No setup change needed: a friend just subscribes to *your* code in their ntfy app, alongside their own — now your pops buzz their phone too. The code is the only secret — share it with the squad, not the world.
 
 ## Customising the ping
 
