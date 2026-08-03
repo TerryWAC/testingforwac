@@ -42,6 +42,38 @@ interface MetaItem {
   year: number | null;
 }
 
+/**
+ * Read-only lookup against the cache — never fetches from TMDB.
+ *
+ * Used for taste modelling over the whole library, where we want whatever
+ * coverage already exists and absolutely don't want to fire hundreds of
+ * network calls. Coverage grows on its own as recommendations run.
+ */
+export async function getCachedMeta(slugs: string[]): Promise<Map<string, FilmMeta>> {
+  const map = new Map<string, FilmMeta>();
+  const unique = [...new Set(slugs)];
+  if (unique.length === 0) return map;
+
+  const admin = createAdminClient();
+  const page = 400;
+  for (let i = 0; i < unique.length; i += page) {
+    const { data, error } = await admin
+      .from("film_meta")
+      .select("slug, runtime, genre_ids, language, vote")
+      .in("slug", unique.slice(i, i + page));
+    if (error) break;
+    for (const row of data ?? []) {
+      map.set(row.slug, {
+        runtime: row.runtime,
+        genres: row.genre_ids ?? [],
+        language: row.language,
+        vote: row.vote !== null ? Number(row.vote) : null,
+      });
+    }
+  }
+  return map;
+}
+
 export async function getFilmMeta(
   items: MetaItem[],
   maxFetch = 12

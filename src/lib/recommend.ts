@@ -241,12 +241,16 @@ export function buildDiscoveryCandidates(
   }
 
   out.sort((a, b) => b.score - a.score);
-  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(out.length, 1);
-  return [...out.slice(dayOffset), ...out.slice(0, dayOffset)].slice(0, max);
+  // Rotate within the strongest slice only — rotating the whole list pushed
+  // the best matches past the cut on most days.
+  const poolSize = Math.min(out.length, Math.max(max * 3, 18));
+  const pool = out.slice(0, poolSize);
+  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(pool.length, 1);
+  return [...pool.slice(dayOffset), ...pool.slice(0, dayOffset)].slice(0, max);
 }
 
 // TMDB genre ids that satisfy each mood.
-const MOOD_GENRES: Record<TonightFilters["mood"], number[]> = {
+export const MOOD_GENRES: Record<TonightFilters["mood"], number[]> = {
   comedy: [35],
   date: [10749, 35],
   thriller: [53, 9648, 80],
@@ -260,6 +264,55 @@ const MOOD_GENRES: Record<TonightFilters["mood"], number[]> = {
   classic: [],
   easy: [35, 10751, 12, 16],
 };
+
+/**
+ * How much you over- or under-rate each genre, versus your own average.
+ *
+ * Built from the films you've already rated, using whatever metadata the
+ * cache has. Returns a delta in stars per genre id: +0.6 means films in that
+ * genre average 0.6★ above your personal baseline. Genres with too few rated
+ * films are dropped — three films is noise, not taste.
+ *
+ * This is the signal that was missing entirely: the engine knew which decades
+ * you rate highly but nothing about whether you actually like horror.
+ */
+export function genreAffinity(
+  films: FilmRow[],
+  meta: Map<string, { genres: number[] }>
+): Map<number, number> {
+  const seen = new Set<string>();
+  const totals = new Map<number, { sum: number; count: number }>();
+  let overallSum = 0;
+  let overallCount = 0;
+
+  for (const f of films) {
+    if (f.rating === null || f.entry_type === "watchlist") continue;
+    if (seen.has(f.film_slug)) continue;
+    seen.add(f.film_slug);
+    overallSum += f.rating;
+    overallCount += 1;
+
+    for (const g of meta.get(f.film_slug)?.genres ?? []) {
+      const agg = totals.get(g) ?? { sum: 0, count: 0 };
+      agg.sum += f.rating;
+      agg.count += 1;
+      totals.set(g, agg);
+    }
+  }
+
+  const affinity = new Map<number, number>();
+  if (overallCount < 20) return affinity; // too little history to model taste
+  const baseline = overallSum / overallCount;
+
+  for (const [genre, agg] of totals) {
+    if (agg.count < 5) continue;
+    // Shrink toward zero for thin samples so a lucky run of four 5★ westerns
+    // doesn't outrank a genre with sixty rated films behind it.
+    const confidence = Math.min(1, agg.count / 25);
+    affinity.set(genre, (agg.sum / agg.count - baseline) * confidence);
+  }
+  return affinity;
+}
 
 export interface CandidateMeta {
   runtime: number | null;
@@ -277,7 +330,8 @@ export function refineCandidates(
   candidates: Candidate[],
   filters: TonightFilters,
   meta: Map<string, CandidateMeta>,
-  genreNames: Record<number, string>
+  genreNames: Record<number, string>,
+  affinity?: Map<number, number>
 ): Candidate[] {
   if (meta.size === 0) return candidates;
   const runtimeMax = RUNTIME_MAX[filters.runtimeCap];
@@ -313,12 +367,62 @@ export function refineCandidates(
       const reason = `Rated ${m.vote} on TMDB`;
       if (!c.reasons.includes(reason)) c.reasons.push(reason);
     }
+
+    // Personal genre taste: how you rate this film's genres against your own
+    // baseline. Worth up to a few points either way, so a genre you reliably
+    // love outranks a generically acclaimed film you'd shrug at.
+    if (affinity && affinity.size > 0 && m.genres.length > 0) {
+      const deltas = m.genres
+        .map((g) => affinity.get(g))
+        .filter((d): d is number => d !== undefined);
+      if (deltas.length > 0) {
+        const best = Math.max(...deltas);
+        const mean = deltas.reduce((s, d) => s + d, 0) / deltas.length;
+        c.score += mean * 4;
+        if (best >= 0.25) {
+          const bestGenre = m.genres.find((g) => affinity.get(g) === best);
+          const label = bestGenre !== undefined ? genreNames[bestGenre] : null;
+          if (label) {
+            const reason = `You rate ${label.toLowerCase()} above your own average`;
+            if (!c.reasons.includes(reason)) c.reasons.push(reason);
+          }
+        }
+      }
+    }
     if (m.runtime && filters.runtimeCap !== "any" && m.runtime <= runtimeMax) {
       c.score += 1;
     }
   }
 
   return refined.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Guarantee discovery survives a score sort.
+ *
+ * Watchlist films carry a flat bonus, so on a big watchlist they sweep the
+ * whole top of the list and nothing new ever surfaces. This interleaves the
+ * two groups — score order preserved inside each — so roughly one pick in
+ * three is something outside the library, while the watchlist still leads.
+ */
+export function ensureDiscoveryMix(candidates: Candidate[], everyNth = 3): Candidate[] {
+  const library = candidates.filter((c) => !c.discovery);
+  const discovery = candidates.filter((c) => c.discovery);
+  if (library.length === 0 || discovery.length === 0) return candidates;
+
+  const out: Candidate[] = [];
+  let li = 0;
+  let di = 0;
+  while (li < library.length || di < discovery.length) {
+    if (di < discovery.length && out.length > 0 && (out.length + 1) % everyNth === 0) {
+      out.push(discovery[di++]);
+    } else if (li < library.length) {
+      out.push(library[li++]);
+    } else {
+      out.push(discovery[di++]);
+    }
+  }
+  return out;
 }
 
 /** Template "why" copy used when AI is skipped, rate-limited, or errors. */

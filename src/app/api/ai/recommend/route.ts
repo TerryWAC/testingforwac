@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 
 import { buildCacheKey, getCachedResponse, setCachedResponse, tryConsumeAiQuota } from "@/lib/aiGate";
-import { GENRE_NAMES, getFilmMeta } from "@/lib/filmMeta";
+import { GENRE_NAMES, getCachedMeta, getFilmMeta } from "@/lib/filmMeta";
 import { getFilmsForProfile } from "@/lib/db";
+import { fetchDiscoverCandidates } from "@/lib/discover";
 import { polishWithGemini } from "@/lib/gemini";
-import { blendGroupCandidates, buildCandidates, deterministicPicks, refineCandidates } from "@/lib/recommend";
+import {
+  blendGroupCandidates,
+  buildCandidates,
+  deterministicPicks,
+  ensureDiscoveryMix,
+  genreAffinity,
+  refineCandidates,
+} from "@/lib/recommend";
 import { recommendRequestSchema } from "@/lib/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -51,6 +59,9 @@ export async function POST(request: Request) {
   // ---- Stage 1: deterministic candidates ----
   let candidates;
   let groupContext: string | undefined;
+  // How this user rates each genre against their own baseline, learned from
+  // the metadata cache. Empty until there's enough rated history to model.
+  let affinity = new Map<number, number>();
 
   if (sessionId) {
     // Compare mode: only profiles in a session the user belongs to are visible.
@@ -89,6 +100,27 @@ export async function POST(request: Request) {
   } else {
     const films = await getFilmsForProfile(profile.id);
     candidates = buildCandidates(films, filters);
+
+    try {
+      const libraryMeta = await getCachedMeta(
+        films.filter((f) => f.rating !== null).map((f) => f.film_slug)
+      );
+      affinity = genreAffinity(films, libraryMeta);
+    } catch {
+      // Taste modelling is best-effort; scoring still works without it.
+    }
+
+    // Widen discovery past the curated catalog with TMDB's Discover API,
+    // filtered by tonight's settings and the genres this user rates highly.
+    try {
+      const external = await fetchDiscoverCandidates(filters, films, affinity, 12);
+      if (external.length > 0) {
+        const known = new Set(candidates.map((c) => c.slug));
+        candidates = [...candidates, ...external.filter((c) => !known.has(c.slug))];
+      }
+    } catch {
+      // Curated catalog discovery still applies.
+    }
 
     // Friend-aware boost: films your friends have watched or watchlisted get
     // a social signal in the "why" — great picks for shared taste.
@@ -136,8 +168,11 @@ export async function POST(request: Request) {
     const metaMap = await getFilmMeta(
       candidates.map((c) => ({ slug: c.slug, title: c.title, year: c.year }))
     );
-    candidates = refineCandidates(candidates, filters, metaMap, GENRE_NAMES);
+    candidates = refineCandidates(candidates, filters, metaMap, GENRE_NAMES, affinity);
   } catch {}
+
+  // Score order alone lets a big watchlist crowd out everything new.
+  candidates = ensureDiscoveryMix(candidates);
 
   // Variety: drop recently shown picks unless that would starve the results.
   if (excludeSlugs.length > 0) {
