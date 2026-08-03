@@ -37,7 +37,7 @@ function makeEnv(name, configOverrides = {}) {
   const config = path.join(TMP, `${name}-config.json`);
   fs.writeFileSync(log, '');
   fs.writeFileSync(config, JSON.stringify({
-    cooldownSeconds: 2, ntfyTopic: null, ...configOverrides,
+    cooldownSeconds: 2, ntfyTopic: null, patternUpdates: false, ...configOverrides,
   }));
   return { log, config };
 }
@@ -471,6 +471,65 @@ async function main() {
     append(env, LINES.lobbyCreated);
     assert(await waitFor(out, t => alerts({ text: t }) === 1), 'pop pings in standard queue');
   });
+
+  console.log('\n37. Self-healing: remote patterns.json overrides detection + update notice');
+  {
+    const http = require('http');
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        version: 42, latestVersion: '99.0',
+        patterns: ['SUPERPOP\\s+(\\d+)'],
+      }));
+    });
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const env = makeEnv('ota', {
+      patternUpdates: true,
+      patternsUrl: `http://127.0.0.1:${server.address().port}/patterns.json`,
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(1000);
+    append(env, 'SUPERPOP 123'); // only the REMOTE pattern matches this
+    const gotAlert = await waitFor(out, t => alerts({ text: t }) === 1);
+    child.kill();
+    server.close();
+    assert(out.text.includes('up to date (v42'), 'remote patterns applied', out.text.split('\n')[0]);
+    assert(gotAlert, 'remote pattern actually detects');
+    assert(out.text.includes('Update available: v99.0'), 'update notice shown');
+  }
+
+  console.log('\n38. Self-healing: unreachable patterns URL falls back to built-ins');
+  {
+    const env = makeEnv('ota-offline', {
+      patternUpdates: true,
+      patternsUrl: 'http://127.0.0.1:1/nope.json',
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(1500); // fetch fails fast, watcher continues
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    const gotAlert = await waitFor(out, t => alerts({ text: t }) === 1);
+    child.kill();
+    assert(gotAlert, 'built-in patterns still detect when offline');
+  }
+
+  await scenario('39. AFK escalation fires when you never load in', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    assert(await waitFor(out, t => t.includes('YOU ARE MISSING THE MATCH'), 4000),
+      'escalation fired after afkSeconds');
+  }, { afkSeconds: 1 });
+
+  await scenario('40. AFK escalation cancelled when you load into the match', async (env, out) => {
+    append(env, LINES.queueStart);
+    append(env, LINES.lobbyCreated);
+    await waitFor(out, t => alerts({ text: t }) === 1);
+    append(env, '[Server] Loaded hero 3/hero_gigawatt'); // made it in
+    await sleep(2500); // well past afkSeconds
+    assert(!out.text.includes('YOU ARE MISSING THE MATCH'), 'no escalation after loading in');
+    assert(out.text.includes('escalation cancelled'), 'cancellation logged');
+  }, { afkSeconds: 1 });
 
   console.log('\n34. --share prints a squad invite with the code and download link');
   {

@@ -42,13 +42,13 @@ While searching, the console (if visible) shows `✓ Queue started — watching 
 | `DeadlockMatchPing.exe --setup` | Re-run the wizard (change text, volume, channel) |
 | `DeadlockMatchPing.exe --find` | Scan the log for the match-found line after a game patch |
 | `DeadlockMatchPing.exe --learn` | Pinpoint the match-found line live, by timing |
-| `npm test` | Run the automated test suite (70 checks; needs Node) |
+| `npm test` | Run the automated test suite (77 checks; needs Node) |
 
 (No exe? Use `node watch.js --test` etc. — identical.)
 
 ## Sharing with friends — one message
 
-After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): download link, the squad code, and the three steps. Friends paste your **squad code** when their wizard asks — that one answer wires them into the squad channel; when anyone's match pops, everyone gets pinged. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 70-check test suite and rebuilds the exe via GitHub Actions.
+After setup, the app hands you a **ready-to-forward invite** (also saved as `share-with-friends.txt`, reprint with `--share`): download link, the squad code, and the three steps. Friends paste your **squad code** when their wizard asks — that one answer wires them into the squad channel; when anyone's match pops, everyone gets pinged. No Node, no README, no accounts, no server — the exe alone is the whole product, and its Steam auto-start uses the built-in `--steam` mode. Every push of this repo runs the 77-check test suite and rebuilds the exe via GitHub Actions.
 
 ## Discord pings — the squad channel with zero installs
 
@@ -94,6 +94,10 @@ Deadlock, launched with `-condebug`, writes its console to `game/citadel/console
 Alerts go out as a PowerShell toast + beeps on Windows (`osascript`/`notify-send` on macOS/Linux) and an HTTPS POST to `ntfy.sh/<your-topic>` for phones. `config.example.json` documents every setting.
 
 **Patch insurance:** if you join a game server without the watcher ever seeing a queue — the signature of Valve rewording the log — it warns you on phone, toast, and console (at most hourly) and points you at `--find`.
+
+**Self-healing patterns:** at startup the watcher fetches a small `patterns.json` from this repo (cached for offline starts; only pattern fields can be overridden — never webhooks, topics, or alert text; `patternUpdates: false` opts out). When a Deadlock patch rewords the log, one file gets fixed here and **every installed copy heals itself on next launch** — nobody re-downloads anything. The same file carries the latest version, so an **update notice** (console + toast) appears when a genuinely new build exists.
+
+**AFK escalation:** if the pop pinged and there's no sign of you loading in within `afkSeconds` (default 45, 0 disables), a second, louder ping fires on every channel — "⚠ YOU ARE MISSING THE MATCH". It stands down the moment the log shows you joining.
 
 ## Troubleshooting
 

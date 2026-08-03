@@ -1,4 +1,5 @@
 config.json
 queue-stats.json
 share-with-friends.txt
+patterns-cache.json
 node_modules/
