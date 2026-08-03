@@ -97,7 +97,7 @@ export function AppNav({ active }: { active: NavKey }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-night-700/60 bg-night-950/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-night-700/60 bg-night-950/90 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5">
           <button
             aria-label="Open menu"
@@ -124,7 +124,7 @@ export function AppNav({ active }: { active: NavKey }) {
             className="animate-overlay-in absolute inset-0 bg-black/65 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
-          <nav className="animate-drawer-in absolute inset-y-0 left-0 flex w-72 max-w-[82vw] flex-col overflow-y-auto border-r border-night-700/60 bg-night-900 p-5">
+          <nav className="animate-drawer-in absolute inset-y-0 left-0 flex w-72 max-w-[82vw] flex-col overflow-y-auto border-r border-night-700/60 bg-night-900 p-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="flex gap-1" aria-hidden>
