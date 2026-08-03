@@ -1,6 +1,6 @@
-# 🎯 Deadlock Match Ping
+# 🎯 Deadlock Match Ping (Game Tracker)
 
-**Never miss a Deadlock queue pop again.** Get a phone push, desktop notification, and a beep the moment your match is found — alt-tab, watch YouTube, or leave the room during long queues without eating a low-priority penalty.
+**Never miss a queue pop again — Deadlock and Counter-Strike 2.** Get a phone push, desktop notification, and a beep the moment your match is found — alt-tab, watch YouTube, or leave the room during long queues without eating a low-priority penalty.
 
 > "🎯 MATCH FOUND · YOU HAVE A GAME — GO GO GO! You queued 4m 32s."
 > "🎮 You got Haze — Street Brawl · Match is loading — get ready!"
@@ -11,6 +11,7 @@
 - 👥 **Friends welcome** — everyone runs their own copy and gets their own pings; optionally hear each other's pops too
 - 🎮 **Links with Steam** — starts itself, invisibly, whenever you launch Deadlock
 - 🪶 **Zero dependencies** — one small Node.js script, no installer, no telemetry, MIT-licensed
+- 🎮 **Multi-game** — Deadlock (full support: hero, mode, ranked) and **CS2** (queue-pop pings; setup asks which game to watch)
 
 *Community tool. Not affiliated with or endorsed by Valve. It only reads the game's own log file — no memory reading, no injection, nothing that touches the game process.*
 

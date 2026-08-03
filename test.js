@@ -595,6 +595,45 @@ async function main() {
       'escalation still fires despite stale replay');
   }, { afkSeconds: 1 });
 
+  await scenario('45. CS2 profile: its own patterns detect, Deadlock lines do not', async (env, out) => {
+    append(env, 'Searching for a match');
+    assert(await waitFor(out, t => t.includes('Queue started')), 'CS2 queue start detected');
+    append(env, LINES.lobbyCreated); // Deadlock line — wrong game
+    await sleep(1200);
+    assert(alerts(out) === 0, 'Deadlock lobby line ignored in CS2 mode', `got ${alerts(out)}`);
+    append(env, 'Matchmaking successful');
+    assert(await waitFor(out, t => alerts({ text: t }) === 1), 'CS2 match-found line pings');
+  }, { game: 'cs2' });
+
+  console.log('\n46. OTA per-game: cs2 section applies, Deadlock top-level does not leak');
+  {
+    const http = require('http');
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        version: 7,
+        patterns: ['DEADLOCKONLY'],            // top level = Deadlock set
+        games: { cs2: { patterns: ['CSPOP\\s+\\d+'] } },
+      }));
+    });
+    await new Promise(r => server.listen(0, '127.0.0.1', r));
+    const env = makeEnv('ota-cs2', {
+      game: 'cs2', patternUpdates: true,
+      patternsUrl: `http://127.0.0.1:${server.address().port}/p.json`,
+    });
+    const { child, out } = startWatcher(env);
+    await sleep(1200);
+    append(env, 'DEADLOCKONLY');
+    await sleep(900);
+    const leaked = alerts(out) > 0;
+    append(env, 'CSPOP 55');
+    const ok = await waitFor(out, t => alerts({ text: t }) === 1);
+    child.kill();
+    server.close();
+    assert(!leaked, 'Deadlock top-level patterns did not leak into CS2');
+    assert(ok, 'cs2 OTA section applied and detects');
+  }
+
   console.log('\n34. --share prints a universal invite (no personal codes leaked)');
   {
     const env = makeEnv('share', { ntfyTopic: 'dl-test99' });
