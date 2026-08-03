@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { WrappedClient } from "@/components/WrappedClient";
 import { getFilmsForProfile } from "@/lib/db";
 import { getFilmMeta } from "@/lib/filmMeta";
-import { longestStreak } from "@/lib/stats";
+import { bestRatingBySlug, longestStreak, uniqueViewings } from "@/lib/stats";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function WrappedPage({
@@ -25,7 +25,10 @@ export default async function WrappedPage({
   if (!profile) redirect("/setup");
 
   const films = await getFilmsForProfile(profile.id);
-  const dated = films.filter((f) => f.entry_type !== "watchlist" && f.watched_date);
+  // One watch can be stored twice (export ZIP as 'diary', RSS sync as 'rss').
+  const dated = uniqueViewings(
+    films.filter((f) => f.entry_type !== "watchlist" && f.watched_date)
+  );
 
   const years = [...new Set(dated.map((f) => Number(f.watched_date!.slice(0, 4))))].sort(
     (a, b) => b - a
@@ -37,10 +40,12 @@ export default async function WrappedPage({
   const monthCounts = Array.from({ length: 12 }, () => 0);
   for (const f of inYear) monthCounts[Number(f.watched_date!.slice(5, 7)) - 1]++;
 
-  const rated = inYear.filter((f) => f.rating !== null);
+  // Per distinct film, so a rewatch doesn't weight the average twice.
+  const ratedBySlug = bestRatingBySlug(inYear);
+  const ratings = [...ratedBySlug.values()];
   const avgRating =
-    rated.length > 0
-      ? Math.round((rated.reduce((s, f) => s + f.rating!, 0) / rated.length) * 100) / 100
+    ratings.length > 0
+      ? Math.round((ratings.reduce((s, r) => s + r, 0) / ratings.length) * 100) / 100
       : null;
 
   const decadeCounts = new Map<string, number>();
@@ -52,9 +57,13 @@ export default async function WrappedPage({
   }
   const topDecade = [...decadeCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
+  // Dedupe by slug: a film rewatched and rated twice in one year would
+  // otherwise fill two slots in a five-item list.
+  const topRatedSeen = new Set<string>();
   const topRated = [...inYear]
     .filter((f) => f.rating !== null)
     .sort((a, b) => b.rating! - a.rating!)
+    .filter((f) => !topRatedSeen.has(f.film_slug) && topRatedSeen.add(f.film_slug))
     .slice(0, 5)
     .map((f) => ({ slug: f.film_slug, title: f.title, year: f.year, rating: f.rating! }));
 
@@ -65,6 +74,14 @@ export default async function WrappedPage({
     : null;
 
   const streak = longestStreak(inYear.map((f) => f.watched_date!));
+
+  // "Films a week" for the year in progress has to divide by the weeks that
+  // have actually happened — dividing by 52 in August understates the pace by
+  // about 40%.
+  const weeksElapsed =
+    year === currentYear
+      ? Math.max(1, Math.ceil((Date.now() - new Date(year, 0, 1).getTime()) / 604_800_000))
+      : 52;
   const busiestMonthIdx = monthCounts.indexOf(Math.max(...monthCounts));
 
   // Total time in front of films: known runtimes from the metadata cache,
@@ -104,6 +121,7 @@ export default async function WrappedPage({
       firstFilm={firstFilm}
       lastFilm={lastFilm}
       streak={streak}
+      weeksElapsed={weeksElapsed}
       minutesWatched={minutesWatched}
       busiestMonth={
         monthCounts[busiestMonthIdx] > 0

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { StatsClient } from "@/components/StatsClient";
 import { getFilmsForProfile } from "@/lib/db";
-import { longestStreak, movieBuffProfile } from "@/lib/stats";
+import { longestStreak, movieBuffProfile, uniqueViewings } from "@/lib/stats";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function StatsPage() {
@@ -20,7 +20,9 @@ export default async function StatsPage() {
   if (!profile) redirect("/setup");
 
   const films = await getFilmsForProfile(profile.id);
-  const watched = films.filter((f) => f.entry_type !== "watchlist");
+  // One watch can be stored twice (export ZIP as 'diary', RSS sync as 'rss'),
+  // which would darken heatmap cells for days you only watched one film.
+  const watched = uniqueViewings(films.filter((f) => f.entry_type !== "watchlist"));
 
   // Daily counts for the last ~26 weeks, aligned so columns start on Monday.
   const counts = new Map<string, number>();

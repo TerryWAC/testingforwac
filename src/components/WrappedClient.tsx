@@ -18,6 +18,7 @@ interface Props {
   firstFilm: { title: string; date: string } | null;
   lastFilm: { title: string; date: string } | null;
   streak: number;
+  weeksElapsed: number;
   minutesWatched: number;
   busiestMonth: string | null;
 }
@@ -33,7 +34,7 @@ function formatWatchTime(mins: number): string {
 }
 
 export function WrappedClient(props: Props) {
-  const { year, years, total, monthCounts, avgRating, topDecade, topRated, firstFilm, lastFilm, streak, minutesWatched, busiestMonth } = props;
+  const { year, years, total, monthCounts, avgRating, topDecade, topRated, firstFilm, lastFilm, streak, weeksElapsed, minutesWatched, busiestMonth } = props;
   const [copied, setCopied] = useState(false);
   const maxMonth = Math.max(1, ...monthCounts);
 
@@ -138,7 +139,7 @@ export function WrappedClient(props: Props) {
               <StatTile
                 delay={300}
                 label="Films a week"
-                value={(total / 52).toFixed(1)}
+                value={(total / weeksElapsed).toFixed(1)}
               />
             </div>
 
