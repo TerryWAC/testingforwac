@@ -63,7 +63,29 @@ const GAME_PROFILES = {
 };
 
 function gameProfile(config) {
-  return GAME_PROFILES[config && config.game] || GAME_PROFILES.deadlock;
+  const key = (config && Array.isArray(config.games) && config.games[0]) ||
+    (config && config.game) || 'deadlock';
+  return GAME_PROFILES[key] || GAME_PROFILES.deadlock;
+}
+
+// Per-game view of the shared config. Channels/alert text/etc. are shared;
+// pattern fields resolve from the game's profile. A user's hand-customised
+// single-set patterns apply only to their primary (first) game.
+function effectiveConfig(config, gameKey, multi) {
+  const prof = GAME_PROFILES[gameKey] || GAME_PROFILES.deadlock;
+  const eff = { ...config, game: gameKey, games: [gameKey] }; // this view is one game only
+  const primary = (Array.isArray(config.games) && config.games[0]) || config.game || 'deadlock';
+  if (multi || gameKey !== primary) {
+    for (const k of OTA_KEYS) eff[k] = prof.overrides[k] ?? DEFAULTS[k];
+    eff.logPath = null;
+  }
+  // Tap-to-launch follows the game that popped (unless the user customised it).
+  if (!eff.customWebhookLink || /^steam:\/\/run\/\d+$/.test(eff.customWebhookLink)) {
+    eff.customWebhookLink = `steam://run/${prof.appid}`;
+  }
+  if (config.perGame && config.perGame[gameKey]) Object.assign(eff, config.perGame[gameKey]);
+  eff.__gameTitle = multi ? prof.title : null;
+  return eff;
 }
 
 // ---------------------------------------------------------------- config ---
@@ -232,8 +254,8 @@ function verNewer(remote, local) {
 // Fetch remote patterns (falling back to the last cached copy when offline),
 // apply them over the config, and surface an update notice if a newer app
 // version exists. Returns quietly on any failure — built-ins always work.
-async function applyRemotePatterns(config) {
-  if (config.patternUpdates === false || !config.patternsUrl) return;
+async function fetchRemotePatterns(config) {
+  if (config.patternUpdates === false || !config.patternsUrl) return null;
   const cachePath = path.basename(CONFIG_PATH) === 'config.json'
     ? path.join(path.dirname(CONFIG_PATH), 'patterns-cache.json')
     : CONFIG_PATH.replace(/\.json$/, '') + '.pcache.json';
@@ -243,38 +265,43 @@ async function applyRemotePatterns(config) {
   } else {
     try { remote = JSON.parse(fs.readFileSync(cachePath, 'utf8')); } catch {}
   }
-  if (!remote || typeof remote !== 'object') return;
-  // Per-game sections: patterns.json may carry { games: { cs2: {...} } };
-  // the top level stays the Deadlock set for older clients. For a non-
-  // Deadlock game with no matching section, apply NOTHING — Deadlock
-  // patterns must never overwrite another game's profile.
-  const src = (!config.game || config.game === 'deadlock')
-    ? remote
-    : (remote.games && typeof remote.games === 'object' && remote.games[config.game]) || null;
-  let applied = 0;
-  if (src && typeof src === 'object') {
-    for (const key of OTA_KEYS) {
-      // Non-empty required: an empty array would wipe detection or the
-      // loopback safety guard across every install from one bad repo commit.
-      if (Array.isArray(src[key]) && src[key].length > 0 &&
-          src[key].every(p => typeof p === 'string')) {
-        try {
-          src[key].forEach(p => new RegExp(p)); // reject broken regexes whole
-          config[key] = src[key];
-          applied++;
-        } catch {}
-      }
-    }
-  }
-  if (applied) {
-    console.log(`· Detection patterns: up to date (v${remote.version ?? '?'} from the repo).`);
-  }
+  if (!remote || typeof remote !== 'object') return null;
   if (remote.latestVersion && verNewer(remote.latestVersion, APP_VERSION)) {
     const note = remote.updateNote ? ` ${remote.updateNote}` : '';
     console.log(`· Update available: v${remote.latestVersion} (you have v${APP_VERSION}).${note}`);
     console.log(`  Re-download: ${config.shareDownloadUrl || DEFAULTS.shareDownloadUrl}`);
-    desktopNotify(`Deadlock Match Ping v${remote.latestVersion} available`,
-      'Re-download the exe from your usual link — settings survive.', 'off');
+    desktopNotify(`Game Tracker v${remote.latestVersion} available`,
+      'Re-download from your usual link — settings survive.', 'off');
+  }
+  return remote;
+}
+
+// Apply the fetched patterns to one game's effective config. Per-game
+// sections live under remote.games; the top level stays the Deadlock set for
+// older clients. A non-Deadlock game with no matching section gets NOTHING —
+// Deadlock patterns must never overwrite another game's profile.
+function applyRemoteTo(config, remote) {
+  if (!remote || typeof remote !== 'object') return;
+  const src = (!config.game || config.game === 'deadlock')
+    ? remote
+    : (remote.games && typeof remote.games === 'object' && remote.games[config.game]) || null;
+  if (!src || typeof src !== 'object') return;
+  let applied = 0;
+  for (const key of OTA_KEYS) {
+    // Non-empty required: an empty array would wipe detection or the
+    // loopback safety guard across every install from one bad repo commit.
+    if (Array.isArray(src[key]) && src[key].length > 0 &&
+        src[key].every(p => typeof p === 'string')) {
+      try {
+        src[key].forEach(p => new RegExp(p)); // reject broken regexes whole
+        config[key] = src[key];
+        applied++;
+      } catch {}
+    }
+  }
+  if (applied) {
+    const title = (GAME_PROFILES[config.game] || GAME_PROFILES.deadlock).title;
+    console.log(`· ${title} patterns: up to date (v${remote.version ?? '?'} from the repo).`);
   }
 }
 
@@ -323,9 +350,10 @@ function loadStats() {
   catch { return []; }
 }
 
-function recordQueue(seconds, hero, mode) {
+function recordQueue(seconds, hero, mode, game) {
   const stats = loadStats();
-  stats.push({ at: new Date().toISOString(), seconds, hero: hero || null, ...(mode ? { mode } : {}) });
+  stats.push({ at: new Date().toISOString(), seconds, hero: hero || null,
+    ...(mode ? { mode } : {}), ...(game ? { game } : {}) });
   while (stats.length > 50) stats.shift();
   try { fs.writeFileSync(STATS_PATH, JSON.stringify(stats, null, 2) + '\n'); } catch {}
   return stats;
@@ -432,10 +460,15 @@ function loadConfig() {
     saveConfig({ ...DEFAULTS, ...user });
     console.log('(Updated config.json to the latest defaults.)');
   }
-  // Resolution order: built-in Deadlock defaults → the selected game's
+  // Resolution order: built-in Deadlock defaults → the primary game's
   // profile overrides → whatever the user explicitly set.
-  const profileOverrides = (GAME_PROFILES[user.game] || GAME_PROFILES.deadlock).overrides;
-  return { ...DEFAULTS, ...profileOverrides, ...user };
+  const primary = (Array.isArray(user.games) && user.games[0]) || user.game || 'deadlock';
+  const profileOverrides = (GAME_PROFILES[primary] || GAME_PROFILES.deadlock).overrides;
+  const merged = { ...DEFAULTS, ...profileOverrides, ...user };
+  merged.games = (Array.isArray(user.games) && user.games.length
+    ? user.games : [user.game || 'deadlock']).filter(g => GAME_PROFILES[g]);
+  if (!merged.games.length) merged.games = ['deadlock'];
+  return merged;
 }
 
 function saveConfig(config) {
@@ -671,7 +704,8 @@ function customPush(config, title, message) {
 function fireAlert(config, line, hero, queueSeconds, mode) {
   const t = formatWithHero(config.alertTitle || DEFAULTS.alertTitle, hero, mode);
   const b = formatWithHero(config.alertMessage || DEFAULTS.alertMessage, hero, mode);
-  const title = t.text;
+  let title = t.text;
+  if (config.__gameTitle) title += ` — ${config.__gameTitle}`;
   let body = b.text;
   // Custom templates without {hero} still get the hero mentioned somewhere.
   if (hero && !t.usedHero && !b.usedHero) body += ` Hero: ${hero}.`;
@@ -813,44 +847,45 @@ async function setupWizard(existing) {
   console.log('  ║   🎯  DEADLOCK MATCH PING — SETUP     ║');
   console.log('  ╚═══════════════════════════════════════╝');
 
-  // Step 1: which game, and its log file
-  console.log(`\nStep 1 of ${STEPS} — Your game & its log file`);
+  // Step 1: pick which games to watch — each is a simple opt-in/out
+  console.log(`\nStep 1 of ${STEPS} — Your games & their log files`);
   {
     const installed = detectInstalledGames();
-    const keys = Object.keys(GAME_PROFILES);
-    let chosen = config.game || 'deadlock';
-    if (installed.length === 1 && !config.game) {
-      chosen = installed[0];
-      console.log(`  ✓ Found ${GAME_PROFILES[chosen].title} installed.`);
-    } else if (installed.length > 1 || (installed.length === 0 && keys.length > 1)) {
-      keys.forEach((k, i) => {
-        const tag = installed.includes(k) ? ' (installed)' : '';
-        console.log(`    ${i + 1}. ${GAME_PROFILES[k].title}${tag}`);
-      });
-      const pick = await ask(rl,
-        `  Which game should I watch? (1-${keys.length}, Enter = ${GAME_PROFILES[chosen].title}): `);
-      const byNum = keys[parseInt(pick, 10) - 1];
-      const byName = keys.find(k => k === pick.toLowerCase() ||
-        GAME_PROFILES[k].title.toLowerCase().includes(pick.toLowerCase()));
-      if (pick && (byNum || byName)) chosen = byNum || byName;
+    const current = Array.isArray(config.games) && config.games.length
+      ? config.games : [config.game || 'deadlock'];
+    const selected = [];
+    for (const key of Object.keys(GAME_PROFILES)) {
+      const prof = GAME_PROFILES[key];
+      const defYes = current.includes(key) || installed.includes(key);
+      const note = installed.includes(key) ? ' (installed)' : '';
+      const a = await ask(rl, `  Watch ${prof.title}?${note} (${defYes ? 'Y/n' : 'y/N'}): `);
+      const yes = a ? a.toLowerCase().startsWith('y') : defYes;
+      if (yes) selected.push(key);
     }
-    if (chosen !== (config.game || 'deadlock')) config.logPath = null; // different game, different log
-    config.game = chosen;
-    const prof = GAME_PROFILES[chosen];
-    // Selecting a game locks in its patterns and tap-to-launch link.
-    for (const key of OTA_KEYS) config[key] = prof.overrides[key] ?? DEFAULTS[key];
-    config.customWebhookLink = `steam://run/${prof.appid}`;
-    console.log(`  Watching for: ${prof.title}`);
-
-    const logPath = findLogPath(config);
-    if (logPath) {
-      console.log(`  ✓ Found its log: ${logPath}`);
-    } else {
-      console.log(`  ${prof.title} needs one launch option so it writes a log file:`);
-      console.log(`    Steam → right-click ${prof.title} → Properties → Launch Options → add:  -condebug`);
-      console.log(`  Then launch ${prof.title} once. (You can finish this setup first.)`);
-      const p = await ask(rl, '  Path to console.log if you know it (Enter to auto-detect later): ');
-      if (p) config.logPath = p;
+    if (!selected.length) {
+      selected.push('deadlock');
+      console.log('  Nothing picked — defaulting to Deadlock.');
+    }
+    if (JSON.stringify(selected) !== JSON.stringify(current)) config.logPath = null;
+    config.games = selected;
+    delete config.game;
+    const multi = selected.length > 1;
+    for (const key of selected) {
+      const prof = GAME_PROFILES[key];
+      const lp = findLogPath(effectiveConfig(config, key, multi));
+      if (lp) {
+        console.log(`  ✓ ${prof.title} log: ${lp}`);
+      } else {
+        console.log(`  ${prof.title}: add the launch option  -condebug  (Steam → right-click`);
+        console.log(`  ${prof.title} → Properties → Launch Options), then launch it once.`);
+      }
+    }
+    if (selected.length === 1) {
+      const lp = findLogPath(effectiveConfig(config, selected[0], false));
+      if (!lp) {
+        const p = await ask(rl, '  Path to console.log if you know it (Enter to auto-detect later): ');
+        if (p) config.logPath = p;
+      }
     }
   }
 
@@ -982,10 +1017,10 @@ async function setupWizard(existing) {
       console.log('  Copy this line:');
     }
     console.log(`\n    ${steamLine}\n`);
-    const gp = gameProfile(config);
-    console.log(`  Steam → right-click ${gp.title} → Properties → Launch Options:`);
-    console.log('  delete what\'s there and paste (Ctrl+V). From then on the watcher');
-    console.log(`  starts itself, hidden, every time you launch ${gp.title}.`);
+    const titles = (config.games || ['deadlock']).map(g => GAME_PROFILES[g].title).join(' and ');
+    console.log(`  Steam → right-click ${titles} → Properties → Launch Options:`);
+    console.log('  delete what\'s there and paste (Ctrl+V) — into EACH watched game.');
+    console.log('  From then on the watcher starts itself, hidden, with your game.');
   }
 
   saveConfig(config);
@@ -1133,8 +1168,8 @@ async function main() {
     return;
   }
 
-  const logPath = findLogPath(config);
-  if (!logPath) { console.error(noLogHelp()); process.exit(1); }
+  const gamesList = config.games && config.games.length ? config.games : ['deadlock'];
+  const multi = gamesList.length > 1;
 
   // Single instance per config: Steam launching the game repeatedly must not
   // stack duplicate watchers (each would ping separately).
@@ -1166,22 +1201,14 @@ async function main() {
   process.on('SIGINT', () => process.exit(0));
   process.on('SIGTERM', () => process.exit(0));
 
-  await applyRemotePatterns(config); // self-heal detection before compiling
-  const patterns = config.patterns.map(p => new RegExp(p, 'i'));
-  let lastAlert = 0;
-  console.log(`Game Tracker v${APP_VERSION} (${gameProfile(config).title}) — watching ${logPath}`);
+  const remote = await fetchRemotePatterns(config); // self-heal before compiling
+
+  console.log(`Game Tracker v${APP_VERSION} — ${gamesList.map(g => (GAME_PROFILES[g] || GAME_PROFILES.deadlock).title).join(' + ')}`);
   if (args.includes('--announce')) {
     // Launched hidden (e.g. by Steam) — say hello via a toast since there is
     // no console to look at.
-    desktopNotify('🎯 Deadlock Match Ping is on', 'Watching for your match. Queue away.', 'off');
+    desktopNotify('🎯 Game Tracker is on', 'Watching for your match. Queue away.', 'off');
   }
-  try {
-    const ageMin = Math.round((Date.now() - fs.statSync(logPath).mtimeMs) / 60_000);
-    if (ageMin > 120) {
-      console.log(`  ⚠ Note: this log was last updated ${ageMin} min ago. If Deadlock is`);
-      console.log('    running right now, -condebug may be missing or this is the wrong file.');
-    }
-  } catch {}
   console.log(config.ntfyTopic
     ? `Phone pings: ON — topic "${config.ntfyTopic}" (share it so friends get pinged too)`
     : 'Phone pings: off — run "node watch.js --setup" to enable');
@@ -1190,7 +1217,45 @@ async function main() {
     console.log('Tip: don\'t click inside this window — if the title bar says "Select",');
     console.log('Windows has PAUSED the app; press Esc in the window to resume.');
   }
+  {
+    const stats = loadStats();
+    const avg = avgSeconds(stats);
+    if (avg != null) {
+      console.log(`Queue stats: ${stats.length} pops recorded, recent average ${fmtDuration(avg)}.`);
+    }
+  }
   console.log('');
+
+  let started = 0;
+  for (const gameKey of gamesList) {
+    const prof = GAME_PROFILES[gameKey] || GAME_PROFILES.deadlock;
+    const eff = effectiveConfig(config, gameKey, multi);
+    applyRemoteTo(eff, remote);
+    const logPath = findLogPath(eff);
+    if (!logPath) {
+      console.log(`⚠ ${prof.title}: console.log not found — is -condebug in its launch options? Skipping.`);
+      continue;
+    }
+    startGameWatch(eff, prof, logPath, multi);
+    started++;
+  }
+  if (!started) { console.error(noLogHelp()); process.exit(1); }
+}
+
+// One game's whole detection pipeline: compiled patterns, queue/match state
+// machine, escalation, and the log tail. Channels are shared via config.
+function startGameWatch(config, prof, logPath, multi) {
+  const tag = multi ? `[${prof.title}] ` : '';
+  console.log(`${tag}Watching ${logPath}`);
+  try {
+    const ageMin = Math.round((Date.now() - fs.statSync(logPath).mtimeMs) / 60_000);
+    if (ageMin > 120) {
+      console.log(`${tag}  ⚠ Note: this log was last updated ${ageMin} min ago. If the game is`);
+      console.log(`${tag}    running right now, -condebug may be missing or this is the wrong file.`);
+    }
+  } catch {}
+  const patterns = config.patterns.map(p => new RegExp(p, 'i'));
+  let lastAlert = 0;
   const backupPatterns = (config.backupPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStart = (config.queueStartPatterns || []).map(p => new RegExp(p, 'i'));
   const queueStop = (config.queueStopPatterns || []).map(p => new RegExp(p, 'i'));
@@ -1218,7 +1283,7 @@ async function main() {
     if (!secs) return;
     escalateTimer = setTimeout(() => {
       escalateTimer = null;
-      const title = '⚠ YOU ARE MISSING THE MATCH';
+      const title = '⚠ YOU ARE MISSING THE MATCH' + (multi ? ` — ${prof.title}` : '');
       const body = 'The game found your match and you are still not in — GET IN NOW!';
       phonePush(config.ntfyTopic, title, body);
       discordPush(config.discordWebhook,
@@ -1229,13 +1294,6 @@ async function main() {
       beepLoop(8);
     }, secs * 1000);
   };
-  {
-    const stats = loadStats();
-    const avg = avgSeconds(stats);
-    if (avg != null) {
-      console.log(`Queue stats: ${stats.length} pops recorded, recent average ${fmtDuration(avg)}.\n`);
-    }
-  }
   tailFile(logPath, line => {
     // Any FRESH sign of life after a pop — joining a server (even a local
     // one), hero/mode loading, a new queue — means you made it: stand down.
@@ -1306,7 +1364,7 @@ async function main() {
       // menu-hover sightings; the real assignment is announced at load-in.
       lastHero = null;
       heroAnnounced = false;
-      console.log(`  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
+      console.log(`${tag}  ✓ Queue started (${new Date().toLocaleTimeString()}) — watching for the pop...`);
       return;
     }
     if (queueStop.some(re => re.test(line))) {
@@ -1314,7 +1372,7 @@ async function main() {
       if (ts !== null && Date.now() - ts > staleMs) return;
       inQueue = false;
       queueStartedAt = 0; // an abandoned start must not pollute queue timing
-      console.log(`  · Queue stopped (${new Date().toLocaleTimeString()}).`);
+      console.log(`${tag}  · Queue stopped (${new Date().toLocaleTimeString()}).`);
       return;
     }
     if (matchEnd.some(re => re.test(line))) {
@@ -1351,7 +1409,7 @@ async function main() {
             Date.now() - lastAlert > 10 * 60_000 &&
             Date.now() - lastMissWarn > 60 * 60_000) {
           lastMissWarn = Date.now();
-          const warnTitle = '⚠ Deadlock Match Ping: possible missed match';
+          const warnTitle = `⚠ ${prof.title}: possible missed match`;
           const warnBody = 'You joined a server but I never saw a queue or match pop. ' +
             'If you did just queue into a match, a game patch may have changed the ' +
             'log format — run "node watch.js --find" after this game.';
@@ -1393,7 +1451,7 @@ async function main() {
     if (queueStartedAt) {
       queueSeconds = (Date.now() - queueStartedAt) / 1000;
       queueStartedAt = 0;
-      const stats = recordQueue(queueSeconds, null, currentMode); // hero assigned at load-in
+      const stats = recordQueue(queueSeconds, null, currentMode, prof.title); // hero assigned at load-in
       const avg = avgSeconds(stats);
       fireAlert(config, line, null, queueSeconds, currentMode);
       console.log(`    Queue time: ${fmtDuration(queueSeconds)}` +
