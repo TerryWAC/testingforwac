@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { DashboardClient } from "@/components/DashboardClient";
 import { getFilmsForProfile, isSyncStale } from "@/lib/db";
-import { computeSnapshot } from "@/lib/stats";
+import { computeSnapshot, uniqueViewings } from "@/lib/stats";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -26,7 +26,9 @@ export default async function DashboardPage() {
   const now = new Date();
   const month = now.getMonth() + 1;
   const day = now.getDate();
-  const memories = films
+  // Deduped: a watch stored as both 'diary' and 'rss' would list the film
+  // twice in the same memory row.
+  const memories = uniqueViewings(films)
     .filter((f) => {
       if (!f.watched_date) return false;
       const [y, m, d] = f.watched_date.split("-").map(Number);

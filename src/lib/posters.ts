@@ -6,7 +6,18 @@ import "server-only";
  * Optional: without TMDB_API_KEY the app falls back to typographic cards.
  */
 
+// Bounded: an unbounded map grows for the whole life of a warm serverless
+// instance, and a busy profile resolves thousands of distinct slugs.
 const memoryCache = new Map<string, string | null>();
+const CACHE_MAX = 2000;
+
+function remember(slug: string, url: string | null) {
+  if (memoryCache.size >= CACHE_MAX) {
+    const oldest = memoryCache.keys().next().value;
+    if (oldest !== undefined) memoryCache.delete(oldest);
+  }
+  memoryCache.set(slug, url);
+}
 const TMDB_SEARCH = "https://api.themoviedb.org/3/search/movie";
 const IMG_BASE = "https://image.tmdb.org/t/p/w342";
 
@@ -40,7 +51,7 @@ export async function findPoster(
     let url = await searchOnce(title, year);
     // Retry without the year filter — TMDB years occasionally differ by one.
     if (!url && year) url = await searchOnce(title, null);
-    memoryCache.set(slug, url);
+    remember(slug, url);
     return url;
   } catch {
     return null; // don't cache transient failures

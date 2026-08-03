@@ -131,7 +131,6 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale, memories }:
   }, []);
 
   // Remember tonight's filters between visits.
-  const filtersLoaded = useRef(false);
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("lbnight-filters") ?? "null");
@@ -144,10 +143,17 @@ export function DashboardClient({ snapshot, lastSyncedAt, syncStale, memories }:
         if (typeof saved.allowRewatches === "boolean") setAllowRewatches(saved.allowRewatches);
       }
     } catch {}
-    filtersLoaded.current = true;
   }, []);
+
+  // Skip the mount run. The loader above sets state asynchronously, so on the
+  // first commit this effect still sees the default filters — persisting then
+  // would write defaults over the values just restored from storage.
+  const skipFirstPersist = useRef(true);
   useEffect(() => {
-    if (!filtersLoaded.current) return;
+    if (skipFirstPersist.current) {
+      skipFirstPersist.current = false;
+      return;
+    }
     try {
       localStorage.setItem(
         "lbnight-filters",

@@ -9,7 +9,7 @@ import {
   tryConsumeAiQuota,
 } from "@/lib/aiGate";
 import { GENRE_NAMES, getCachedMeta, getFilmMeta } from "@/lib/filmMeta";
-import { getFilmsForProfile } from "@/lib/db";
+import { getFilmSlugsForProfile, getFilmsForProfile } from "@/lib/db";
 import { fetchDiscoverCandidates, verifySuggestions } from "@/lib/discover";
 import { polishWithGemini, suggestTitles } from "@/lib/gemini";
 import {
@@ -29,12 +29,46 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
+ * Map of film slug -> friend username, across up to three friends. Only slugs
+ * are read: the boost just needs set membership, and a friend who imported
+ * their export ZIP can have thousands of rows.
+ */
+async function loadFriendFilms(userId: string): Promise<Map<string, string>> {
+  const admin = createAdminClient();
+  const { data: friendRows } = await admin
+    .from("friends")
+    .select("profile_id, profiles!inner(letterboxd_username)")
+    .eq("owner_user_id", userId)
+    .limit(3);
+  if (!friendRows || friendRows.length === 0) return new Map();
+
+  const libraries = await Promise.all(
+    friendRows.map(async (row) => ({
+      name: (row.profiles as unknown as { letterboxd_username: string }).letterboxd_username,
+      slugs: await getFilmSlugsForProfile(row.profile_id),
+    }))
+  );
+
+  const map = new Map<string, string>();
+  for (const { name, slugs } of libraries) {
+    for (const slug of slugs) if (!map.has(slug)) map.set(slug, name);
+  }
+  return map;
+}
+
+/**
  * POST /api/ai/recommend — two-stage engine.
  * Stage 1 always runs (deterministic candidates). Stage 2 is a single Gemini
  * call, gated by a 24h cache and a 10/day per-user quota; any failure falls
  * back to deterministic picks so the button always works.
  */
 export async function POST(request: Request) {
+  // Cold caches make this route do real work: a library read, three discovery
+  // lanes, TMDB recommendations, a metadata pass and a Gemini call. Track
+  // elapsed time and shed the optional stages rather than risk the platform
+  // timing the whole request out and returning nothing.
+  const startedAt = Date.now();
+  const elapsed = () => Date.now() - startedAt;
   const supabase = createClient();
   const {
     data: { user },
@@ -111,19 +145,21 @@ export async function POST(request: Request) {
     library = films;
     candidates = buildCandidates(films, filters);
 
-    try {
-      const libraryMeta = await getCachedMeta(
-        films.filter((f) => f.rating !== null).map((f) => f.film_slug)
-      );
-      affinity = genreAffinity(films, libraryMeta);
-    } catch {
-      // Taste modelling is best-effort; scoring still works without it.
-    }
+    // Taste modelling and the friends lookup are independent, so overlap them
+    // instead of paying for both in series. Discovery has to wait on affinity
+    // because it searches the genres this user rates highly.
+    const [affinityResult, friendFilms] = await Promise.all([
+      getCachedMeta(films.filter((f) => f.rating !== null).map((f) => f.film_slug))
+        .then((libraryMeta) => genreAffinity(films, libraryMeta))
+        .catch(() => new Map<number, number>()),
+      loadFriendFilms(user.id).catch(() => new Map<string, string>()),
+    ]);
+    affinity = affinityResult;
 
-    // Widen discovery past the curated catalog with TMDB's Discover API,
-    // filtered by tonight's settings and the genres this user rates highly.
+    // Widen discovery past the curated catalog: canon, cult, overlooked gems
+    // and TMDB's recommendation graph seeded with this user's favourites.
     try {
-      const external = await fetchDiscoverCandidates(filters, films, affinity, 12);
+      const external = await fetchDiscoverCandidates(filters, films, affinity, 16);
       if (external.length > 0) {
         const known = new Set(candidates.map((c) => c.slug));
         candidates = [...candidates, ...external.filter((c) => !known.has(c.slug))];
@@ -134,41 +170,15 @@ export async function POST(request: Request) {
 
     // Friend-aware boost: films your friends have watched or watchlisted get
     // a social signal in the "why" — great picks for shared taste.
-    try {
-      const admin = createAdminClient();
-      const { data: friendRows } = await admin
-        .from("friends")
-        .select("profile_id, profiles!inner(letterboxd_username)")
-        .eq("owner_user_id", user.id)
-        .limit(3);
-      if (friendRows && friendRows.length > 0) {
-        // Fetch friends' libraries concurrently. Serially this cost three full
-        // library reads back to back on every Recommend press, which matters
-        // now that a friend's export ZIP can carry thousands of films.
-        const libraries = await Promise.all(
-          friendRows.map(async (row) => ({
-            name: (row.profiles as unknown as { letterboxd_username: string })
-              .letterboxd_username,
-            films: await getFilmsForProfile(row.profile_id),
-          }))
-        );
-        const friendFilms = new Map<string, string>();
-        for (const { name, films: fFilms } of libraries) {
-          for (const f of fFilms) {
-            if (!friendFilms.has(f.film_slug)) friendFilms.set(f.film_slug, name);
-          }
+    if (friendFilms.size > 0) {
+      for (const c of candidates) {
+        const friendName = friendFilms.get(c.slug);
+        if (friendName) {
+          c.score += 3;
+          c.reasons.push(`@${friendName} has it in their orbit too`);
         }
-        for (const c of candidates) {
-          const friendName = friendFilms.get(c.slug);
-          if (friendName) {
-            c.score += 3;
-            c.reasons.push(`@${friendName} has it in their orbit too`);
-          }
-        }
-        candidates.sort((a, b) => b.score - a.score);
       }
-    } catch {
-      // Social enrichment is best-effort — recommendations never fail on it.
+      candidates.sort((a, b) => b.score - a.score);
     }
   }
 
@@ -176,7 +186,12 @@ export async function POST(request: Request) {
   // name films from its own knowledge of cinema, then verify every title
   // against TMDB so nothing invented reaches the user. Cached for 24h and
   // charged to the same daily quota as the polish call, because it is one.
-  if (!sessionId && candidates.length < count * 2 && process.env.GEMINI_API_KEY) {
+  if (
+    !sessionId &&
+    candidates.length < count * 2 &&
+    process.env.GEMINI_API_KEY &&
+    elapsed() < 12_000
+  ) {
     try {
       const lovedTitles = [
         ...new Map(
@@ -217,8 +232,9 @@ export async function POST(request: Request) {
       candidates.map((c) => ({ slug: c.slug, title: c.title, year: c.year })),
       // The candidate pool roughly doubled once external sources landed, so
       // lift the per-request fetch budget to keep coverage growing at the
-      // same rate. Lookups run concurrently.
-      20
+      // same rate. Lookups run concurrently, and the budget shrinks if the
+      // earlier stages were slow — coverage catches up on the next request.
+      elapsed() < 8_000 ? 20 : elapsed() < 15_000 ? 8 : 0
     );
     candidates = refineCandidates(candidates, filters, metaMap, GENRE_NAMES, affinity);
   } catch {}

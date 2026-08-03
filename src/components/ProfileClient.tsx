@@ -40,6 +40,7 @@ interface Props {
   lastSyncedAt: string | null;
   snapshot: TasteSnapshot;
   friends: FriendSummary[];
+  syncFriends: boolean;
   reviews: ReviewItem[];
   badges: Badge[];
 }
@@ -79,6 +80,7 @@ export function ProfileClient({
   lastSyncedAt,
   snapshot,
   friends,
+  syncFriends,
   reviews,
   badges,
 }: Props) {
@@ -89,6 +91,23 @@ export function ProfileClient({
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [openFriend, setOpenFriend] = useState<string | null>(null);
+
+  // Refresh stale friend feeds after paint rather than during render — this
+  // used to hold the whole page behind up to eight Letterboxd fetches. Only
+  // re-render if the sync actually brought something back.
+  useEffect(() => {
+    if (!syncFriends) return;
+    let cancelled = false;
+    fetch("/api/friends/sync", { method: "POST" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!cancelled && json?.added > 0) router.refresh();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [syncFriends, router]);
 
   async function addFriend(e: React.FormEvent) {
     e.preventDefault();

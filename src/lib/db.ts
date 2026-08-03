@@ -38,6 +38,30 @@ export async function getFilmsForProfile(
 }
 
 /**
+ * Just the slugs in a profile's library.
+ *
+ * Some callers (the friend-overlap boost) only need to answer "is this film
+ * in that library?" — reading full rows to build a set means deserialising
+ * thousands of titles, dates and ratings to throw them all away.
+ */
+export async function getFilmSlugsForProfile(profileId: string): Promise<string[]> {
+  const admin = createAdminClient();
+  const slugs: string[] = [];
+  const page = 1000;
+  for (let from = 0; ; from += page) {
+    const { data, error } = await admin
+      .from("films")
+      .select("film_slug")
+      .eq("profile_id", profileId)
+      .range(from, from + page - 1);
+    if (error) throw new Error(error.message);
+    for (const row of data ?? []) slugs.push(row.film_slug);
+    if (!data || data.length < page) break;
+  }
+  return slugs;
+}
+
+/**
  * Insert film rows that aren't already stored. The films table's unique index
  * is expression-based (nulls coalesced), which PostgREST upserts can't target,
  * so we dedupe here: read existing keys, insert only the missing rows.
