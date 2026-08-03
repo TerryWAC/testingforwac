@@ -14,6 +14,37 @@ export function buildCacheKey(parts: Record<string, unknown>): string {
   return createHash("sha256").update(canonical).digest("hex");
 }
 
+/**
+ * Same ai_cache table, any JSON payload. Used for intermediate model output
+ * (e.g. suggested titles awaiting TMDB verification) rather than a finished
+ * response.
+ */
+export async function getCachedJson<T>(cacheKey: string): Promise<T | null> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("ai_cache")
+    .select("response_json, expires_at")
+    .eq("cache_key", cacheKey)
+    .maybeSingle();
+  if (!data) return null;
+  if (new Date(data.expires_at) < new Date()) {
+    await admin.from("ai_cache").delete().eq("cache_key", cacheKey);
+    return null;
+  }
+  return data.response_json as T;
+}
+
+export async function setCachedJson(cacheKey: string, payload: unknown) {
+  const admin = createAdminClient();
+  const expires = new Date(Date.now() + CACHE_TTL_HOURS * 3600 * 1000).toISOString();
+  await admin
+    .from("ai_cache")
+    .upsert(
+      { cache_key: cacheKey, response_json: payload, expires_at: expires },
+      { onConflict: "cache_key" }
+    );
+}
+
 export async function getCachedResponse(cacheKey: string): Promise<RecommendResponse | null> {
   const admin = createAdminClient();
   const { data } = await admin

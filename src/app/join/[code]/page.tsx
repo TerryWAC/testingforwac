@@ -17,14 +17,16 @@ export default async function JoinPage({ params }: { params: { code: string } })
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/");
+  // Carry the invite through login/setup, otherwise a friend who isn't signed
+  // in yet loses the session they were invited to.
+  if (!user) redirect(`/?next=${encodeURIComponent(`/join/${code}`)}`);
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!profile) redirect("/setup");
+  if (!profile) redirect(`/setup?next=${encodeURIComponent(`/join/${code}`)}`);
 
   const admin = createAdminClient();
   const { data: session } = await admin

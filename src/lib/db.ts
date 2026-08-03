@@ -38,6 +38,30 @@ export async function getFilmsForProfile(
 }
 
 /**
+ * Just the slugs in a profile's library.
+ *
+ * Some callers (the friend-overlap boost) only need to answer "is this film
+ * in that library?" — reading full rows to build a set means deserialising
+ * thousands of titles, dates and ratings to throw them all away.
+ */
+export async function getFilmSlugsForProfile(profileId: string): Promise<string[]> {
+  const admin = createAdminClient();
+  const slugs: string[] = [];
+  const page = 1000;
+  for (let from = 0; ; from += page) {
+    const { data, error } = await admin
+      .from("films")
+      .select("film_slug")
+      .eq("profile_id", profileId)
+      .range(from, from + page - 1);
+    if (error) throw new Error(error.message);
+    for (const row of data ?? []) slugs.push(row.film_slug);
+    if (!data || data.length < page) break;
+  }
+  return slugs;
+}
+
+/**
  * Insert film rows that aren't already stored. The films table's unique index
  * is expression-based (nulls coalesced), which PostgREST upserts can't target,
  * so we dedupe here: read existing keys, insert only the missing rows.
@@ -49,19 +73,35 @@ export async function insertMissingFilms(
   if (films.length === 0) return 0;
   const admin = createAdminClient();
 
-  const { data: existing, error } = await admin
-    .from("films")
-    .select("film_slug, watched_date, entry_type")
-    .eq("profile_id", profileId);
-  if (error) throw new Error(error.message);
+  // Page past PostgREST's 1000-row cap. Reading only the first page would
+  // leave existing rows out of `seen`, so we'd try to re-insert them and the
+  // unique index would abort the whole batch — every sync and every re-import
+  // failing outright once a library passes 1000 rows.
+  const seen = new Set<string>();
+  const page = 1000;
+  for (let from = 0; ; from += page) {
+    const { data, error } = await admin
+      .from("films")
+      .select("film_slug, watched_date, entry_type")
+      .eq("profile_id", profileId)
+      .order("created_at", { ascending: true })
+      .range(from, from + page - 1);
+    if (error) throw new Error(error.message);
+    for (const f of data ?? []) {
+      seen.add(`${f.film_slug}|${f.watched_date ?? ""}|${f.entry_type}`);
+    }
+    if (!data || data.length < page) break;
+  }
 
-  const seen = new Set(
-    (existing ?? []).map((f) => `${f.film_slug}|${f.watched_date ?? ""}|${f.entry_type}`)
-  );
-
-  const fresh = films.filter(
-    (f) => !seen.has(`${f.film_slug}|${f.watched_date ?? ""}|${f.entry_type}`)
-  );
+  // Filter against what's stored, and against the batch itself — a feed that
+  // lists the same film twice on one day would otherwise trip the unique
+  // index and take the whole insert down with it.
+  const fresh = films.filter((f) => {
+    const key = `${f.film_slug}|${f.watched_date ?? ""}|${f.entry_type}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   if (fresh.length === 0) return 0;
 
   const rows = fresh.map((f) => ({ ...f, profile_id: profileId }));

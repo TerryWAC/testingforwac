@@ -15,15 +15,25 @@ export interface BuffProfile {
  * roast, computed deterministically from the user's own library.
  */
 export function movieBuffProfile(films: FilmRow[]): BuffProfile {
-  const watched = films.filter((f) => f.entry_type !== "watchlist");
-  const unique = new Set(watched.map((f) => f.film_slug));
-  const total = unique.size;
-  const rated = watched.filter((f) => f.rating !== null);
-  const avg = rated.length > 0 ? rated.reduce((s, f) => s + f.rating!, 0) / rated.length : null;
+  // Your build describes a library, not a viewing log: a film rewatched five
+  // times is still one film and shouldn't drag the decade mix or the average
+  // rating five times as hard.
+  const bySlug = new Map<string, FilmRow>();
+  for (const f of films) {
+    if (f.entry_type === "watchlist") continue;
+    const existing = bySlug.get(f.film_slug);
+    if (!existing || (existing.rating === null && f.rating !== null)) {
+      bySlug.set(f.film_slug, f);
+    }
+  }
+  const watched = [...bySlug.values()];
+  const total = watched.length;
+  const ratings = [...bestRatingBySlug(watched).values()];
+  const avg = ratings.length > 0 ? ratings.reduce((s, r) => s + r, 0) / ratings.length : null;
   const watchlistCount = new Set(
     films.filter((f) => f.entry_type === "watchlist").map((f) => f.film_slug)
   ).size;
-  const reviews = films.filter((f) => f.review).length;
+  const reviews = new Set(films.filter((f) => f.review).map((f) => f.film_slug)).size;
 
   const decadeCounts = new Map<number, number>();
   const dated = watched.filter((f) => f.year);
@@ -87,17 +97,17 @@ export function movieBuffProfile(films: FilmRow[]): BuffProfile {
       weaknesses: ["Weak to 'is it in colour?'", "Low general-audience compatibility"],
     };
   }
-  if (avg !== null && avg <= 2.9 && rated.length > 50) {
+  if (avg !== null && avg <= 2.9 && ratings.length > 50) {
     return {
       level,
       title: "The Hater",
       tier: grade("B"),
-      roast: `A ${avg.toFixed(2)}★ average across ${rated.length} ratings. You've min-maxed contrarian damage — nothing is ever good enough, and honestly, that's a build. Respect.`,
+      roast: `A ${avg.toFixed(2)}★ average across ${ratings.length} ratings. You've min-maxed contrarian damage — nothing is ever good enough, and honestly, that's a build. Respect.`,
       strengths: ["Devastating takedown criticals", "Unshakeable standards"],
       weaknesses: ["Cannot experience joy", "-5 to movie-night invitations"],
     };
   }
-  if (avg !== null && avg >= 4.2 && rated.length > 50) {
+  if (avg !== null && avg >= 4.2 && ratings.length > 50) {
     return {
       level,
       title: "The Enjoyer",
@@ -243,10 +253,48 @@ export function longestStreak(dates: string[]): number {
 }
 
 /** Compute the taste snapshot on the fly from stored film rows. */
+/**
+ * Collapse rows that describe the same viewing.
+ *
+ * The films table is keyed on (profile, slug, date, entry_type), so one watch
+ * can legitimately land twice — once from the export ZIP as 'diary' and again
+ * from the RSS sync as 'rss'. Same film on the same day is one viewing, so
+ * anything counting watches (month charts, heatmaps, averages) has to dedupe
+ * first or it silently double-counts. Rewatches on different dates survive,
+ * which is correct.
+ */
+export function uniqueViewings(films: FilmRow[]): FilmRow[] {
+  const byViewing = new Map<string, FilmRow>();
+  for (const f of films) {
+    const key = `${f.film_slug}|${f.watched_date ?? ""}`;
+    const existing = byViewing.get(key);
+    // Prefer the copy carrying a rating, then the one carrying a review.
+    if (
+      !existing ||
+      (existing.rating === null && f.rating !== null) ||
+      (!existing.review && f.review)
+    ) {
+      byViewing.set(key, f);
+    }
+  }
+  return [...byViewing.values()];
+}
+
+/** Each film's highest rating across rewatches, keyed by slug. */
+export function bestRatingBySlug(films: FilmRow[]): Map<string, number> {
+  const best = new Map<string, number>();
+  for (const f of films) {
+    if (f.rating !== null) {
+      best.set(f.film_slug, Math.max(best.get(f.film_slug) ?? 0, f.rating));
+    }
+  }
+  return best;
+}
+
 export function computeSnapshot(films: FilmRow[]): TasteSnapshot {
-  const watched = films.filter((f) => f.entry_type !== "watchlist");
-  const rated = watched.filter((f) => f.rating !== null);
-  const uniqueRated = new Set(rated.map((f) => f.film_slug)).size;
+  const watched = uniqueViewings(films.filter((f) => f.entry_type !== "watchlist"));
+  const ratedBySlug = bestRatingBySlug(watched);
+  const uniqueRated = ratedBySlug.size;
   const watchlist = films.filter((f) => f.entry_type === "watchlist");
 
   // Dedupe by slug for counts (a rewatch is still one film).
@@ -287,9 +335,13 @@ export function computeSnapshot(films: FilmRow[]): TasteSnapshot {
     .slice(0, 20)
     .map((f) => ({ title: f.title, year: f.year, slug: f.film_slug, watched_date: f.watched_date }));
 
+  // Averaged over distinct films, not rows: otherwise a film you rewatched
+  // three times pulls the average three times as hard, and the number stops
+  // matching the "Rated N" count sitting next to it.
+  const ratings = [...ratedBySlug.values()];
   const averageRating =
-    rated.length > 0
-      ? Math.round((rated.reduce((sum, f) => sum + (f.rating ?? 0), 0) / rated.length) * 100) / 100
+    ratings.length > 0
+      ? Math.round((ratings.reduce((sum, r) => sum + r, 0) / ratings.length) * 100) / 100
       : null;
 
   return {

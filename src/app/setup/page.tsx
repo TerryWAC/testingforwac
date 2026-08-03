@@ -1,9 +1,15 @@
 import { redirect } from "next/navigation";
 
 import { SetupWizard } from "@/components/SetupWizard";
+import { safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function SetupPage() {
+export default async function SetupPage({
+  searchParams,
+}: {
+  searchParams: { next?: string };
+}) {
+  const next = safeNextPath(searchParams.next);
   const supabase = createClient();
   const {
     data: { user },
@@ -34,6 +40,7 @@ export default async function SetupPage() {
               ? { username: profile.letterboxd_username, rssUrl: profile.rss_url }
               : null
           }
+          next={next}
         />
       </div>
     </main>

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { ProfileClient, type Badge, type FriendSummary } from "@/components/ProfileClient";
-import { getFilmsForProfile, syncProfileFromRss } from "@/lib/db";
+import { getFilmsForProfile } from "@/lib/db";
 import { computeSnapshot, longestStreak, movieBuffProfile } from "@/lib/stats";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -66,22 +66,6 @@ export default async function ProfilePage() {
     .eq("owner_user_id", user.id)
     .order("created_at", { ascending: true });
 
-  // Friend libraries grow over time: their public feed only shows recent
-  // activity, so re-sync stale feeds on every visit to accumulate history.
-  const STALE_MS = 12 * 3600 * 1000;
-  await Promise.all(
-    (friendRows ?? []).slice(0, 8).map(async (row) => {
-      const p = row.profiles as unknown as { last_synced_at: string | null; rss_url: string };
-      const stale =
-        !p.last_synced_at || Date.now() - new Date(p.last_synced_at).getTime() > STALE_MS;
-      if (stale) {
-        try {
-          await syncProfileFromRss({ id: row.profile_id, rss_url: p.rss_url });
-        } catch {}
-      }
-    })
-  );
-
   const friends: FriendSummary[] = await Promise.all(
     (friendRows ?? []).map(async (row) => {
       const p = row.profiles as unknown as {
@@ -112,6 +96,7 @@ export default async function ProfilePage() {
       lastSyncedAt={profile.last_synced_at}
       snapshot={snapshot}
       friends={friends}
+      syncFriends={friends.length > 0}
       reviews={reviews}
       badges={badges}
     />

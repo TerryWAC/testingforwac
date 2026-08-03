@@ -7,9 +7,13 @@ import type { ImportSummary } from "@/lib/types";
 
 interface Props {
   existingProfile: { username: string; rssUrl: string } | null;
+  next?: string | null;
 }
 
-export function SetupWizard({ existingProfile }: Props) {
+export function SetupWizard({ existingProfile, next }: Props) {
+  // Where to land once the import finishes — usually the dashboard, but an
+  // invite link routed through setup wants the user back at /join/CODE.
+  const destination = next ?? "/dashboard";
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [username, setUsername] = useState(existingProfile?.username ?? "");
@@ -163,8 +167,8 @@ export function SetupWizard({ existingProfile }: Props) {
             Files detected: {summary.filesFound.join(", ")} · {summary.totalUpserted} films stored
             {summary.reviews > 0 && ` · ${summary.reviews} reviews imported`}
           </p>
-          <button className="btn-primary w-full" onClick={() => router.push("/dashboard")}>
-            Go to dashboard
+          <button className="btn-primary w-full" onClick={() => router.push(destination)}>
+            {next ? "Continue" : "Go to dashboard"}
           </button>
         </div>
       )}

@@ -1,0 +1,93 @@
+<!--
+  Letterboxd Night — Magic Link email
+  Paste into: Supabase Dashboard → Authentication → Emails → Magic Link
+  Suggested subject: Your Letterboxd Night sign-in link
+
+  Table-based layout with inline styles: Gmail, Outlook and Apple Mail all
+  strip <style> blocks and external CSS, so everything has to live on the
+  element. No web fonts, no images — nothing to block or fail to load.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0d1117;margin:0;padding:32px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:460px;background-color:#141a22;border:1px solid #2a3644;border-radius:16px;overflow:hidden;">
+
+        <!-- Header -->
+        <tr>
+          <td style="padding:28px 32px 0 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding-right:6px;"><div style="width:11px;height:11px;border-radius:50%;background-color:#ff8000;"></div></td>
+                <td style="padding-right:6px;"><div style="width:11px;height:11px;border-radius:50%;background-color:#00c030;"></div></td>
+                <td style="padding-right:12px;"><div style="width:11px;height:11px;border-radius:50%;background-color:#40bcf4;"></div></td>
+                <td style="font-size:17px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">Letterboxd&nbsp;Night</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:26px 32px 0 32px;">
+            <h1 style="margin:0;font-size:26px;line-height:1.25;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">
+              Pick something great tonight
+            </h1>
+            <p style="margin:12px 0 0 0;font-size:15px;line-height:1.6;color:#8899aa;">
+              Tap the button below and you're in. The link works once and expires in an hour.
+            </p>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:26px 32px 0 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" style="background-color:#00c030;border-radius:12px;">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:block;padding:15px 24px;font-size:16px;font-weight:700;color:#0d1117;text-decoration:none;">
+                    Sign in to Letterboxd Night
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Code fallback -->
+        <tr>
+          <td style="padding:22px 32px 0 32px;">
+            <p style="margin:0;font-size:12px;line-height:1.5;color:#8899aa;">
+              Button not working? Enter this code in the app instead:
+            </p>
+            <p style="margin:8px 0 0 0;font-size:26px;font-weight:800;letter-spacing:6px;color:#ffffff;font-family:'SF Mono',Menlo,Consolas,monospace;">
+              {{ .Token }}
+            </p>
+          </td>
+        </tr>
+
+        <!-- Raw URL -->
+        <tr>
+          <td style="padding:20px 32px 0 32px;">
+            <p style="margin:0;font-size:11px;line-height:1.5;color:#8899aa;word-break:break-all;">
+              Or paste this into your browser:<br />
+              <a href="{{ .ConfirmationURL }}" style="color:#40bcf4;text-decoration:none;">{{ .ConfirmationURL }}</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:26px 32px 28px 32px;">
+            <div style="height:1px;background-color:#2a3644;line-height:1px;font-size:0;">&nbsp;</div>
+            <p style="margin:18px 0 0 0;font-size:11px;line-height:1.6;color:#8899aa;">
+              If you didn't ask to sign in, you can safely ignore this email — no one can get into
+              your account without this link.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>

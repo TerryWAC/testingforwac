@@ -97,7 +97,7 @@ export function ComingClient() {
           <div className="card mt-6 text-center">
             <p className="font-semibold text-white">Release data needs a TMDB key</p>
             <p className="mt-1 text-sm text-night-400">
-              Add TMDB_API_KEY to your environment to light this page up.
+              Release data isn&apos;t available right now — check back soon.
             </p>
           </div>
         ) : (

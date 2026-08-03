@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { syncProfileFromRss } from "@/lib/db";
+import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -12,6 +13,9 @@ export async function POST() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const limited = rateLimit("sync", user.id, LIMITS.feed);
+  if (limited) return limited;
 
   const { data: profile } = await supabase
     .from("profiles")

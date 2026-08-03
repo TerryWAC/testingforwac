@@ -33,7 +33,11 @@ function writeStore(store: Record<string, string | null>) {
  */
 export function usePosters(items: PosterItem[]): Record<string, string | null> {
   const [posters, setPosters] = useState<Record<string, string | null>>({});
-  const inFlight = useRef(false);
+  // Slugs already asked for. Bailing out while a request was in flight meant
+  // a second batch arriving mid-request was never fetched at all — its
+  // posters shimmered forever, because the effect wouldn't re-run until the
+  // slug list changed again.
+  const requested = useRef<Set<string>>(new Set());
   const key = items.map((i) => i.slug).join(",");
 
   useEffect(() => {
@@ -43,16 +47,18 @@ export function usePosters(items: PosterItem[]): Record<string, string | null> {
     const missing: PosterItem[] = [];
     for (const item of items) {
       if (item.slug in store) cachedHits[item.slug] = store[item.slug];
-      else missing.push(item);
+      else if (!requested.current.has(item.slug)) missing.push(item);
     }
     setPosters((prev) => ({ ...prev, ...cachedHits }));
 
-    if (missing.length === 0 || inFlight.current) return;
-    inFlight.current = true;
+    if (missing.length === 0) return;
+    // Mark only what we actually send, so an oversized list isn't written off.
+    const batch = missing.slice(0, 60);
+    for (const item of batch) requested.current.add(item.slug);
     fetch("/api/posters", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: missing.slice(0, 60) }),
+      body: JSON.stringify({ items: batch }),
     })
       .then((r) => r.json())
       .then((json) => {
@@ -60,7 +66,7 @@ export function usePosters(items: PosterItem[]): Record<string, string | null> {
           // Poster lookups unavailable (no TMDB key) — resolve to null so the
           // designed fallback card shows instead of an endless shimmer. Not
           // persisted, so adding a key later re-fetches these.
-          const nulls = Object.fromEntries(missing.map((m) => [m.slug, null]));
+          const nulls = Object.fromEntries(batch.map((m) => [m.slug, null]));
           setPosters((prev) => ({ ...nulls, ...prev }));
           return;
         }
@@ -69,11 +75,8 @@ export function usePosters(items: PosterItem[]): Record<string, string | null> {
         writeStore({ ...readStore(), ...fresh });
       })
       .catch(() => {
-        const nulls = Object.fromEntries(missing.map((m) => [m.slug, null]));
+        const nulls = Object.fromEntries(batch.map((m) => [m.slug, null]));
         setPosters((prev) => ({ ...nulls, ...prev }));
-      })
-      .finally(() => {
-        inFlight.current = false;
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);

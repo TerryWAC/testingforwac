@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { LIMITS, rateLimit } from "@/lib/rateLimit";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -17,6 +18,9 @@ export async function GET(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const limited = rateLimit("person", user.id, LIMITS.browse);
+  if (limited) return limited;
 
   const key = process.env.TMDB_API_KEY;
   if (!key) return NextResponse.json({ enabled: false });
