@@ -14,6 +14,16 @@
 
 *Community tool. Not affiliated with or endorsed by Valve. It only reads the game's own log file — no memory reading, no injection, nothing that touches the game process.*
 
+## Download
+
+| File | For | Size |
+|---|---|---|
+| [`DeadlockMatchPing.exe`](https://github.com/TerryWAC/testingforwac/releases/latest/download/DeadlockMatchPing.exe) | Windows 10/11 (same requirement as Deadlock itself) — just run it | ~87 MB |
+| [`DeadlockMatchPing.zip`](https://github.com/TerryWAC/testingforwac/releases/latest/download/DeadlockMatchPing.zip) | Same exe, **~65% smaller download** — unzip, then run | ~30 MB |
+| [`DeadlockMatchPing-linux`](https://github.com/TerryWAC/testingforwac/releases/latest/download/DeadlockMatchPing-linux) | Linux (Deadlock under Proton) — `chmod +x`, then run | ~90 MB |
+
+These links always serve the **newest** build. (ARM Windows runs the exe via built-in emulation; macOS users can run `node watch.js` — but Deadlock doesn't ship for macOS anyway.)
+
 ## Install (Windows, ~2 minutes — nothing else to install)
 
 1. **Download this folder** anywhere — Downloads, `C:\DeadlockPing`, even inside the Deadlock folder itself. It finds the game wherever it is: it reads Steam's own library index, so any drive and any Steam library works. The folder includes **`DeadlockMatchPing.exe`** — a standalone build, so you do **not** need Node.js or anything else. (Windows SmartScreen may warn on first run because the exe is unsigned — choose "More info → Run anyway"; the code is open in this repo. Prefer auditable? Delete the exe, install Node.js, and every script uses `watch.js` instead automatically.)

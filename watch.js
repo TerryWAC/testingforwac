@@ -127,7 +127,7 @@ const DEFAULTS = {
   customWebhookImage: 'https://github.com/TerryWAC/testingforwac/raw/main/assets/game-tracker-avatar.png',
   customWebhookLink: 'steam://run/1422450',
   // Download link used in the generated share-with-friends message.
-  shareDownloadUrl: 'https://github.com/TerryWAC/testingforwac/raw/main/DeadlockMatchPing.exe',
+  shareDownloadUrl: 'https://github.com/TerryWAC/testingforwac/releases/latest/download/DeadlockMatchPing.exe',
   // Self-healing: at startup the watcher fetches this small file from the
   // repo. When a Deadlock patch rewords the log, the repo file is updated
   // and every copy heals itself on next launch — no re-downloads. It also
