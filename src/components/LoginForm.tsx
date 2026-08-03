@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string | null }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,11 @@ export function LoginForm() {
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: next
+          ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+          : `${window.location.origin}/auth/callback`,
+      },
     });
 
     if (authError) {

@@ -100,11 +100,18 @@ export async function POST(request: Request) {
         .eq("owner_user_id", user.id)
         .limit(3);
       if (friendRows && friendRows.length > 0) {
+        // Fetch friends' libraries concurrently. Serially this cost three full
+        // library reads back to back on every Recommend press, which matters
+        // now that a friend's export ZIP can carry thousands of films.
+        const libraries = await Promise.all(
+          friendRows.map(async (row) => ({
+            name: (row.profiles as unknown as { letterboxd_username: string })
+              .letterboxd_username,
+            films: await getFilmsForProfile(row.profile_id),
+          }))
+        );
         const friendFilms = new Map<string, string>();
-        for (const row of friendRows) {
-          const name = (row.profiles as unknown as { letterboxd_username: string })
-            .letterboxd_username;
-          const fFilms = await getFilmsForProfile(row.profile_id);
+        for (const { name, films: fFilms } of libraries) {
           for (const f of fFilms) {
             if (!friendFilms.has(f.film_slug)) friendFilms.set(f.film_slug, name);
           }

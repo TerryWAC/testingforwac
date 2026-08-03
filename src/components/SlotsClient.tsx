@@ -80,6 +80,9 @@ export function SlotsClient() {
 
   function pull() {
     if (spinning || fetching) return;
+    // Drop already-fired timer ids so repeated pulls don't grow the list.
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
     setPicks(null);
     setError(null);
     setSpinning(true);

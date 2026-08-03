@@ -1,9 +1,15 @@
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/LoginForm";
+import { safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: { next?: string };
+}) {
+  const next = safeNextPath(searchParams.next);
   const supabase = createClient();
   const {
     data: { user },
@@ -15,7 +21,7 @@ export default async function LoginPage() {
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle();
-    redirect(profile ? "/dashboard" : "/setup");
+    redirect(profile ? (next ?? "/dashboard") : "/setup");
   }
 
   return (
@@ -31,7 +37,7 @@ export default async function LoginPage() {
           Turn your Letterboxd library into tonight&apos;s perfect pick.
         </p>
       </div>
-      <LoginForm />
+      <LoginForm next={next} />
       <p className="mt-8 text-center text-xs text-night-400">
         One-time import of your official Letterboxd export — then it stays up to date by itself.
         No scraping, no passwords.

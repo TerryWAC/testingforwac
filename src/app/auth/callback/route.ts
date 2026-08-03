@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
 
 /** Magic-link landing: exchange the code for a session, then route by profile state. */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  // Where the user was headed before login (e.g. a /join/CODE invite).
+  const next = safeNextPath(url.searchParams.get("next"));
 
   if (code) {
     const supabase = createClient();
@@ -20,7 +23,12 @@ export async function GET(request: Request) {
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle();
-        return NextResponse.redirect(new URL(profile ? "/dashboard" : "/setup", url.origin));
+        const destination = profile
+          ? (next ?? "/dashboard")
+          : next
+            ? `/setup?next=${encodeURIComponent(next)}`
+            : "/setup";
+        return NextResponse.redirect(new URL(destination, url.origin));
       }
     }
   }

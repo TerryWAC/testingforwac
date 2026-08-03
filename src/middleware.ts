@@ -1,7 +1,31 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/setup", "/compare"];
+// Every signed-in route. Each page also guards itself server-side, but
+// bouncing here avoids rendering a page we're about to throw away — and the
+// list had drifted badly behind the app, so most routes were rendering first
+// and redirecting second.
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/setup",
+  "/compare",
+  "/profile",
+  "/stats",
+  "/wrapped",
+  "/play",
+  "/tonight",
+  "/faceoff",
+  "/veto",
+  "/wheel",
+  "/slots",
+  "/match",
+  "/double",
+  "/coin",
+  "/coming",
+  "/people",
+  "/gauntlet",
+  "/join",
+];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -34,6 +58,10 @@ export async function middleware(request: NextRequest) {
   if (!user && PROTECTED_PREFIXES.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
+    // Remember where they were headed so login lands them there, not on a
+    // generic dashboard — this is what made shared /join invite links break.
+    const intended = `${path}${request.nextUrl.search}`;
+    url.search = intended === "/" ? "" : `?next=${encodeURIComponent(intended)}`;
     return NextResponse.redirect(url);
   }
 

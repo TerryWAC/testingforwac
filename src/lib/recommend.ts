@@ -69,10 +69,13 @@ export function buildCandidates(
     films.filter((f) => f.entry_type !== "watchlist").map((f) => f.film_slug)
   );
 
-  // Taste signals from rated films.
+  // Taste signals from rated films — one vote per film, so a decade you
+  // rewatch a lot doesn't outrank a decade you simply rate higher.
   const ratedByDecade = new Map<number, { total: number; count: number }>();
+  const decadeCounted = new Set<string>();
   for (const f of films) {
-    if (f.rating !== null && f.year) {
+    if (f.rating !== null && f.year && !decadeCounted.has(f.film_slug)) {
+      decadeCounted.add(f.film_slug);
       const decade = Math.floor(f.year / 10) * 10;
       const agg = ratedByDecade.get(decade) ?? { total: 0, count: 0 };
       agg.total += f.rating;
@@ -138,10 +141,21 @@ export function buildCandidates(
 
   const libraryCands = [...byFilm.values()].sort((a, b) => b.score - a.score);
 
-  // Stable shuffle-ish variety: rotate by day so "Recommend" isn't identical
-  // every night while staying deterministic within a day.
-  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(libraryCands.length, 1);
-  const rotated = [...libraryCands.slice(dayOffset), ...libraryCands.slice(0, dayOffset)];
+  // Daily variety without throwing away quality.
+  //
+  // This used to rotate the whole score-sorted list by the day number, which
+  // meant that with a large library the offset landed deep in the list and the
+  // best-matching films were rotated past the cut on almost every day. Rotate
+  // inside a pool of the strongest candidates instead: every night draws from
+  // good picks, but not the same ones twice.
+  const poolSize = Math.min(libraryCands.length, Math.max(max * 3, 24));
+  const pool = libraryCands.slice(0, poolSize);
+  const dayOffset = Math.floor(Date.now() / 86_400_000) % Math.max(pool.length, 1);
+  const rotated = [
+    ...pool.slice(dayOffset),
+    ...pool.slice(0, dayOffset),
+    ...libraryCands.slice(poolSize),
+  ];
 
   // Blend in curated discovery picks (classics and acclaimed films the user
   // hasn't seen) so recommendations reach beyond the watchlist: roughly one
