@@ -54,20 +54,25 @@ export function WrappedClient(props: Props) {
     <div className="min-h-screen">
       <AppNav active="wrapped" />
       <main className="mx-auto max-w-md px-4 py-6">
-        <div className="flex items-center justify-between">
-          <h1 className="animate-fade-up title-grad text-2xl font-bold">Wrapped</h1>
-          <div className="flex gap-1.5">
-            {years.slice(0, 4).map((y) => (
+        <h1 className="animate-fade-up title-grad text-2xl font-bold">Wrapped</h1>
+        {years.length > 1 && (
+          // Every year you've logged, not just the latest few — the row scrolls
+          // sideways rather than truncating.
+          <div
+            className="animate-fade-up -mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4 pb-1"
+            style={{ animationDelay: "60ms" }}
+          >
+            {years.map((y) => (
               <Link
                 key={y}
                 href={`/wrapped?year=${y}`}
-                className={`chip ${y === year ? "chip-active" : ""}`}
+                className={`chip shrink-0 ${y === year ? "chip-active" : ""}`}
               >
                 {y}
               </Link>
             ))}
           </div>
-        </div>
+        )}
 
         {total === 0 ? (
           <div className="card mt-6 text-center">

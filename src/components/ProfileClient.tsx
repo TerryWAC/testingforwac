@@ -105,13 +105,39 @@ export function ProfileClient({
       if (!res.ok) throw new Error(json.error ?? "Could not add friend");
       setNotice(
         json.filmsImported > 0
-          ? `Added @${friendName} — pulled ${json.filmsImported} of their recent films`
+          ? `Added @${friendName} — pulled their ${json.filmsImported} most recent films. Open them below to import their full export ZIP.`
           : `Added @${friendName} — their public activity looks empty so far`
       );
       setFriendName("");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not add friend");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  /**
+   * Replace a friend's shallow RSS library with their full export ZIP.
+   * Letterboxd's feed only carries their last ~50 entries; the ZIP has
+   * everything.
+   */
+  async function importFriendZip(friendId: string, name: string, file: File | undefined) {
+    if (!file) return;
+    setBusy(friendId);
+    setError(null);
+    setNotice(null);
+    try {
+      const body = new FormData();
+      body.append("friendId", friendId);
+      body.append("zip", file);
+      const res = await fetch("/api/friends/import", { method: "POST", body });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Import failed");
+      setNotice(`Imported ${json.summary.totalUpserted} films for @${name}`);
+      router.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not import that ZIP");
     } finally {
       setBusy(null);
     }
@@ -393,7 +419,7 @@ export function ProfileClient({
                     <span className="flex-1">
                       <span className="block font-semibold text-white">@{f.username}</span>
                       <span className="text-xs text-night-400">
-                        {f.filmCount} films from their public activity
+                        {f.filmCount} films in their library
                       </span>
                       <span className="mt-1 inline-block rounded bg-night-800 px-1.5 py-0.5 text-[10px] font-bold text-accent">
                         Lv {f.build.level} · {f.build.title} · {f.build.tier} tier
@@ -419,6 +445,31 @@ export function ProfileClient({
                           detail: `${w.rating}★`,
                         }))}
                       />
+                      <label className="block cursor-pointer rounded-lg border border-dashed border-night-700 px-3 py-2.5 text-center text-xs text-night-400 transition hover:border-accent/60 hover:text-slate-300">
+                        <input
+                          type="file"
+                          accept=".zip,application/zip"
+                          className="hidden"
+                          disabled={busy === f.id}
+                          onChange={(e) => {
+                            importFriendZip(f.id, f.username, e.target.files?.[0]);
+                            e.target.value = "";
+                          }}
+                        />
+                        {busy === f.id ? (
+                          "Importing…"
+                        ) : (
+                          <>
+                            <span className="font-semibold text-slate-300">
+                              Import their export ZIP
+                            </span>
+                            <span className="mt-0.5 block">
+                              Their feed only shows 50 recent films. Ask them for their Letterboxd
+                              export and drop it here for the full library.
+                            </span>
+                          </>
+                        )}
+                      </label>
                       <div className="flex gap-2">
                         <a
                           href={`https://letterboxd.com/${f.username}/`}

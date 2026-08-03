@@ -1,0 +1,105 @@
+<!--
+  Letterboxd Night — Confirm signup email
+  Paste into: Supabase Dashboard → Authentication → Emails → Confirm signup
+  Suggested subject: Welcome to Letterboxd Night
+
+  This is the template a *brand new* address gets. Existing users get the
+  Magic Link template instead — both need styling or half your users still
+  see the stock Supabase email.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0d1117;margin:0;padding:32px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:460px;background-color:#141a22;border:1px solid #2a3644;border-radius:16px;overflow:hidden;">
+
+        <!-- Header -->
+        <tr>
+          <td style="padding:28px 32px 0 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="padding-right:6px;"><div style="width:11px;height:11px;border-radius:50%;background-color:#ff8000;"></div></td>
+                <td style="padding-right:6px;"><div style="width:11px;height:11px;border-radius:50%;background-color:#00c030;"></div></td>
+                <td style="padding-right:12px;"><div style="width:11px;height:11px;border-radius:50%;background-color:#40bcf4;"></div></td>
+                <td style="font-size:17px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">Letterboxd&nbsp;Night</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:26px 32px 0 32px;">
+            <h1 style="margin:0;font-size:26px;line-height:1.25;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">
+              Welcome in
+            </h1>
+            <p style="margin:12px 0 0 0;font-size:15px;line-height:1.6;color:#8899aa;">
+              Confirm your email and you'll be picking films in about a minute. Bring your
+              Letterboxd export — you only ever import it once.
+            </p>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:26px 32px 0 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" style="background-color:#00c030;border-radius:12px;">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:block;padding:15px 24px;font-size:16px;font-weight:700;color:#0d1117;text-decoration:none;">
+                    Confirm and get started
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Code fallback -->
+        <tr>
+          <td style="padding:22px 32px 0 32px;">
+            <p style="margin:0;font-size:12px;line-height:1.5;color:#8899aa;">
+              Button not working? Enter this code in the app instead:
+            </p>
+            <p style="margin:8px 0 0 0;font-size:26px;font-weight:800;letter-spacing:6px;color:#ffffff;font-family:'SF Mono',Menlo,Consolas,monospace;">
+              {{ .Token }}
+            </p>
+          </td>
+        </tr>
+
+        <!-- What's inside -->
+        <tr>
+          <td style="padding:24px 32px 0 32px;">
+            <div style="height:1px;background-color:#2a3644;line-height:1px;font-size:0;">&nbsp;</div>
+            <p style="margin:18px 0 10px 0;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#8899aa;">
+              What's waiting
+            </p>
+            <p style="margin:0 0 6px 0;font-size:13px;line-height:1.5;color:#8899aa;">
+              <span style="color:#00c030;font-weight:700;">&#9656;</span>
+              <span style="color:#ffffff;font-weight:600;">Recommend</span> — eight picks tuned to your mood, runtime and era
+            </p>
+            <p style="margin:0 0 6px 0;font-size:13px;line-height:1.5;color:#8899aa;">
+              <span style="color:#00c030;font-weight:700;">&#9656;</span>
+              <span style="color:#ffffff;font-weight:600;">Compare</span> — share a code and find what you both want to watch
+            </p>
+            <p style="margin:0;font-size:13px;line-height:1.5;color:#8899aa;">
+              <span style="color:#00c030;font-weight:700;">&#9656;</span>
+              <span style="color:#ffffff;font-weight:600;">Wrapped &amp; Stats</span> — your year in film, and your build
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:24px 32px 28px 32px;">
+            <div style="height:1px;background-color:#2a3644;line-height:1px;font-size:0;">&nbsp;</div>
+            <p style="margin:18px 0 0 0;font-size:11px;line-height:1.6;color:#8899aa;">
+              If you didn't sign up for Letterboxd Night, you can safely ignore this email.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
