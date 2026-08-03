@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { buildCacheKey, getCachedResponse, setCachedResponse, tryConsumeAiQuota } from "@/lib/aiGate";
+import {
+  buildCacheKey,
+  getCachedJson,
+  getCachedResponse,
+  setCachedJson,
+  setCachedResponse,
+  tryConsumeAiQuota,
+} from "@/lib/aiGate";
 import { GENRE_NAMES, getCachedMeta, getFilmMeta } from "@/lib/filmMeta";
 import { getFilmsForProfile } from "@/lib/db";
-import { fetchDiscoverCandidates } from "@/lib/discover";
-import { polishWithGemini } from "@/lib/gemini";
+import { fetchDiscoverCandidates, verifySuggestions } from "@/lib/discover";
+import { polishWithGemini, suggestTitles } from "@/lib/gemini";
 import {
   blendGroupCandidates,
   buildCandidates,
@@ -16,7 +23,7 @@ import {
 import { recommendRequestSchema } from "@/lib/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { RecommendResponse } from "@/lib/types";
+import type { FilmRow, RecommendResponse } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -59,6 +66,8 @@ export async function POST(request: Request) {
   // ---- Stage 1: deterministic candidates ----
   let candidates;
   let groupContext: string | undefined;
+  // The signed-in user's own library, kept for the AI-suggestion stage below.
+  let library: FilmRow[] = [];
   // How this user rates each genre against their own baseline, learned from
   // the metadata cache. Empty until there's enough rated history to model.
   let affinity = new Map<number, number>();
@@ -99,6 +108,7 @@ export async function POST(request: Request) {
       .join(", ")}). Prefer films flagged as being in multiple libraries.`;
   } else {
     const films = await getFilmsForProfile(profile.id);
+    library = films;
     candidates = buildCandidates(films, filters);
 
     try {
@@ -162,11 +172,53 @@ export async function POST(request: Request) {
     }
   }
 
+  // Thin pool (narrow filters, small or well-watched library): let the model
+  // name films from its own knowledge of cinema, then verify every title
+  // against TMDB so nothing invented reaches the user. Cached for 24h and
+  // charged to the same daily quota as the polish call, because it is one.
+  if (!sessionId && candidates.length < count * 2 && process.env.GEMINI_API_KEY) {
+    try {
+      const lovedTitles = [
+        ...new Map(
+          library
+            .filter((f) => f.rating !== null && f.rating >= 4.5 && f.entry_type !== "watchlist")
+            .map((f) => [f.film_slug, f.title])
+        ).values(),
+      ].slice(0, 12);
+
+      const suggestKey = buildCacheKey({
+        v: 1,
+        kind: "suggest",
+        profileId: profile.id,
+        filters,
+        chatMessage: chatMessage ?? null,
+      });
+
+      let suggestions = await getCachedJson<{ title: string; year: number | null }[]>(suggestKey);
+      if (!suggestions && (await tryConsumeAiQuota(user.id))) {
+        suggestions = await suggestTitles(filters, lovedTitles, chatMessage);
+        await setCachedJson(suggestKey, suggestions);
+      }
+
+      if (suggestions && suggestions.length > 0) {
+        const verified = await verifySuggestions(suggestions, filters, library, affinity, 8);
+        const known = new Set(candidates.map((c) => c.slug));
+        candidates = [...candidates, ...verified.filter((c) => !known.has(c.slug))];
+      }
+    } catch {
+      // Suggestions are a bonus lane — never fail the request over them.
+    }
+  }
+
   // Real metadata pass: genres, runtime, language, acclaim (progressively
   // cached in film_meta, so coverage and quality grow with every request).
   try {
     const metaMap = await getFilmMeta(
-      candidates.map((c) => ({ slug: c.slug, title: c.title, year: c.year }))
+      candidates.map((c) => ({ slug: c.slug, title: c.title, year: c.year })),
+      // The candidate pool roughly doubled once external sources landed, so
+      // lift the per-request fetch budget to keep coverage growing at the
+      // same rate. Lookups run concurrently.
+      20
     );
     candidates = refineCandidates(candidates, filters, metaMap, GENRE_NAMES, affinity);
   } catch {}
