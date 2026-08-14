@@ -104,8 +104,11 @@ The build could not reach the images on the live site (they sit behind a host th
 environment cannot fetch), so every photo position currently shows a branded placeholder
 rather than a broken image. They look deliberate, but they are placeholders.
 
-To drop the real photos in, save each file into `site/assets/img/` and replace the
-`photoSlot('name')` call in `src/pages.js` with an `<img>` tag, then `npm run build`.
+**Adding the real photos takes one step.** Save each file into `site/assets/img/` using the
+slot name below — `.webp`, `.jpg`, `.png` and `.avif` all work — then run `npm run build`.
+The build finds the file, swaps it in over the placeholder and fades it in. There is no
+markup to edit, and while a slot is still empty nothing is requested, so there are no
+broken images and no failed requests.
 
 | Slot | Where it appears | Suggested shot |
 |---|---|---|

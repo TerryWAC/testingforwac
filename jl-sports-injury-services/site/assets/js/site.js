@@ -15,6 +15,7 @@
   var header = $('#site-header');
   var progress = $('.scroll-progress span');
   var ctaBar = $('#cta-bar');
+  var heroBg = $('.hero-bg');
   var lastY = window.scrollY;
   var ticking = false;
 
@@ -36,6 +37,11 @@
       // Show once past the hero, hide again near the footer CTA.
       var nearEnd = max > 0 && y > max - 260;
       ctaBar.classList.toggle('is-visible', y > 620 && !nearEnd);
+    }
+
+    // The hero backdrop drifts slower than the copy over it.
+    if (heroBg && !reduced && y < window.innerHeight * 1.5) {
+      heroBg.style.transform = 'translate3d(0,' + (y * 0.14).toFixed(1) + 'px,0)';
     }
 
     lastY = y;
@@ -228,7 +234,7 @@
     var isWeekday = now.getDay() >= 1 && now.getDay() <= 4; // Mon–Thu
     var h = now.getHours() + now.getMinutes() / 60;
     var open = isWeekday && h >= 9 && h < 20;
-    openNow.textContent = open ? 'Open now' : 'Book online 24/7';
+    openNow.textContent = open ? 'Open now' : 'Book 24/7';
   }
 
   // -------------------------------------------------------------------------
@@ -249,6 +255,56 @@
       track.appendChild(clone);
     }
   });
+
+  // -------------------------------------------------------------------------
+  // Photography
+  //
+  // Each photo position ships a real <img> over a branded placeholder. Until
+  // the file exists the image is removed and the placeholder shows through, so
+  // dropping a photo into assets/img/ is the only step needed to use it.
+  // -------------------------------------------------------------------------
+
+  $$('img.photo').forEach(function (img) {
+    var shown = function () { img.classList.add('is-loaded'); };
+    var missing = function () { img.remove(); };
+
+    if (img.complete) {
+      img.naturalWidth > 0 ? shown() : missing();
+    } else {
+      img.addEventListener('load', shown);
+      img.addEventListener('error', missing);
+    }
+  });
+
+  // -------------------------------------------------------------------------
+  // Pointer-reactive polish (desktop, motion allowed)
+  // -------------------------------------------------------------------------
+
+  if (!reduced && window.matchMedia('(hover: hover)').matches) {
+    // Primary calls to action lean towards the cursor.
+    $$('.btn-primary.btn-lg, .hero-card .btn-primary').forEach(function (btn) {
+      btn.addEventListener('pointermove', function (e) {
+        var r = btn.getBoundingClientRect();
+        var x = (e.clientX - r.left - r.width / 2) / r.width;
+        var y = (e.clientY - r.top - r.height / 2) / r.height;
+        btn.style.transform = 'translate(' + (x * 7).toFixed(1) + 'px,' + (y * 4 - 2).toFixed(1) + 'px)';
+      });
+      btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
+    });
+
+    // The booking card tilts a few degrees with the cursor.
+    $$('.hero-card').forEach(function (card) {
+      var frame = card.parentNode;
+      frame.addEventListener('pointermove', function (e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left - r.width / 2) / r.width;
+        var y = (e.clientY - r.top - r.height / 2) / r.height;
+        card.style.transform =
+          'rotateY(' + (x * 4).toFixed(2) + 'deg) rotateX(' + (-y * 4).toFixed(2) + 'deg) translateZ(0)';
+      });
+      frame.addEventListener('pointerleave', function () { card.style.transform = ''; });
+    });
+  }
 
   // -------------------------------------------------------------------------
   // Contact form (progressive enhancement)

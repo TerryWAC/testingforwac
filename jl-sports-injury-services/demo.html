@@ -165,9 +165,16 @@ p { text-wrap: pretty; }
 .eyebrow-rose::before { background: linear-gradient(90deg, transparent, var(--rose)); }
 
 .grad {
-  background: linear-gradient(100deg, var(--green) 0%, #6dffb4 55%, #a8ffd4 82%, var(--rose-soft) 118%);
+  background: linear-gradient(100deg, var(--green) 0%, #7dffc0 28%, #eafff4 44%,
+    #7dffc0 62%, var(--green) 84%, var(--rose-soft) 100%);
+  background-size: 230% 100%;
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
+  animation: gradSweep 11s var(--ease-in-out) infinite;
+}
+@keyframes gradSweep {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .muted { color: var(--text-dim); }
@@ -425,8 +432,8 @@ p { text-wrap: pretty; }
 
 .hero {
   position: relative;
-  padding-top: calc(var(--header-h) + clamp(3rem, 8vw, 6rem));
-  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  padding-top: calc(var(--header-h) + clamp(2rem, 4.5vw, 3.25rem));
+  padding-bottom: clamp(2.5rem, 5vw, 3.75rem);
   overflow: hidden;
   isolation: isolate;
 }
@@ -492,8 +499,10 @@ p { text-wrap: pretty; }
   align-items: center;
 }
 
-.hero-copy > * + * { margin-top: 1.5rem; }
-.hero h1 { letter-spacing: -0.035em; }
+.hero-copy > * + * { margin-top: 1.35rem; }
+/* Deliberately smaller than the display scale: the job of the fold is to get
+   the offer and the booking panel in front of people, not to fill it with type. */
+.hero h1 { font-size: clamp(2.25rem, 4.3vw, 3.55rem); letter-spacing: -0.032em; }
 .hero h1 .line { display: block; overflow: hidden; }
 .hero h1 .line > span { display: block; }
 
@@ -524,9 +533,11 @@ p { text-wrap: pretty; }
 .proof-item span { font-size: 0.8rem; color: var(--text-faint); letter-spacing: 0.02em; }
 
 /* Hero visual */
-.hero-visual { position: relative; }
+.hero-visual { position: relative; perspective: 1200px; }
 .hero-card {
   position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.45s var(--ease);
   padding: clamp(1.5rem, 3vw, 2.25rem);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -573,6 +584,57 @@ p { text-wrap: pretty; }
 .quick-item-price {
   font-family: var(--display); font-weight: 600; font-size: 1.05rem; color: var(--green); flex: none;
 }
+
+/* --------------------------------------------------------------------------
+   7b. Offer strip — what he does and what it costs, straight after the hero
+   -------------------------------------------------------------------------- */
+
+.offer-strip {
+  padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(0, 250, 130, 0.045), transparent 70%);
+}
+.offer-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1.1rem;
+}
+.offer-head h2 {
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+.offer-head .btn-link { font-size: 0.88rem; }
+
+.offer-grid {
+  display: grid; gap: 0.6rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.offer {
+  position: relative; display: grid; gap: 0.3rem; align-content: start;
+  padding: 1rem 1.05rem 2.6rem;
+  border: 1px solid var(--line); border-radius: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  transition: border-color 0.35s, background 0.35s, transform 0.4s var(--ease);
+}
+.offer:hover { border-color: rgba(0, 250, 130, 0.45); background: rgba(0, 250, 130, 0.07); transform: translateY(-4px); }
+.offer-icon {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+  background: rgba(0, 250, 130, 0.11); color: var(--green); margin-bottom: 0.45rem;
+}
+.offer-icon .icon { width: 18px; height: 18px; }
+.offer-name {
+  font-family: var(--display); font-size: 0.95rem; font-weight: 600; line-height: 1.2;
+  letter-spacing: -0.012em;
+}
+.offer-meta { font-size: 0.8rem; color: var(--green); font-variant-numeric: tabular-nums; }
+.offer-go {
+  position: absolute; inset: auto 1.05rem 0.95rem;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-family: var(--display); font-size: 0.82rem; font-weight: 600; color: var(--text-faint);
+  transition: color 0.3s, transform 0.35s var(--ease);
+}
+.offer-go .icon { width: 15px; height: 15px; }
+.offer:hover .offer-go { color: var(--green); transform: translateX(3px); }
 
 /* --------------------------------------------------------------------------
    8. Marquee
@@ -758,9 +820,18 @@ p { text-wrap: pretty; }
 .frame-caption b { font-family: var(--display); font-size: 0.95rem; display: block; }
 .frame-caption span { font-size: 0.8rem; color: var(--text-faint); }
 
+/* The real photograph, layered over the placeholder. `site.js` removes it if
+   the file is not there yet, revealing the placeholder underneath. */
+.frame .photo {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity 0.7s var(--ease);
+}
+.frame .photo.is-loaded { opacity: 1; }
+
 /* Placeholder art used until real photography is dropped in */
 .photo-slot {
-  position: relative; width: 100%; height: 100%;
+  position: absolute; inset: 0; width: 100%; height: 100%;
   display: grid; place-items: center;
   background:
     radial-gradient(90% 70% at 25% 12%, rgba(0, 250, 130, 0.14), transparent 60%),
@@ -1268,7 +1339,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
 .cta-bar-text { display: grid; gap: 0.1rem; min-width: 0; }
-.cta-bar-text strong { font-family: var(--display); font-size: 0.95rem; font-weight: 600; }
+.cta-bar-text strong {
+  font-family: var(--display); font-size: 0.95rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .cta-bar-text span { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--text-faint); }
 .cta-bar-actions { display: flex; gap: 0.5rem; flex: none; }
 
@@ -1314,7 +1388,12 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   .page-head-grid { grid-template-columns: 1fr; align-items: start; }
 }
 
+@media (max-width: 1180px) {
+  .offer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 @media (max-width: 900px) {
+  .offer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1332,6 +1411,8 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 
 @media (max-width: 720px) {
   :root { --header-h: 66px; }
+  .offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .offer { padding: 0.9rem 0.95rem 2.4rem; }
   .header-inner { gap: 0.55rem; }
   .header-actions { gap: 0.4rem; }
   .btn-hdr { padding: 0.6rem 1rem; font-size: 0.9rem; }
@@ -1484,37 +1565,36 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   <div class="shell">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow" data-hero style="--d:0ms"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Gosforth · Newcastle</span>
-        <h1 data-hero style="--d:90ms">
-          Sports injury treatment that <span class="grad">fixes the cause</span>, not just the ache.
+        <span class="eyebrow" data-hero style="--d:0ms">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Gosforth · Newcastle upon Tyne · Est. 2018
+        </span>
+        <h1 class="split-lines" data-hero style="--d:80ms">
+          Sports Injury Clinic &amp;<br><span class="grad">Sports Massage</span> in Gosforth, Newcastle
         </h1>
-        <p class="lead" data-hero style="--d:180ms">
-          Elite level assessment, hands-on treatment and gym-based rehabilitation from a therapist who
-          spent a decade in professional rugby — at a price that works for everyone. No referral needed.
+        <p class="lead" data-hero style="--d:170ms">
+          Injury assessment, sports massage, deep tissue massage, medical acupuncture, electrotherapy,
+          ultrasound therapy and gym-based rehabilitation — elite level treatment from a therapist with
+          ten years in professional rugby. <strong>No referral needed. Book online in 60 seconds.</strong>
         </p>
-        <div class="btn-row" data-hero style="--d:260ms">
+        <div class="btn-row" data-hero style="--d:250ms">
           <a class="btn btn-primary btn-lg" href="#/book" data-cta="hero">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
-          <a class="btn btn-ghost btn-lg" href="#/services">See treatments &amp; prices</a>
+          <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
         </div>
-        <div class="hero-badges" data-hero style="--d:340ms">
+        <div class="hero-badges" data-hero style="--d:330ms">
           <span class="badge badge-rating"><span class="stars" role="img" aria-label="5 out of 5 stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg></span> 5.0 from 31 reviews</span>
           <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
-          <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> <span data-open-now>Book online 24/7</span></span>
-        </div>
-        <div class="hero-proof" data-hero style="--d:420ms">
-          <div class="proof-item"><b>10+</b><span>Years in practice</span></div>
-          <div class="proof-item"><b>2018</b><span>Serving Gosforth</span></div>
-          <div class="proof-item"><b>Elite</b><span>Rugby union &amp; league</span></div>
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> Mon–Thu, 9am–8pm</span>
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £30</span>
         </div>
       </div>
 
-      <div class="hero-visual" data-hero style="--d:300ms">
+      <div class="hero-visual" data-hero style="--d:290ms">
         <div class="hero-card">
           <div class="hero-card-head">
             <h2>Book in 60 seconds</h2>
-            <span class="pill"><span class="pill-dot"></span>Online</span>
+            <span class="pill"><span class="pill-dot"></span><span data-open-now>Online</span></span>
           </div>
-          <p class="tiny muted">Pick a treatment to get started — you can change it at any point.</p>
+          <p class="tiny muted">Tap what you need — pick a time on the next screen. No deposit.</p>
           <div class="quick-list">
             <a class="quick-item" href="#/book?treatment=injury-assessment">
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg>
@@ -1550,6 +1630,53 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <p class="tiny muted" style="text-align:center">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="offer-strip" aria-label="Treatments and prices">
+  <div class="shell">
+    <div class="offer-head">
+      <h2>What Jack offers</h2>
+      <a class="btn-link" href="#/services">All treatments &amp; prices <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+    </div>
+    <div class="offer-grid" data-stagger="55">
+      <a class="offer" href="#/book?treatment=injury-assessment" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg></span>
+        <span class="offer-name">Injury Assessment</span>
+        <span class="offer-meta">£44 · 60 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a><a class="offer" href="#/book?treatment=sports-massage" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></span>
+        <span class="offer-name">Sports Massage</span>
+        <span class="offer-meta">from £30 · 60 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a><a class="offer" href="#/book?treatment=deep-tissue-massage" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></span>
+        <span class="offer-name">Deep Tissue Massage</span>
+        <span class="offer-meta">£44 · 60 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a><a class="offer" href="#/book?treatment=follow-up-treatment" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg></span>
+        <span class="offer-name">Injury Treatment</span>
+        <span class="offer-meta">£38 · 45 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a><a class="offer" href="#/book?treatment=medical-acupuncture" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></span>
+        <span class="offer-name">Medical Acupuncture</span>
+        <span class="offer-meta">£44 · 60 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a><a class="offer" href="#/book?treatment=electrotherapy" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></span>
+        <span class="offer-name">Electrotherapy</span>
+        <span class="offer-meta">£38 · 45 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a><a class="offer" href="#/book?treatment=ultrasound-therapy" data-reveal>
+        <span class="offer-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15 9.5a3.5 3.5 0 0 1 0 5"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span>
+        <span class="offer-name">Ultrasound Therapy</span>
+        <span class="offer-meta">£38 · 45 min</span>
+        <span class="offer-go">Book <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a>
     </div>
   </div>
 </section>
@@ -1736,6 +1863,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-jack-portrait)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/jack-portrait.jpg and rebuild -->
           <div class="frame-caption">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg>
             <span><b>Jack Laurie</b><span>Sports Injury Therapist · Est. 2018</span></span>
@@ -1990,6 +2118,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-jack-treating)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/jack-treating.jpg and rebuild -->
           <div class="frame-caption">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg>
             <span><b>Assessment and treatment</b><span>Hidden Strength, Gosforth</span></span>
@@ -2086,6 +2215,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-clinic-gym)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/clinic-gym.jpg and rebuild -->
         </div>
       </div>
     </div>
@@ -2491,6 +2621,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-injury-assessment)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-injury-assessment.jpg and rebuild -->
         </div>
       </div>
 
@@ -2612,6 +2743,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-sports-massage)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-sports-massage.jpg and rebuild -->
         </div>
       </div>
 
@@ -2730,6 +2862,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-deep-tissue-massage)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-deep-tissue-massage.jpg and rebuild -->
         </div>
       </div>
 
@@ -2851,6 +2984,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-follow-up-treatment)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-follow-up-treatment.jpg and rebuild -->
         </div>
       </div>
 
@@ -2972,6 +3106,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-medical-acupuncture)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-medical-acupuncture.jpg and rebuild -->
         </div>
       </div>
 
@@ -3090,6 +3225,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-electrotherapy)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-electrotherapy.jpg and rebuild -->
         </div>
       </div>
 
@@ -3208,6 +3344,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-treatment-ultrasound-therapy)"/>
   </svg>
 </div>
+<!-- photo slot: add site/assets/img/treatment-ultrasound-therapy.jpg and rebuild -->
         </div>
       </div>
 
@@ -3864,7 +4001,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 <div class="cta-bar" id="cta-bar" aria-hidden="false">
   <div class="cta-bar-inner">
     <div class="cta-bar-text">
-      <strong>Injured? Get it looked at properly.</strong>
+      <strong>Book your appointment</strong>
       <span><span class="stars" role="img" aria-label="5 out of 5 stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg></span> Rated 5.0 from 31 reviews</span>
     </div>
     <div class="cta-bar-actions">
@@ -3891,6 +4028,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   var header = $('#site-header');
   var progress = $('.scroll-progress span');
   var ctaBar = $('#cta-bar');
+  var heroBg = $('.hero-bg');
   var lastY = window.scrollY;
   var ticking = false;
 
@@ -3912,6 +4050,11 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       // Show once past the hero, hide again near the footer CTA.
       var nearEnd = max > 0 && y > max - 260;
       ctaBar.classList.toggle('is-visible', y > 620 && !nearEnd);
+    }
+
+    // The hero backdrop drifts slower than the copy over it.
+    if (heroBg && !reduced && y < window.innerHeight * 1.5) {
+      heroBg.style.transform = 'translate3d(0,' + (y * 0.14).toFixed(1) + 'px,0)';
     }
 
     lastY = y;
@@ -4104,7 +4247,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     var isWeekday = now.getDay() >= 1 && now.getDay() <= 4; // Mon–Thu
     var h = now.getHours() + now.getMinutes() / 60;
     var open = isWeekday && h >= 9 && h < 20;
-    openNow.textContent = open ? 'Open now' : 'Book online 24/7';
+    openNow.textContent = open ? 'Open now' : 'Book 24/7';
   }
 
   // -------------------------------------------------------------------------
@@ -4125,6 +4268,56 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       track.appendChild(clone);
     }
   });
+
+  // -------------------------------------------------------------------------
+  // Photography
+  //
+  // Each photo position ships a real <img> over a branded placeholder. Until
+  // the file exists the image is removed and the placeholder shows through, so
+  // dropping a photo into assets/img/ is the only step needed to use it.
+  // -------------------------------------------------------------------------
+
+  $$('img.photo').forEach(function (img) {
+    var shown = function () { img.classList.add('is-loaded'); };
+    var missing = function () { img.remove(); };
+
+    if (img.complete) {
+      img.naturalWidth > 0 ? shown() : missing();
+    } else {
+      img.addEventListener('load', shown);
+      img.addEventListener('error', missing);
+    }
+  });
+
+  // -------------------------------------------------------------------------
+  // Pointer-reactive polish (desktop, motion allowed)
+  // -------------------------------------------------------------------------
+
+  if (!reduced && window.matchMedia('(hover: hover)').matches) {
+    // Primary calls to action lean towards the cursor.
+    $$('.btn-primary.btn-lg, .hero-card .btn-primary').forEach(function (btn) {
+      btn.addEventListener('pointermove', function (e) {
+        var r = btn.getBoundingClientRect();
+        var x = (e.clientX - r.left - r.width / 2) / r.width;
+        var y = (e.clientY - r.top - r.height / 2) / r.height;
+        btn.style.transform = 'translate(' + (x * 7).toFixed(1) + 'px,' + (y * 4 - 2).toFixed(1) + 'px)';
+      });
+      btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
+    });
+
+    // The booking card tilts a few degrees with the cursor.
+    $$('.hero-card').forEach(function (card) {
+      var frame = card.parentNode;
+      frame.addEventListener('pointermove', function (e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left - r.width / 2) / r.width;
+        var y = (e.clientY - r.top - r.height / 2) / r.height;
+        card.style.transform =
+          'rotateY(' + (x * 4).toFixed(2) + 'deg) rotateX(' + (-y * 4).toFixed(2) + 'deg) translateZ(0)';
+      });
+      frame.addEventListener('pointerleave', function () { card.style.transform = ''; });
+    });
+  }
 
   // -------------------------------------------------------------------------
   // Contact form (progressive enhancement)

@@ -160,9 +160,16 @@ p { text-wrap: pretty; }
 .eyebrow-rose::before { background: linear-gradient(90deg, transparent, var(--rose)); }
 
 .grad {
-  background: linear-gradient(100deg, var(--green) 0%, #6dffb4 55%, #a8ffd4 82%, var(--rose-soft) 118%);
+  background: linear-gradient(100deg, var(--green) 0%, #7dffc0 28%, #eafff4 44%,
+    #7dffc0 62%, var(--green) 84%, var(--rose-soft) 100%);
+  background-size: 230% 100%;
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
+  animation: gradSweep 11s var(--ease-in-out) infinite;
+}
+@keyframes gradSweep {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 .muted { color: var(--text-dim); }
@@ -420,8 +427,8 @@ p { text-wrap: pretty; }
 
 .hero {
   position: relative;
-  padding-top: calc(var(--header-h) + clamp(3rem, 8vw, 6rem));
-  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  padding-top: calc(var(--header-h) + clamp(2rem, 4.5vw, 3.25rem));
+  padding-bottom: clamp(2.5rem, 5vw, 3.75rem);
   overflow: hidden;
   isolation: isolate;
 }
@@ -487,8 +494,10 @@ p { text-wrap: pretty; }
   align-items: center;
 }
 
-.hero-copy > * + * { margin-top: 1.5rem; }
-.hero h1 { letter-spacing: -0.035em; }
+.hero-copy > * + * { margin-top: 1.35rem; }
+/* Deliberately smaller than the display scale: the job of the fold is to get
+   the offer and the booking panel in front of people, not to fill it with type. */
+.hero h1 { font-size: clamp(2.25rem, 4.3vw, 3.55rem); letter-spacing: -0.032em; }
 .hero h1 .line { display: block; overflow: hidden; }
 .hero h1 .line > span { display: block; }
 
@@ -519,9 +528,11 @@ p { text-wrap: pretty; }
 .proof-item span { font-size: 0.8rem; color: var(--text-faint); letter-spacing: 0.02em; }
 
 /* Hero visual */
-.hero-visual { position: relative; }
+.hero-visual { position: relative; perspective: 1200px; }
 .hero-card {
   position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.45s var(--ease);
   padding: clamp(1.5rem, 3vw, 2.25rem);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -568,6 +579,57 @@ p { text-wrap: pretty; }
 .quick-item-price {
   font-family: var(--display); font-weight: 600; font-size: 1.05rem; color: var(--green); flex: none;
 }
+
+/* --------------------------------------------------------------------------
+   7b. Offer strip — what he does and what it costs, straight after the hero
+   -------------------------------------------------------------------------- */
+
+.offer-strip {
+  padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(0, 250, 130, 0.045), transparent 70%);
+}
+.offer-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1.1rem;
+}
+.offer-head h2 {
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+.offer-head .btn-link { font-size: 0.88rem; }
+
+.offer-grid {
+  display: grid; gap: 0.6rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.offer {
+  position: relative; display: grid; gap: 0.3rem; align-content: start;
+  padding: 1rem 1.05rem 2.6rem;
+  border: 1px solid var(--line); border-radius: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  transition: border-color 0.35s, background 0.35s, transform 0.4s var(--ease);
+}
+.offer:hover { border-color: rgba(0, 250, 130, 0.45); background: rgba(0, 250, 130, 0.07); transform: translateY(-4px); }
+.offer-icon {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+  background: rgba(0, 250, 130, 0.11); color: var(--green); margin-bottom: 0.45rem;
+}
+.offer-icon .icon { width: 18px; height: 18px; }
+.offer-name {
+  font-family: var(--display); font-size: 0.95rem; font-weight: 600; line-height: 1.2;
+  letter-spacing: -0.012em;
+}
+.offer-meta { font-size: 0.8rem; color: var(--green); font-variant-numeric: tabular-nums; }
+.offer-go {
+  position: absolute; inset: auto 1.05rem 0.95rem;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-family: var(--display); font-size: 0.82rem; font-weight: 600; color: var(--text-faint);
+  transition: color 0.3s, transform 0.35s var(--ease);
+}
+.offer-go .icon { width: 15px; height: 15px; }
+.offer:hover .offer-go { color: var(--green); transform: translateX(3px); }
 
 /* --------------------------------------------------------------------------
    8. Marquee
@@ -753,9 +815,18 @@ p { text-wrap: pretty; }
 .frame-caption b { font-family: var(--display); font-size: 0.95rem; display: block; }
 .frame-caption span { font-size: 0.8rem; color: var(--text-faint); }
 
+/* The real photograph, layered over the placeholder. `site.js` removes it if
+   the file is not there yet, revealing the placeholder underneath. */
+.frame .photo {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity 0.7s var(--ease);
+}
+.frame .photo.is-loaded { opacity: 1; }
+
 /* Placeholder art used until real photography is dropped in */
 .photo-slot {
-  position: relative; width: 100%; height: 100%;
+  position: absolute; inset: 0; width: 100%; height: 100%;
   display: grid; place-items: center;
   background:
     radial-gradient(90% 70% at 25% 12%, rgba(0, 250, 130, 0.14), transparent 60%),
@@ -1263,7 +1334,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
 .cta-bar-text { display: grid; gap: 0.1rem; min-width: 0; }
-.cta-bar-text strong { font-family: var(--display); font-size: 0.95rem; font-weight: 600; }
+.cta-bar-text strong {
+  font-family: var(--display); font-size: 0.95rem; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .cta-bar-text span { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--text-faint); }
 .cta-bar-actions { display: flex; gap: 0.5rem; flex: none; }
 
@@ -1309,7 +1383,12 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   .page-head-grid { grid-template-columns: 1fr; align-items: start; }
 }
 
+@media (max-width: 1180px) {
+  .offer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 @media (max-width: 900px) {
+  .offer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1327,6 +1406,8 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 
 @media (max-width: 720px) {
   :root { --header-h: 66px; }
+  .offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .offer { padding: 0.9rem 0.95rem 2.4rem; }
   .header-inner { gap: 0.55rem; }
   .header-actions { gap: 0.4rem; }
   .btn-hdr { padding: 0.6rem 1rem; font-size: 0.9rem; }

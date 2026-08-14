@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const {
   site, treatments, steps, credentials, faqs, trustPoints,
 } = require('./content');
@@ -10,7 +13,26 @@ const addr = site.address;
 // Shared blocks
 // ---------------------------------------------------------------------------
 
-const photoSlot = (name) => `<div class="photo-slot" data-photo="${name}">
+const IMG_DIR = path.join(__dirname, '..', 'site', 'assets', 'img');
+
+/** First existing file for this slot, or null while it is still a placeholder. */
+function findPhoto(name) {
+  for (const ext of ['webp', 'jpg', 'jpeg', 'png', 'avif']) {
+    if (fs.existsSync(path.join(IMG_DIR, `${name}.${ext}`))) return `${name}.${ext}`;
+  }
+  return null;
+}
+
+/**
+ * A photo position.
+ *
+ * Drop `<name>.jpg` (or .webp/.png) into site/assets/img/, run `npm run build`,
+ * and the photograph replaces the branded placeholder. No markup to edit — and
+ * no broken request while the slot is still empty.
+ */
+const photo = (name, alt) => {
+  const file = findPhoto(name);
+  const placeholder = `<div class="photo-slot" data-photo="${name}">
   <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
     <mask id="ph-${name}"><circle cx="100" cy="100" r="96" fill="#fff"/>
       <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
@@ -19,6 +41,12 @@ const photoSlot = (name) => `<div class="photo-slot" data-photo="${name}">
     <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-${name})"/>
   </svg>
 </div>`;
+
+  if (!file) return `${placeholder}\n<!-- photo slot: add site/assets/img/${name}.jpg and rebuild -->`;
+
+  return `${placeholder}
+<img class="photo" src="assets/img/${file}" alt="${esc(alt)}" loading="lazy" decoding="async">`;
+};
 
 const treatmentCard = (t) => `<article class="card t-card card-stretch" data-reveal>
   <div class="t-card-top">
@@ -115,40 +143,38 @@ function home() {
   <div class="shell">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow" data-hero style="--d:0ms">${icon('pin')} Gosforth · Newcastle</span>
-        <h1 data-hero style="--d:90ms">
-          Sports injury treatment that <span class="grad">fixes the cause</span>, not just the ache.
+        <span class="eyebrow" data-hero style="--d:0ms">
+          ${icon('pin')} Gosforth · Newcastle upon Tyne · Est. ${site.founded}
+        </span>
+        <h1 class="split-lines" data-hero style="--d:80ms">
+          Sports Injury Clinic &amp;<br><span class="grad">Sports Massage</span> in Gosforth, Newcastle
         </h1>
-        <p class="lead" data-hero style="--d:180ms">
-          Elite level assessment, hands-on treatment and gym-based rehabilitation from a therapist who
-          spent a decade in professional rugby — at a price that works for everyone. No referral needed.
+        <p class="lead" data-hero style="--d:170ms">
+          Injury assessment, sports massage, deep tissue massage, medical acupuncture, electrotherapy,
+          ultrasound therapy and gym-based rehabilitation — elite level treatment from a therapist with
+          ten years in professional rugby. <strong>No referral needed. Book online in 60 seconds.</strong>
         </p>
-        <div class="btn-row" data-hero style="--d:260ms">
+        <div class="btn-row" data-hero style="--d:250ms">
           <a class="btn btn-primary btn-lg" href="book.html" data-cta="hero">Book an appointment ${icon('arrow')}</a>
-          <a class="btn btn-ghost btn-lg" href="services.html">See treatments &amp; prices</a>
+          <a class="btn btn-ghost btn-lg" href="tel:${site.phoneHref}">${icon('phone')} ${esc(site.phone)}</a>
         </div>
-        <div class="hero-badges" data-hero style="--d:340ms">
+        <div class="hero-badges" data-hero style="--d:330ms">
           <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} from ${site.reviews.count} reviews</span>
           <span class="badge">${icon('check')} No referral needed</span>
-          <span class="badge">${icon('clock')} <span data-open-now>Book online 24/7</span></span>
-        </div>
-        <div class="hero-proof" data-hero style="--d:420ms">
-          <div class="proof-item"><b>10+</b><span>Years in practice</span></div>
-          <div class="proof-item"><b>2018</b><span>Serving Gosforth</span></div>
-          <div class="proof-item"><b>Elite</b><span>Rugby union &amp; league</span></div>
+          <span class="badge">${icon('clock')} Mon–Thu, 9am–8pm</span>
+          <span class="badge">${icon('tag')} From £30</span>
         </div>
       </div>
 
-      <div class="hero-visual" data-hero style="--d:300ms">
+      <div class="hero-visual" data-hero style="--d:290ms">
         <div class="hero-card">
           <div class="hero-card-head">
             <h2>Book in 60 seconds</h2>
-            <span class="pill"><span class="pill-dot"></span>Online</span>
+            <span class="pill"><span class="pill-dot"></span><span data-open-now>Online</span></span>
           </div>
-          <p class="tiny muted">Pick a treatment to get started — you can change it at any point.</p>
+          <p class="tiny muted">Tap what you need — pick a time on the next screen. No deposit.</p>
           <div class="quick-list">
             ${featured
-              .slice(0, 4)
               .map(
                 (t) => `<a class="quick-item" href="book.html?treatment=${t.slug}">
               ${icon(t.icon)}
@@ -162,9 +188,34 @@ function home() {
               .join('')}
           </div>
           <a class="btn btn-primary btn-block" href="book.html" data-cta="hero-card">Choose a time ${icon('arrow')}</a>
-          <p class="tiny muted" style="text-align:center">Mon–Thu, 9am–8pm · ${esc(addr.venue)}, ${esc(addr.locality)}</p>
+          <p class="tiny muted" style="text-align:center">Mon–Thu, 9am–8pm · ${esc(addr.venue)}, ${esc(
+    addr.locality
+  )}</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="offer-strip" aria-label="Treatments and prices">
+  <div class="shell">
+    <div class="offer-head">
+      <h2>What Jack offers</h2>
+      <a class="btn-link" href="services.html">All treatments &amp; prices ${icon('arrow')}</a>
+    </div>
+    <div class="offer-grid" data-stagger="55">
+      ${treatments
+        .map(
+          (t) => `<a class="offer" href="book.html?treatment=${t.slug}" data-reveal>
+        <span class="offer-icon">${icon(t.icon)}</span>
+        <span class="offer-name">${esc(t.title)}</span>
+        <span class="offer-meta">${
+          t.priceOptions ? `from £${Math.min(...t.priceOptions.map((o) => o.price))}` : `£${t.price}`
+        } · ${t.duration} min</span>
+        <span class="offer-go">Book ${icon('arrow')}</span>
+      </a>`
+        )
+        .join('')}
     </div>
   </div>
 </section>
@@ -237,7 +288,7 @@ ${marquee()}
       </div>
       <div class="split-media" data-reveal="right">
         <div class="frame frame-glow">
-          ${photoSlot('jack-portrait')}
+          ${photo('jack-portrait', 'Jack Laurie, sports injury therapist at J.L. Sports Injury Services in Gosforth, Newcastle')}
           <div class="frame-caption">
             ${icon('shield')}
             <span><b>Jack Laurie</b><span>Sports Injury Therapist · Est. ${site.founded}</span></span>
@@ -420,7 +471,7 @@ function about() {
     <div class="split">
       <div class="split-media" data-reveal="left">
         <div class="frame frame-glow">
-          ${photoSlot('jack-treating')}
+          ${photo('jack-treating', 'Jack Laurie treating a client at the Gosforth clinic')}
           <div class="frame-caption">
             ${icon('hands')}
             <span><b>Assessment and treatment</b><span>${esc(addr.venue)}, ${esc(addr.locality)}</span></span>
@@ -508,7 +559,7 @@ function about() {
       </div>
       <div class="split-media" data-reveal="right">
         <div class="frame frame-wide frame-glow">
-          ${photoSlot('clinic-gym')}
+          ${photo('clinic-gym', 'The gym floor at Hidden Strength, Gosforth, used for rehabilitation')}
         </div>
       </div>
     </div>
@@ -757,7 +808,7 @@ function treatmentPage(t) {
         </div>
 
         <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
-          ${photoSlot(`treatment-${t.slug}`)}
+          ${photo(`treatment-${t.slug}`, `${t.title} at J.L. Sports Injury Services, Gosforth, Newcastle`)}
         </div>
       </div>
 

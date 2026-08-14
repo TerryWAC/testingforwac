@@ -291,7 +291,7 @@ function footer() {
 <div class="cta-bar" id="cta-bar" aria-hidden="false">
   <div class="cta-bar-inner">
     <div class="cta-bar-text">
-      <strong>Injured? Get it looked at properly.</strong>
+      <strong>Book your appointment</strong>
       <span>${stars(5)} Rated ${site.reviews.rating} from ${site.reviews.count} reviews</span>
     </div>
     <div class="cta-bar-actions">
