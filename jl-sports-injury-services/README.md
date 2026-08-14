@@ -15,9 +15,23 @@ straight onto existing hosting via FTP.
 npm run build      # regenerate site/ from src/
 npm run serve      # preview at http://localhost:8899
 npm run verify     # build, then run the full browser test suite
+npm run demo       # build + check demo.html, the shareable single-file version
 ```
 
 To publish, upload the contents of `site/`. That folder is the whole website.
+
+### Sending it to the client
+
+`npm run demo` packs every page, the CSS, the fonts and the booking flow into a
+single `demo.html` with hash routing — one file, no server, no install. Open it
+locally or host it anywhere to show the site off. The only thing it drops is the
+"add to calendar" download, which needs a real web host to work.
+
+`site/` is still the real website. The demo is a delivery convenience, not the
+deliverable — it has no per-page URLs, so don't deploy it as the live site.
+
+For a live URL in about thirty seconds: drag the `site/` folder onto
+[app.netlify.com/drop](https://app.netlify.com/drop).
 
 ---
 

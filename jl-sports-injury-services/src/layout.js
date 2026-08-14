@@ -384,6 +384,8 @@ module.exports = {
   page,
   esc,
   logo,
+  header,
+  footer,
   breadcrumbSchema,
   addressOneLine,
 };
