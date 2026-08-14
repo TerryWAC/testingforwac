@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {
-  site, treatments, steps, credentials, faqs, trustPoints,
+  site, treatments, steps, credentials, faqs, trustPoints, reviewCount,
 } = require('./content');
 const { icon, stars } = require('./icons');
 const { esc, breadcrumbSchema, addressOneLine } = require('./layout');
@@ -209,7 +209,20 @@ const crumbs = (items) => `<nav class="crumbs" aria-label="Breadcrumb">
  * visitor opts in, and keeps ~700 kB of third-party payload out of the initial
  * load — the map is not what anyone came for.
  */
-const mapCard = (id, variant = '') => `<div class="map-card ${variant}" id="${id}" data-reveal>
+const mapEmbedSrc = `https://maps.google.com/maps?q=${encodeURIComponent(
+  site.google.mapQuery
+)}&z=16&output=embed`;
+const mapTitle = `Map showing ${site.name}, ${addr.locality}, ${addr.region}`;
+
+const mapCard = (id, variant = '') => `<div class="map-card ${variant}${
+  site.google.mapMode === 'auto' ? ' is-live' : ''
+}" id="${id}" data-reveal>
+  ${
+    site.google.mapMode === 'auto'
+      ? `<iframe src="${mapEmbedSrc}" title="${esc(mapTitle)}" loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`
+      : ''
+  }
   <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
     <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
       <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
@@ -233,11 +246,14 @@ const mapCard = (id, variant = '') => `<div class="map-card ${variant}" id="${id
       <span>${esc(addr.street)}, ${esc(addr.locality)} ${esc(addr.postcode)}</span>
     </div>
     <div class="map-actions">
-      <button class="btn btn-ghost btn-sm" type="button" data-map-load
-        data-map-src="https://maps.google.com/maps?q=${encodeURIComponent(site.google.mapQuery)}&z=16&output=embed"
-        data-map-title="Map showing ${esc(site.name)}, ${esc(addr.locality)}">
+      ${
+        site.google.mapMode === 'auto'
+          ? ''
+          : `<button class="btn btn-ghost btn-sm" type="button" data-map-load
+        data-map-src="${mapEmbedSrc}" data-map-title="${esc(mapTitle)}">
         ${icon('pin')} Show map
-      </button>
+      </button>`
+      }
       <a class="btn btn-primary btn-sm" href="${site.directionsUrl}" target="_blank" rel="noopener">Directions</a>
     </div>
   </div>
@@ -278,7 +294,7 @@ function home() {
           <a class="btn btn-ghost btn-lg" href="tel:${site.phoneHref}">${icon('phone')} ${esc(site.phone)}</a>
         </div>
         <div class="hero-badges" data-hero style="--d:330ms">
-          <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} from ${site.reviews.count} reviews</span>
+          <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} from ${reviewCount}</span>
           <span class="badge">${icon('check')} No referral needed</span>
           <span class="badge">${icon('clock')} Mon–Thu, 9am–8pm</span>
           <span class="badge">${icon('tag')} From £30</span>
@@ -455,7 +471,7 @@ ${marquee()}
     <div class="stats" data-reveal>
       <div class="stat"><b data-count="10" data-suffix="+">0</b><span>Years in practice</span></div>
       <div class="stat"><b>${site.founded}</b><span>Serving Gosforth</span></div>
-      <div class="stat"><b data-count="5" data-decimals="1" data-suffix="★">0</b><span>From ${site.reviews.count} reviews</span></div>
+      <div class="stat"><b data-count="5" data-decimals="1" data-suffix="★">0</b><span>From ${reviewCount}</span></div>
       <div class="stat"><b data-count="7">0</b><span>Treatments available</span></div>
     </div>
   </div>
@@ -467,7 +483,7 @@ ${marquee()}
       <div class="rating-score">
         <b>${site.reviews.rating}</b>
         ${stars(5)}
-        <small>${site.reviews.count} reviews</small>
+        <small>${reviewCount}</small>
       </div>
       <div class="rating-copy">
         <h3>Five stars, everywhere clients leave them.</h3>
@@ -520,7 +536,7 @@ ${ctaBand()}
     slug: 'index.html',
     title: 'Sports Injury Clinic & Sports Massage | Gosforth, Newcastle',
     desc:
-      'Sports injury clinic in Gosforth, Newcastle. Injury assessment, sports massage, medical acupuncture and gym-based rehab. Rated 5.0 from 31 reviews. Book online.',
+      'Sports injury clinic in Gosforth, Newcastle. Injury assessment, sports massage, medical acupuncture and gym-based rehab. Rated 5.0 from over 30 reviews. Book online.',
     body,
     schema: [
       {
@@ -1063,7 +1079,7 @@ function book() {
         </p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
-        <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} from ${site.reviews.count} reviews</span>
+        <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} from ${reviewCount}</span>
         <span class="badge">${icon('check')} No referral needed</span>
         <span class="badge">${icon('clock')} Mon–Thu, 9am–8pm</span>
       </div>

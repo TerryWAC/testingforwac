@@ -157,10 +157,12 @@ Everything Google-related is configured in one place: the `google` block in
 
 ### Already working
 
-- **Map.** The contact page and the home page carry a real Google map. It loads only when
-  the visitor presses "Show map", so no Google cookies are set on someone who never asked
-  for one, and none of that payload is in the initial page load. "Directions" opens Google
-  Maps with the clinic set as the destination.
+- **Map.** The contact page and the home page carry a real Google map. By default it loads
+  only when the visitor presses "Show map", so no Google cookies are set on someone who
+  never asked for one, and none of that payload is in the initial page load. Set
+  `google.mapMode` to `'auto'` if you would rather it load with the page like most sites
+  do — the trade-off is Google cookies on every visit. "Directions" opens Google Maps with
+  the clinic set as the destination.
 - **Business Profile and reviews.** Linked from the footer, the reviews panel and the
   structured data's `sameAs`, which is how Google ties the site to the listing.
 - **Structured data.** `MedicalBusiness` with the address, coordinates, opening hours,

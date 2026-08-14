@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { site, nav, treatments } = require('./content');
+const { site, nav, treatments, reviewCount } = require('./content');
 const { icon, stars } = require('./icons');
 
 const esc = (s) =>
@@ -306,7 +306,7 @@ function footer() {
   <div class="cta-bar-inner">
     <div class="cta-bar-text">
       <strong>Book your appointment</strong>
-      <span>${stars(5)} Rated ${site.reviews.rating} from ${site.reviews.count} reviews</span>
+      <span>${stars(5)} Rated ${site.reviews.rating} from ${reviewCount}</span>
     </div>
     <div class="cta-bar-actions">
       <a class="btn btn-ghost btn-sm" href="tel:${site.phoneHref}">${icon('phone')}<span class="sr-only">Call ${esc(

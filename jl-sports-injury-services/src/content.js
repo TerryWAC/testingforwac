@@ -53,6 +53,13 @@ const site = {
     // Drives the embedded map. Precise enough to land on the building.
     mapQuery: 'Hidden Strength, Lansdowne Court, Gosforth, Newcastle upon Tyne NE3 1HR',
 
+    // How the Google map loads:
+    //   'click' — styled card first, Google only loaded when asked (default).
+    //             No Google cookies for anyone who does not want a map.
+    //   'auto'  — the real map loads with the page, like most sites do.
+    //             Simpler, but it sets Google cookies on every visit.
+    mapMode: 'click',
+
     // Google Business Profile. Replace with the profile's own short link
     // (Google Business Profile → Read reviews → Share) once you have it —
     // this search URL resolves to the listing in the meantime.
@@ -76,6 +83,11 @@ const site = {
   reviews: {
     rating: '5.0',
     count: 31,
+    // How the count is worded on the page. "over 30" stays true as reviews
+    // come in — an exact number is out of date the moment someone leaves one,
+    // and nobody wants to edit the site every time. Set `countLabel` to null
+    // to show the exact `count` instead.
+    countLabel: 'over 30',
     // Platforms the 5★ record lives on.
     platforms: ['Google', 'Fresha', 'Facebook'],
   },
@@ -446,7 +458,7 @@ const steps = [
 const stats = [
   { value: 10, suffix: '+', label: 'Years in practice' },
   { value: 2018, prefix: 'Est. ', label: 'Serving Gosforth', raw: true },
-  { value: 5.0, suffix: '★', label: 'From 31 reviews', decimals: 1 },
+  { value: 5.0, suffix: '★', label: 'From over 30 reviews', decimals: 1 },
   { value: 2, label: 'Elite clubs worked with' },
 ];
 
@@ -512,14 +524,20 @@ const trustPoints = [
     icon: 'tag',
   },
   {
-    h: 'Rated 5.0 from 31 reviews',
+    h: 'Rated 5.0 from over 30 reviews',
     p: 'A five star record across Google, Fresha and Facebook from clients across Newcastle and North Tyneside.',
     icon: 'star',
   },
 ];
 
+// How the review count reads on the page, e.g. "over 30 reviews".
+const reviewCount = site.reviews.countLabel
+  ? `${site.reviews.countLabel} reviews`
+  : `${site.reviews.count} reviews`;
+
 module.exports = {
   site,
+  reviewCount,
   treatments,
   nav,
   steps,

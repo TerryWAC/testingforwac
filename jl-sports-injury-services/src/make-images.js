@@ -55,7 +55,7 @@ const og = `<!doctype html><html><head><meta charset="utf-8">
     </div>
     <h1>Sports injury treatment that <span class="g">fixes the cause</span>.</h1>
     <div class="foot">
-      <span class="chip hi">★ 5.0 from 31 reviews</span>
+      <span class="chip hi">★ 5.0 from over 30 reviews</span>
       <span class="chip">Gosforth, Newcastle upon Tyne</span>
       <span class="chip">Book online</span>
     </div>
