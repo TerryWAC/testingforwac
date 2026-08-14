@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <mask id="f">
+      <circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="#06100C"/>
+  <circle cx="100" cy="100" r="96" fill="#00FA82" mask="url(#f)" transform="translate(100 100) scale(0.84) translate(-100 -100)"/>
+</svg>

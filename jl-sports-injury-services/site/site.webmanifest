@@ -1,0 +1,22 @@
+{
+  "name": "J.L. Sports Injury Services",
+  "short_name": "J.L. Sports Injury",
+  "description": "Sports injury clinic in Gosforth, Newcastle upon Tyne.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06100C",
+  "theme_color": "#06100C",
+  "icons": [
+    {
+      "src": "/assets/img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

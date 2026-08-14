@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="J.L. Sports Injury Services">
+  <title>J.L. Sports Injury Services</title>
+  <defs>
+    <mask id="jl-knockout">
+      <circle cx="100" cy="100" r="96" fill="#fff"/>
+      <!-- J -->
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <!-- L -->
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="currentColor" mask="url(#jl-knockout)"/>
+</svg>
