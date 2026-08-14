@@ -147,7 +147,7 @@ function header(current) {
         )
         .join('');
       return `<li class="has-mega">
-        <a class="nav-link${active ? ' is-active' : ''}" href="${item.href}" aria-expanded="false">
+        <a class="nav-link${active ? ' is-active' : ''}" href="${item.href}">
           ${esc(item.label)} ${icon('chevron', 'chev')}
         </a>
         <div class="mega" role="group" aria-label="Treatments">

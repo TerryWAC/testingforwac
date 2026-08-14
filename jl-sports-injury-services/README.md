@@ -169,6 +169,22 @@ markup in one go.
 
 ## Tests
 
+`npm run check` runs both suites. `npm run audit` is the accessibility, responsive and
+page-weight pass; it checks every page for:
+
+- colour contrast on every text element against its true composited background,
+  at WCAG AA (4.5:1 body, 3:1 large text)
+- images without alt text, form controls without labels, links and buttons without an
+  accessible name, vague link text
+- heading order with no skipped levels, landmark elements, a `lang` attribute, zoom not
+  disabled, no duplicate ids
+- tap targets at least 32px on mobile
+- horizontal overflow at 360, 390, 768, 1024, 1280, 1440 and 1920px
+- page weight, request count and DOM size per page
+
+Current state: no problems, and the heaviest page is 255 kB over 7 requests — most of
+which is the two fonts, cached for every page after the first.
+
 `npm run verify` drives a real browser and checks:
 
 - every page loads with no console or network errors

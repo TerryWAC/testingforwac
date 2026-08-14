@@ -15,6 +15,79 @@ const addr = site.address;
 
 const IMG_DIR = path.join(__dirname, '..', 'site', 'assets', 'img');
 
+// ---------------------------------------------------------------------------
+// Placeholder artwork
+//
+// Contour lines — the visual language of body mapping and movement. Generated
+// deterministically from the slot name so each position gets its own pattern
+// and the output is stable between builds.
+// ---------------------------------------------------------------------------
+
+function seedFrom(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** mulberry32 — small, deterministic PRNG. */
+function rng(seed) {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function contourArt(name) {
+  const rand = rng(seedFrom(name));
+  const W = 400;
+  const H = 400;
+  const LINES = 26;
+  const lines = [];
+
+  const baseAmp = 26 + rand() * 20;
+  const baseFreq = 1.1 + rand() * 0.9;
+  const phase0 = rand() * Math.PI * 2;
+  const skew = (rand() - 0.5) * 40;
+
+  for (let i = 0; i < LINES; i++) {
+    const t = i / (LINES - 1);
+    // Lines bunch towards the middle, the way contours crowd on a slope.
+    const y = -40 + t * (H + 80);
+    const swell = Math.sin(t * Math.PI); // 0 at edges, 1 in the middle
+    const amp = baseAmp * (0.35 + swell * 0.95);
+    const freq = baseFreq * (0.85 + swell * 0.4);
+    const phase = phase0 + t * 2.4;
+
+    let d = '';
+    for (let x = -20; x <= W + 20; x += 20) {
+      const px = x / W;
+      const py =
+        y +
+        Math.sin(px * Math.PI * freq + phase) * amp +
+        Math.sin(px * Math.PI * freq * 2.7 + phase * 1.6) * amp * 0.22 +
+        px * skew;
+      d += (d ? ' L' : 'M') + x.toFixed(0) + ' ' + py.toFixed(1);
+    }
+
+    const accent = i % 7 === 3;
+    lines.push(
+      `<path d="${d}" stroke="${accent ? 'var(--green)' : 'currentColor'}" stroke-width="${
+        accent ? 1.5 : 1
+      }" opacity="${(accent ? 0.5 : 0.16 + swell * 0.2).toFixed(2)}"/>`
+    );
+  }
+
+  return `<svg class="contours" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true">${lines.join('')}</svg>`;
+}
+
 /** First existing file for this slot, or null while it is still a placeholder. */
 function findPhoto(name) {
   for (const ext of ['webp', 'jpg', 'jpeg', 'png', 'avif']) {
@@ -33,6 +106,7 @@ function findPhoto(name) {
 const photo = (name, alt) => {
   const file = findPhoto(name);
   const placeholder = `<div class="photo-slot" data-photo="${name}">
+  ${contourArt(name)}
   <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
     <mask id="ph-${name}"><circle cx="100" cy="100" r="96" fill="#fff"/>
       <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
@@ -56,9 +130,12 @@ const treatmentCard = (t) => `<article class="card t-card card-stretch" data-rev
   <h3><a href="${t.slug}.html">${esc(t.title)}</a></h3>
   <p>${esc(t.summary)}</p>
   <div class="t-card-meta">
-    <span class="price">£${t.price}</span>
+    ${t.priceOptions ? '<span>from</span>' : ''}
+    <span class="price">£${
+      t.priceOptions ? Math.min(...t.priceOptions.map((o) => o.price)) : t.price
+    }</span>
     <span class="sep">·</span>
-    <span>${t.duration} min</span>
+    <span>${t.priceOptions ? `${Math.min(...t.priceOptions.map((o) => o.duration))}–${t.duration}` : t.duration} min</span>
   </div>
   <span class="t-card-link">Read more ${icon('arrow')}</span>
 </article>`;
@@ -180,9 +257,17 @@ function home() {
               ${icon(t.icon)}
               <span class="quick-item-text">
                 <strong>${esc(t.title)}</strong>
-                <span>${t.duration} minutes</span>
+                <span>${
+                  t.priceOptions
+                    ? `${Math.min(...t.priceOptions.map((o) => o.duration))}–${t.duration} minutes`
+                    : `${t.duration} minutes`
+                }</span>
               </span>
-              <span class="quick-item-price">£${t.price}</span>
+              <span class="quick-item-price">${
+                t.priceOptions
+                  ? `from £${Math.min(...t.priceOptions.map((o) => o.price))}`
+                  : `£${t.price}`
+              }</span>
             </a>`
               )
               .join('')}
@@ -210,8 +295,12 @@ function home() {
         <span class="offer-icon">${icon(t.icon)}</span>
         <span class="offer-name">${esc(t.title)}</span>
         <span class="offer-meta">${
-          t.priceOptions ? `from £${Math.min(...t.priceOptions.map((o) => o.price))}` : `£${t.price}`
-        } · ${t.duration} min</span>
+          t.priceOptions
+            ? `from £${Math.min(...t.priceOptions.map((o) => o.price))} · ${Math.min(
+                ...t.priceOptions.map((o) => o.duration)
+              )}–${t.duration} min`
+            : `£${t.price} · ${t.duration} min`
+        }</span>
         <span class="offer-go">Book ${icon('arrow')}</span>
       </a>`
         )
@@ -652,8 +741,12 @@ function services() {
   </div>
 </section>
 
-<section class="section" style="padding-top:clamp(2rem,4vw,3rem)">
+<section class="section" style="padding-top:0">
   <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2>All seven treatments</h2>
+      <a class="btn-link" href="#prices">Jump to prices ${icon('arrow')}</a>
+    </div>
     <div class="grid grid-3" data-stagger="70">
       ${treatments.map(treatmentCard).join('')}
     </div>
@@ -1395,7 +1488,8 @@ function notFound() {
       <a class="btn btn-primary btn-lg" href="index.html">Back to home</a>
       <a class="btn btn-ghost btn-lg" href="book.html">Book an appointment</a>
     </div>
-    <div class="grid grid-3" style="margin-top:4rem;text-align:left" data-stagger="80">
+    <h2 class="eyebrow" style="justify-content:center;margin-top:4rem">Popular treatments</h2>
+    <div class="grid grid-3" style="margin-top:1.5rem;text-align:left" data-stagger="80">
       ${treatments
         .slice(0, 3)
         .map(

@@ -250,6 +250,7 @@ p { text-wrap: pretty; }
 
 .btn-link {
   display: inline-flex; align-items: center; gap: 0.5rem;
+  min-height: 32px; /* comfortable tap target */
   font-family: var(--display); font-weight: 600; color: var(--green);
 }
 .btn-link .icon { transition: transform 0.35s var(--ease); }
@@ -718,13 +719,18 @@ p { text-wrap: pretty; }
 .t-card-meta .sep { opacity: 0.4; }
 .t-card-link {
   display: inline-flex; align-items: center; gap: 0.45rem;
-  margin-top: 1.2rem;
+  margin-top: 1.2rem; min-height: 32px;
   font-family: var(--display); font-weight: 600; font-size: 0.93rem; color: var(--green);
 }
 .t-card-link .icon { width: 17px; height: 17px; transition: transform 0.35s var(--ease); }
 .t-card:hover .t-card-link .icon { transform: translateX(5px); }
-.card-stretch::before {
-  content: ''; position: absolute; inset: 0; z-index: 1;
+/* Whole-card click target. The overlay belongs to the anchor, not the card —
+   put it on the card and it covers the link instead of extending it. */
+.card-stretch h3 a::after {
+  content: ''; position: absolute; inset: 0; z-index: 2;
+}
+.card-stretch h3 a:focus-visible::after {
+  outline: 2px solid var(--green); outline-offset: -4px; border-radius: inherit;
 }
 
 /* --------------------------------------------------------------------------
@@ -833,15 +839,17 @@ p { text-wrap: pretty; }
     radial-gradient(80% 70% at 85% 95%, rgba(178, 154, 158, 0.16), transparent 60%),
     linear-gradient(155deg, var(--ink-3), var(--ink));
 }
-.photo-slot::before {
-  content: ''; position: absolute; inset: 0;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(80% 80% at 50% 50%, #000, transparent 75%);
+.photo-slot .contours {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  color: #cfe6da;
+  mask-image: radial-gradient(120% 100% at 50% 40%, #000 35%, transparent 88%);
 }
-.photo-slot .logo-mark { width: 34%; max-width: 150px; opacity: 0.16; }
+.photo-slot .logo-mark {
+  position: relative;
+  width: 26%; max-width: 118px; height: auto; aspect-ratio: 1;
+  color: var(--green); opacity: 0.34;
+  filter: drop-shadow(0 0 30px rgba(0, 250, 130, 0.3));
+}
 
 /* --------------------------------------------------------------------------
    13. Reviews
