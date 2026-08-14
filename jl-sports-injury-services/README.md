@@ -150,6 +150,51 @@ to get the same trust benefit.
 
 ---
 
+## Google
+
+Everything Google-related is configured in one place: the `google` block in
+`src/content.js`.
+
+### Already working
+
+- **Map.** The contact page and the home page carry a real Google map. It loads only when
+  the visitor presses "Show map", so no Google cookies are set on someone who never asked
+  for one, and none of that payload is in the initial page load. "Directions" opens Google
+  Maps with the clinic set as the destination.
+- **Business Profile and reviews.** Linked from the footer, the reviews panel and the
+  structured data's `sameAs`, which is how Google ties the site to the listing.
+- **Structured data.** `MedicalBusiness` with the address, coordinates, opening hours,
+  service area and a `ReserveAction`, so the clinic is legible to Google as a local
+  business rather than just a web page.
+
+### To connect Jack's own account
+
+1. **Business Profile link.** Open the profile → *Read reviews* → *Share*, and paste the
+   short link into `google.profileUrl` and `google.reviewsUrl`. The current search URLs
+   resolve to the listing, but the profile's own links are cleaner and never drift.
+2. **Search Console.** Verify by DNS if possible. If verifying by HTML tag instead, paste
+   the code into `google.searchConsoleVerification` and rebuild — it appears on every page.
+   Then submit `sitemap.xml`.
+3. **Analytics.** Paste the GA4 measurement ID (`G-XXXXXXXXXX`) into `google.analyticsId`
+   and rebuild.
+
+### About the analytics switch
+
+Leave `analyticsId` blank and the site loads no third-party script, sets no cookies and
+shows no cookie banner. Fill it in and a consent banner appears; Google is only contacted
+after the visitor accepts, and the choice is remembered. Declining means nothing from
+Google is ever requested.
+
+That is deliberate: GA4 sets cookies, so under UK GDPR/PECR it needs consent first. Firing
+it on page load — which most sites do — is not compliant.
+
+One thing to eyeball once it is live: the embedded map could not be loaded from the
+environment this was built in, because Google is blocked there. The embed URL is the
+standard keyless form and the button and iframe wiring are tested, but give the map one
+click on the real site to confirm it renders.
+
+---
+
 ## How it is built
 
 ```

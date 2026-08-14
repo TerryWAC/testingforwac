@@ -93,7 +93,9 @@ const PAGES = [
 
   const durCount = await page.locator('#duration-options .opt').count();
   if (durCount !== 3) problems.push(`[booking] expected 3 duration options, got ${durCount}`);
-  await page.click('#duration-options .opt:nth-child(3) input', { force: true });
+  // Select by value, not position — the options are re-rendered when the
+  // treatment changes, so an index can race the rebuild.
+  await page.click('#duration-options input[value="60"]', { force: true });
   await page.click('[data-next="1"]');
   await page.waitForTimeout(400);
 

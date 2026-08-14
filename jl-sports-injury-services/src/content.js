@@ -42,6 +42,37 @@ const site = {
   directionsUrl:
     'https://www.google.com/maps/dir/?api=1&destination=Hidden+Strength%2C+Lansdowne+Court%2C+Gosforth%2C+Newcastle+upon+Tyne+NE3+1HR',
 
+  // -------------------------------------------------------------------------
+  // Google
+  //
+  // The map embed and the Maps/reviews links work as they are. The two IDs are
+  // deliberately blank: fill them in and the site wires itself up. Leave them
+  // blank and no third-party script loads and no cookie banner appears.
+  // -------------------------------------------------------------------------
+  google: {
+    // Drives the embedded map. Precise enough to land on the building.
+    mapQuery: 'Hidden Strength, Lansdowne Court, Gosforth, Newcastle upon Tyne NE3 1HR',
+
+    // Google Business Profile. Replace with the profile's own short link
+    // (Google Business Profile → Read reviews → Share) once you have it —
+    // this search URL resolves to the listing in the meantime.
+    profileUrl:
+      'https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle',
+
+    // "Write a review" deep link. Swap in the profile's own review link when
+    // available; this one opens the listing where the review button lives.
+    reviewsUrl:
+      'https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle',
+
+    // GA4 measurement ID, e.g. 'G-XXXXXXXXXX'. Blank = no analytics, no
+    // cookies, no consent banner.
+    analyticsId: '',
+
+    // Search Console HTML-tag verification code (the content="..." value).
+    // Only needed if you verify by meta tag rather than DNS.
+    searchConsoleVerification: '',
+  },
+
   reviews: {
     rating: '5.0',
     count: 31,

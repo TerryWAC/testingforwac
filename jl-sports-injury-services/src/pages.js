@@ -201,6 +201,48 @@ const crumbs = (items) => `<nav class="crumbs" aria-label="Breadcrumb">
     .join('')}
 </nav>`;
 
+/**
+ * Google map, loaded on demand.
+ *
+ * The styled card is shown first and the real Google iframe only loads when
+ * someone asks for it. That keeps Google's cookies off the page until the
+ * visitor opts in, and keeps ~700 kB of third-party payload out of the initial
+ * load — the map is not what anyone came for.
+ */
+const mapCard = (id, variant = '') => `<div class="map-card ${variant}" id="${id}" data-reveal>
+  <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
+    <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
+      <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
+      <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
+    </g>
+    <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
+      <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
+    </g>
+    <g fill="rgba(255,255,255,0.045)">
+      <rect x="140" y="60" width="90" height="45" rx="5"/>
+      <rect x="300" y="70" width="70" height="60" rx="5"/>
+      <rect x="450" y="230" width="100" height="70" rx="5"/>
+      <rect x="150" y="280" width="80" height="50" rx="5"/>
+    </g>
+  </svg>
+  <div class="map-pulse" aria-hidden="true"></div>
+  <div class="map-pin" aria-hidden="true">${icon('pin')}</div>
+  <div class="map-overlay">
+    <div>
+      <b>${esc(addr.venue)}</b>
+      <span>${esc(addr.street)}, ${esc(addr.locality)} ${esc(addr.postcode)}</span>
+    </div>
+    <div class="map-actions">
+      <button class="btn btn-ghost btn-sm" type="button" data-map-load
+        data-map-src="https://maps.google.com/maps?q=${encodeURIComponent(site.google.mapQuery)}&z=16&output=embed"
+        data-map-title="Map showing ${esc(site.name)}, ${esc(addr.locality)}">
+        ${icon('pin')} Show map
+      </button>
+      <a class="btn btn-primary btn-sm" href="${site.directionsUrl}" target="_blank" rel="noopener">Directions</a>
+    </div>
+  </div>
+</div>`;
+
 const heroBg = () => `<div class="hero-bg" aria-hidden="true">
   <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
 </div>
@@ -434,6 +476,9 @@ ${marquee()}
         </p>
       </div>
       <div class="rating-platforms">
+        <a class="platform" href="${site.google.profileUrl}" target="_blank" rel="noopener">${icon(
+    'google'
+  )} Google</a>
         <a class="platform" href="${site.bookingUrl}" target="_blank" rel="noopener">${icon('star')} Fresha</a>
         <a class="platform" href="${site.social.facebook}" target="_blank" rel="noopener">${icon('facebook')} Facebook</a>
       </div>
@@ -445,32 +490,7 @@ ${marquee()}
   <div class="shell">
     <div class="split">
       <div class="split-media" data-reveal="left">
-        <div class="map-card">
-          <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
-            <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
-              <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
-              <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
-            </g>
-            <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
-              <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
-            </g>
-            <g fill="rgba(255,255,255,0.045)">
-              <rect x="140" y="60" width="90" height="45" rx="5"/>
-              <rect x="300" y="70" width="70" height="60" rx="5"/>
-              <rect x="450" y="230" width="100" height="70" rx="5"/>
-              <rect x="150" y="280" width="80" height="50" rx="5"/>
-            </g>
-          </svg>
-          <div class="map-pulse" aria-hidden="true"></div>
-          <div class="map-pin" aria-hidden="true">${icon('pin')}</div>
-          <div class="map-overlay">
-            <div>
-              <b>${esc(addr.venue)}</b>
-              <span>${esc(addr.street)}, ${esc(addr.locality)} ${esc(addr.postcode)}</span>
-            </div>
-            <a class="btn btn-ghost btn-sm" href="${site.directionsUrl}" target="_blank" rel="noopener">Directions</a>
-          </div>
-        </div>
+        ${mapCard('map-home')}
       </div>
       <div class="split-copy">
         <span class="eyebrow" data-reveal>Find the clinic</span>
@@ -1345,31 +1365,14 @@ function contact() {
           </div>
         </div>
 
-        <div class="map-card" data-reveal>
-          <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
-            <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
-              <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
-              <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
-            </g>
-            <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
-              <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
-            </g>
-            <g fill="rgba(255,255,255,0.045)">
-              <rect x="140" y="60" width="90" height="45" rx="5"/>
-              <rect x="300" y="70" width="70" height="60" rx="5"/>
-              <rect x="450" y="230" width="100" height="70" rx="5"/>
-              <rect x="150" y="280" width="80" height="50" rx="5"/>
-            </g>
-          </svg>
-          <div class="map-pulse" aria-hidden="true"></div>
-          <div class="map-pin" aria-hidden="true">${icon('pin')}</div>
-          <div class="map-overlay">
-            <div><b>${esc(addr.venue)}</b><span>${esc(addr.postcode)}</span></div>
-            <a class="btn btn-ghost btn-sm" href="${site.directionsUrl}" target="_blank" rel="noopener">Directions</a>
-          </div>
-        </div>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    ${mapCard('map-contact', 'map-card-wide')}
   </div>
 </section>
 

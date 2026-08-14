@@ -68,17 +68,90 @@ const icon = `<!doctype html><html><head><meta charset="utf-8"><style>
   svg{width:148px;height:148px}
 </style></head><body>${MARK}</body></html>`;
 
+// Per-page share cards. Each page gets its own headline and price line, so a
+// link pasted into WhatsApp or Facebook shows what that page is actually about
+// rather than one generic image for the whole site.
+const { treatments, site } = require('./content');
+
+const shareCard = (headline, chips) => og
+  .replace(
+    /<h1>[\s\S]*?<\/h1>/,
+    `<h1>${headline}</h1>`
+  )
+  .replace(
+    /<div class="foot">[\s\S]*?<\/div>\s*<\/div>/,
+    `<div class="foot">${chips
+      .map((c, i) => `<span class="chip${i === 0 ? ' hi' : ''}">${c}</span>`)
+      .join('')}</div></div>`
+  );
+
+const CARDS = [
+  {
+    file: 'og-image.png',
+    html: og,
+  },
+  ...treatments.map((t) => ({
+    file: `og-${t.slug}.png`,
+    html: shareCard(
+      `${t.title} <span class="g">in Gosforth</span>`,
+      [
+        t.priceOptions
+          ? `From £${Math.min(...t.priceOptions.map((o) => o.price))}`
+          : `£${t.price}`,
+        t.priceOptions
+          ? `${Math.min(...t.priceOptions.map((o) => o.duration))}–${t.duration} minutes`
+          : `${t.duration} minutes`,
+        'Newcastle upon Tyne',
+      ]
+    ),
+  })),
+  {
+    file: 'og-book.png',
+    html: shareCard('Book online in <span class="g">60 seconds</span>', [
+      'No referral needed',
+      'Mon–Thu, 9am–8pm',
+      'Gosforth, Newcastle',
+    ]),
+  },
+  {
+    file: 'og-about-us.png',
+    html: shareCard('A decade in <span class="g">professional rugby</span>', [
+      'Leicester Tigers',
+      'Castleford Tigers R.L.F.C.',
+      `Est. ${site.founded}`,
+    ]),
+  },
+  {
+    file: 'og-services.png',
+    html: shareCard('Seven treatments, <span class="g">one clinic</span>', [
+      'From £30',
+      'Injury assessment · Sports massage',
+      'Gosforth, Newcastle',
+    ]),
+  },
+  {
+    file: 'og-contact.png',
+    html: shareCard('Hidden Strength, <span class="g">Gosforth</span>', [
+      '+44 7460 937648',
+      'Mon–Thu, 9am–8pm',
+      'Newcastle upon Tyne',
+    ]),
+  },
+];
+
 (async () => {
   const browser = await chromium.launch({ executablePath: CHROME });
 
   const p1 = await browser.newPage({ viewport: { width: 1200, height: 630 } });
-  await p1.setContent(og, { waitUntil: 'networkidle' });
-  await p1.screenshot({ path: path.join(OUT, 'og-image.png') });
+  for (const card of CARDS) {
+    await p1.setContent(card.html, { waitUntil: 'networkidle' });
+    await p1.screenshot({ path: path.join(OUT, card.file) });
+  }
 
   const p2 = await browser.newPage({ viewport: { width: 180, height: 180 } });
   await p2.setContent(icon);
   await p2.screenshot({ path: path.join(OUT, 'apple-touch-icon.png') });
 
   await browser.close();
-  console.log('og-image.png + apple-touch-icon.png written to', OUT);
+  console.log(`${CARDS.length} share images + apple-touch-icon.png written to ${OUT}`);
 })();

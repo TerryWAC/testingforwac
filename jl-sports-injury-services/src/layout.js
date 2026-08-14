@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const { site, nav, treatments } = require('./content');
 const { icon, stars } = require('./icons');
 
@@ -79,7 +82,12 @@ function localBusinessSchema() {
     hasMap: site.directionsUrl,
     openingHoursSpecification: openSpec,
     areaServed: site.areasServed.map((a) => ({ '@type': 'Place', name: a })),
-    sameAs: [site.social.facebook, site.social.instagram, site.bookingUrl],
+    sameAs: [
+      site.google.profileUrl,
+      site.social.facebook,
+      site.social.instagram,
+      site.bookingUrl,
+    ],
     founder: {
       '@type': 'Person',
       name: site.practitioner,
@@ -235,6 +243,9 @@ function footer() {
           site.founded
         }.</p>
         <div class="footer-social">
+          <a href="${site.google.profileUrl}" rel="noopener" target="_blank" aria-label="Google Business Profile">${icon(
+    'google'
+  )}</a>
           <a href="${site.social.facebook}" rel="noopener" target="_blank" aria-label="Facebook">${icon(
     'facebook'
   )}</a>
@@ -242,6 +253,9 @@ function footer() {
     'instagram'
   )}</a>
         </div>
+        <a class="footer-review" href="${site.google.reviewsUrl}" rel="noopener" target="_blank">
+          ${stars(5)}<span>Leave a Google review</span>
+        </a>
       </div>
 
       <div class="footer-col">
@@ -305,6 +319,69 @@ function footer() {
 }
 
 // ---------------------------------------------------------------------------
+// Google Analytics + consent
+//
+// GA4 sets cookies, so under UK GDPR/PECR it needs consent before it loads.
+// Nothing is requested from Google until the visitor accepts; if no
+// measurement ID is configured, neither the script nor the banner exists.
+// ---------------------------------------------------------------------------
+
+function analytics() {
+  const id = site.google.analyticsId;
+  if (!id) return '';
+
+  return `<script>
+(function () {
+  var ID = ${JSON.stringify(id)};
+  var KEY = 'jl-consent';
+  var banner;
+
+  function load() {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { window.dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', ID, { anonymize_ip: true });
+  }
+
+  function decide(accepted) {
+    try { localStorage.setItem(KEY, accepted ? 'yes' : 'no'); } catch (e) {}
+    if (banner) banner.remove();
+    if (accepted) load();
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (saved === 'yes') { load(); return; }
+  if (saved === 'no') return;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    banner = document.createElement('div');
+    banner.className = 'consent';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-label', 'Cookies');
+    banner.innerHTML =
+      '<p>We use Google Analytics to see which pages help people find treatment. ' +
+      'Nothing is loaded until you choose. <a href="privacy-policy.html">Privacy policy</a></p>' +
+      '<div class="consent-actions">' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-consent="no">Decline</button>' +
+      '<button class="btn btn-primary btn-sm" type="button" data-consent="yes">Accept</button>' +
+      '</div>';
+    banner.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-consent]');
+      if (b) decide(b.getAttribute('data-consent') === 'yes');
+    });
+    document.body.appendChild(banner);
+  });
+})();
+</script>`;
+}
+
+// ---------------------------------------------------------------------------
 // Document
 // ---------------------------------------------------------------------------
 
@@ -322,6 +399,11 @@ function page(o) {
   const url = `${site.origin}/${o.slug === 'index.html' ? '' : o.slug}`;
   const schemas = [localBusinessSchema(), ...(o.schema || [])];
 
+  // Per-page share card when one has been generated, else the site-wide one.
+  const cardName = `og-${o.slug.replace('.html', '')}.png`;
+  const cardExists = fs.existsSync(path.join(__dirname, '..', 'site', 'assets', 'img', cardName));
+  const ogImage = `${site.origin}/assets/img/${cardExists ? cardName : 'og-image.png'}`;
+
   return `<!doctype html>
 <html lang="en-GB">
 <head>
@@ -331,6 +413,11 @@ function page(o) {
 <meta name="description" content="${esc(o.desc)}">
 <link rel="canonical" href="${url}">
 ${o.noindex ? '<meta name="robots" content="noindex, follow">' : '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">'}
+${
+  site.google.searchConsoleVerification
+    ? `<meta name="google-site-verification" content="${esc(site.google.searchConsoleVerification)}">`
+    : ''
+}
 
 <meta name="theme-color" content="#06100C">
 <meta name="format-detection" content="telephone=no">
@@ -345,14 +432,14 @@ ${o.noindex ? '<meta name="robots" content="noindex, follow">' : '<meta name="ro
 <meta property="og:title" content="${esc(o.title)}">
 <meta property="og:description" content="${esc(o.desc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${site.origin}/assets/img/og-image.png">
+<meta property="og:image" content="${ogImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="${esc(site.name)} — sports injury clinic in Gosforth, Newcastle">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(o.title)}">
 <meta name="twitter:description" content="${esc(o.desc)}">
-<meta name="twitter:image" content="${site.origin}/assets/img/og-image.png">
+<meta name="twitter:image" content="${ogImage}">
 
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
@@ -375,6 +462,7 @@ ${o.body}
 ${footer()}
 <script src="assets/js/site.js" defer></script>
 ${o.slug === 'book.html' ? '<script src="assets/js/booking.js" defer></script>' : ''}
+${analytics()}
 </body>
 </html>
 `;

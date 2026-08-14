@@ -1250,6 +1250,12 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   overflow: hidden; aspect-ratio: 16 / 11;
   background: linear-gradient(160deg, var(--ink-3), var(--ink));
 }
+/* Full-width band on the contact page — a letterbox reads better than a
+   near-square stretched across the whole shell. */
+.map-card-wide { aspect-ratio: 5 / 2; }
+@media (max-width: 900px) {
+  .map-card-wide { aspect-ratio: 4 / 3; }
+}
 .map-art { position: absolute; inset: 0; opacity: 0.5; }
 .map-pin {
   position: absolute; left: 50%; top: 46%; transform: translate(-50%, -100%);
@@ -1273,6 +1279,17 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 }
 .map-overlay b { font-family: var(--display); font-size: 0.98rem; display: block; }
 .map-overlay span { font-size: 0.84rem; color: var(--text-faint); }
+.map-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Once the real Google map is requested it replaces the artwork entirely. */
+.map-card.is-live .map-art,
+.map-card.is-live .map-pin,
+.map-card.is-live .map-pulse { display: none; }
+.map-card iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; filter: grayscale(0.25) contrast(1.05);
+}
+.map-card.is-live .map-overlay { background: rgba(6, 16, 12, 0.92); }
 
 /* --------------------------------------------------------------------------
    22. Footer
@@ -1301,6 +1318,14 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 }
 .footer-social a:hover { border-color: var(--green); color: var(--green); transform: translateY(-3px); }
 .footer-social .icon { width: 19px; height: 19px; }
+
+.footer-review {
+  display: inline-flex; align-items: center; gap: 0.6rem; min-height: 32px;
+  font-size: 0.88rem; color: var(--text-dim);
+  transition: color 0.25s;
+}
+.footer-review:hover { color: var(--green); }
+.footer-review .stars svg { width: 13px; height: 13px; }
 
 .footer-col h3 {
   font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
@@ -1352,7 +1377,39 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .cta-bar-text span { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--text-faint); }
+.cta-bar-text .stars { color: var(--green); }
 .cta-bar-actions { display: flex; gap: 0.5rem; flex: none; }
+
+/* --------------------------------------------------------------------------
+   23b. Cookie consent — only rendered when analytics is switched on
+   -------------------------------------------------------------------------- */
+
+.consent {
+  position: fixed; z-index: 120;
+  left: var(--gutter); right: var(--gutter); bottom: calc(1rem + env(safe-area-inset-bottom));
+  max-width: 30rem;
+  display: grid; gap: 1rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: rgba(10, 23, 15, 0.96);
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: var(--shadow);
+  animation: consentIn 0.5s var(--ease) 0.6s both;
+}
+@keyframes consentIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.consent p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.55; }
+.consent a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+.consent-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+
+/* Nudge the sticky booking bar out of the way while the banner is up. */
+.consent ~ .cta-bar { bottom: 0; }
+
+@media (min-width: 721px) {
+  .consent { left: auto; right: var(--gutter); }
+}
 
 /* --------------------------------------------------------------------------
    24. Scroll reveal
@@ -1945,6 +2002,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
         </p>
       </div>
       <div class="rating-platforms">
+        <a class="platform" href="https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.06-1.35-.18-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.75 3-4.32 3-7.3Z"/><path d="M12 22c2.7 0 4.97-.9 6.6-2.43l-3.2-2.5c-.9.6-2.05.95-3.4.95-2.6 0-4.8-1.76-5.6-4.12H3.1v2.58A10 10 0 0 0 12 22Z"/><path d="M6.4 13.9a6 6 0 0 1 0-3.83V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z"/><path d="M12 5.95c1.47 0 2.79.5 3.83 1.5l2.84-2.84C16.96 2.99 14.7 2 12 2A10 10 0 0 0 3.1 7.5l3.3 2.57C7.2 7.71 9.4 5.95 12 5.95Z"/></svg> Google</a>
         <a class="platform" href="https://www.fresha.com/a/j-l-sports-injury-services-newcastle-upon-tyne-hidden-strength-lansdowne-court-gosforth-olaass6e" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg> Fresha</a>
         <a class="platform" href="https://www.facebook.com/JLSportsInjuryServices/" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14 9V7.2c0-.8.2-1.2 1.4-1.2H17V3h-2.6C11.5 3 10.5 4.4 10.5 6.9V9H8.5v3h2V21h3.5v-9h2.4l.4-3H14Z"/></svg> Facebook</a>
       </div>
@@ -1956,32 +2014,39 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   <div class="shell">
     <div class="split">
       <div class="split-media" data-reveal="left">
-        <div class="map-card">
-          <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
-            <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
-              <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
-              <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
-            </g>
-            <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
-              <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
-            </g>
-            <g fill="rgba(255,255,255,0.045)">
-              <rect x="140" y="60" width="90" height="45" rx="5"/>
-              <rect x="300" y="70" width="70" height="60" rx="5"/>
-              <rect x="450" y="230" width="100" height="70" rx="5"/>
-              <rect x="150" y="280" width="80" height="50" rx="5"/>
-            </g>
-          </svg>
-          <div class="map-pulse" aria-hidden="true"></div>
-          <div class="map-pin" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-          <div class="map-overlay">
-            <div>
-              <b>Hidden Strength</b>
-              <span>Lansdowne Court, Gosforth NE3 1HR</span>
-            </div>
-            <a class="btn btn-ghost btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=Hidden+Strength%2C+Lansdowne+Court%2C+Gosforth%2C+Newcastle+upon+Tyne+NE3+1HR" target="_blank" rel="noopener">Directions</a>
-          </div>
-        </div>
+        <div class="map-card " id="map-home" data-reveal>
+  <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
+    <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
+      <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
+      <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
+    </g>
+    <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
+      <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
+    </g>
+    <g fill="rgba(255,255,255,0.045)">
+      <rect x="140" y="60" width="90" height="45" rx="5"/>
+      <rect x="300" y="70" width="70" height="60" rx="5"/>
+      <rect x="450" y="230" width="100" height="70" rx="5"/>
+      <rect x="150" y="280" width="80" height="50" rx="5"/>
+    </g>
+  </svg>
+  <div class="map-pulse" aria-hidden="true"></div>
+  <div class="map-pin" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+  <div class="map-overlay">
+    <div>
+      <b>Hidden Strength</b>
+      <span>Lansdowne Court, Gosforth NE3 1HR</span>
+    </div>
+    <div class="map-actions">
+      <button class="btn btn-ghost btn-sm" type="button" data-map-load
+        data-map-src="https://maps.google.com/maps?q=Hidden%20Strength%2C%20Lansdowne%20Court%2C%20Gosforth%2C%20Newcastle%20upon%20Tyne%20NE3%201HR&z=16&output=embed"
+        data-map-title="Map showing J.L. Sports Injury Services, Gosforth">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Show map
+      </button>
+      <a class="btn btn-primary btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=Hidden+Strength%2C+Lansdowne+Court%2C+Gosforth%2C+Newcastle+upon+Tyne+NE3+1HR" target="_blank" rel="noopener">Directions</a>
+    </div>
+  </div>
+</div>
       </div>
       <div class="split-copy">
         <span class="eyebrow" data-reveal>Find the clinic</span>
@@ -3850,31 +3915,46 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </div>
         </div>
 
-        <div class="map-card" data-reveal>
-          <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
-            <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
-              <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
-              <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
-            </g>
-            <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
-              <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
-            </g>
-            <g fill="rgba(255,255,255,0.045)">
-              <rect x="140" y="60" width="90" height="45" rx="5"/>
-              <rect x="300" y="70" width="70" height="60" rx="5"/>
-              <rect x="450" y="230" width="100" height="70" rx="5"/>
-              <rect x="150" y="280" width="80" height="50" rx="5"/>
-            </g>
-          </svg>
-          <div class="map-pulse" aria-hidden="true"></div>
-          <div class="map-pin" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-          <div class="map-overlay">
-            <div><b>Hidden Strength</b><span>NE3 1HR</span></div>
-            <a class="btn btn-ghost btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=Hidden+Strength%2C+Lansdowne+Court%2C+Gosforth%2C+Newcastle+upon+Tyne+NE3+1HR" target="_blank" rel="noopener">Directions</a>
-          </div>
-        </div>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="map-card map-card-wide" id="map-contact" data-reveal>
+  <svg class="map-art" viewBox="0 0 600 420" aria-hidden="true">
+    <g stroke="rgba(255,255,255,0.10)" stroke-width="1.5" fill="none">
+      <path d="M-20 120 H620 M-20 250 H620 M-20 340 H620"/>
+      <path d="M110 -20 V440 M270 -20 V440 M430 -20 V440"/>
+    </g>
+    <g stroke="rgba(0,250,130,0.28)" stroke-width="3" fill="none">
+      <path d="M-20 190 H620"/><path d="M350 -20 V440"/>
+    </g>
+    <g fill="rgba(255,255,255,0.045)">
+      <rect x="140" y="60" width="90" height="45" rx="5"/>
+      <rect x="300" y="70" width="70" height="60" rx="5"/>
+      <rect x="450" y="230" width="100" height="70" rx="5"/>
+      <rect x="150" y="280" width="80" height="50" rx="5"/>
+    </g>
+  </svg>
+  <div class="map-pulse" aria-hidden="true"></div>
+  <div class="map-pin" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+  <div class="map-overlay">
+    <div>
+      <b>Hidden Strength</b>
+      <span>Lansdowne Court, Gosforth NE3 1HR</span>
+    </div>
+    <div class="map-actions">
+      <button class="btn btn-ghost btn-sm" type="button" data-map-load
+        data-map-src="https://maps.google.com/maps?q=Hidden%20Strength%2C%20Lansdowne%20Court%2C%20Gosforth%2C%20Newcastle%20upon%20Tyne%20NE3%201HR&z=16&output=embed"
+        data-map-title="Map showing J.L. Sports Injury Services, Gosforth">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Show map
+      </button>
+      <a class="btn btn-primary btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=Hidden+Strength%2C+Lansdowne+Court%2C+Gosforth%2C+Newcastle+upon+Tyne+NE3+1HR" target="_blank" rel="noopener">Directions</a>
+    </div>
+  </div>
+</div>
   </div>
 </section>
 
@@ -3982,9 +4062,13 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   </a>
         <p class="footer-blurb">Elite level injury treatment, management and rehabilitation — at a price that works for everyone. Based in Gosforth, Newcastle upon Tyne since 2018.</p>
         <div class="footer-social">
+          <a href="https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle" rel="noopener" target="_blank" aria-label="Google Business Profile"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.06-1.35-.18-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.75 3-4.32 3-7.3Z"/><path d="M12 22c2.7 0 4.97-.9 6.6-2.43l-3.2-2.5c-.9.6-2.05.95-3.4.95-2.6 0-4.8-1.76-5.6-4.12H3.1v2.58A10 10 0 0 0 12 22Z"/><path d="M6.4 13.9a6 6 0 0 1 0-3.83V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z"/><path d="M12 5.95c1.47 0 2.79.5 3.83 1.5l2.84-2.84C16.96 2.99 14.7 2 12 2A10 10 0 0 0 3.1 7.5l3.3 2.57C7.2 7.71 9.4 5.95 12 5.95Z"/></svg></a>
           <a href="https://www.facebook.com/JLSportsInjuryServices/" rel="noopener" target="_blank" aria-label="Facebook"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14 9V7.2c0-.8.2-1.2 1.4-1.2H17V3h-2.6C11.5 3 10.5 4.4 10.5 6.9V9H8.5v3h2V21h3.5v-9h2.4l.4-3H14Z"/></svg></a>
           <a href="https://www.instagram.com/jlsportsinjuryservices/" rel="noopener" target="_blank" aria-label="Instagram"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17" cy="7" r="1.1" fill="currentColor" stroke="none"/></svg></a>
         </div>
+        <a class="footer-review" href="https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle" rel="noopener" target="_blank">
+          <span class="stars" role="img" aria-label="5 out of 5 stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg></span><span>Leave a Google review</span>
+        </a>
       </div>
 
       <div class="footer-col">
@@ -4313,6 +4397,31 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       clone.setAttribute('aria-hidden', 'true');
       track.appendChild(clone);
     }
+  });
+
+  // -------------------------------------------------------------------------
+  // Google map, loaded on request
+  //
+  // Nothing from Google is fetched until someone asks for the map, so no
+  // third-party cookies are set on a visitor who never wanted one.
+  // -------------------------------------------------------------------------
+
+  $$('[data-map-load]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('.map-card');
+      if (!card || card.classList.contains('is-live')) return;
+
+      var frame = document.createElement('iframe');
+      frame.src = btn.getAttribute('data-map-src');
+      frame.title = btn.getAttribute('data-map-title') || 'Map';
+      frame.loading = 'lazy';
+      frame.referrerPolicy = 'no-referrer-when-downgrade';
+      frame.setAttribute('allowfullscreen', '');
+
+      card.insertBefore(frame, card.firstChild);
+      card.classList.add('is-live');
+      btn.remove();
+    });
   });
 
   // -------------------------------------------------------------------------

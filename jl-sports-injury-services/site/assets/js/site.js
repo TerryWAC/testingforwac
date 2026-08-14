@@ -257,6 +257,31 @@
   });
 
   // -------------------------------------------------------------------------
+  // Google map, loaded on request
+  //
+  // Nothing from Google is fetched until someone asks for the map, so no
+  // third-party cookies are set on a visitor who never wanted one.
+  // -------------------------------------------------------------------------
+
+  $$('[data-map-load]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('.map-card');
+      if (!card || card.classList.contains('is-live')) return;
+
+      var frame = document.createElement('iframe');
+      frame.src = btn.getAttribute('data-map-src');
+      frame.title = btn.getAttribute('data-map-title') || 'Map';
+      frame.loading = 'lazy';
+      frame.referrerPolicy = 'no-referrer-when-downgrade';
+      frame.setAttribute('allowfullscreen', '');
+
+      card.insertBefore(frame, card.firstChild);
+      card.classList.add('is-live');
+      btn.remove();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Photography
   //
   // Each photo position ships a real <img> over a branded placeholder. Until
