@@ -82,12 +82,12 @@ const site = {
 
   reviews: {
     rating: '5.0',
-    count: 31,
-    // How the count is worded on the page. "over 30" stays true as reviews
-    // come in — an exact number is out of date the moment someone leaves one,
-    // and nobody wants to edit the site every time. Set `countLabel` to null
-    // to show the exact `count` instead.
-    countLabel: 'over 30',
+    count: 27,
+    // How the count is worded on the page. Set a label like 'over 25' if you
+    // would rather not update the exact figure each time a review lands;
+    // null shows the exact `count`. Keep whichever you choose truthful — the
+    // Google badge currently reads 27.
+    countLabel: null,
     // Platforms the 5★ record lives on.
     platforms: ['Google', 'Fresha', 'Facebook'],
   },
@@ -125,18 +125,16 @@ const site = {
 // ---------------------------------------------------------------------------
 // Treatments
 //
-// PRICING NOTE FOR JACK: the 30-minute (£30) and 60-minute (£44) sports
-// massage rates are taken from the published full prices on your existing
-// listings. The 45-minute and follow-up rates are sensible mid-points — please
-// confirm or correct them here before the site goes live. Changing a number in
-// this file updates it everywhere: service pages, booking flow, schema.
+// Prices are taken from the clinic's published price list. Change a number
+// here and it updates everywhere: service pages, the price list, the booking
+// flow, the share images and the structured data.
 // ---------------------------------------------------------------------------
 
 const treatments = [
   {
     slug: 'injury-assessment',
-    nav: 'Injury Assessment',
-    title: 'Injury Assessment',
+    nav: 'Initial Assessment',
+    title: 'Initial Assessment',
     kicker: 'Start here',
     metaTitle: 'Injury Assessment Newcastle | Gosforth Sports Clinic',
     metaDescription:
@@ -144,7 +142,7 @@ const treatments = [
     summary:
       'A thorough, hands-on assessment that finds the actual cause of your pain — then treats it in the same appointment.',
     duration: 60,
-    price: 44,
+    price: 55,
     priceNote: 'Assessment and first treatment included',
     icon: 'clipboard',
     featured: true,
@@ -186,11 +184,10 @@ const treatments = [
     summary:
       'Targeted soft tissue work that releases tight muscle, eases post-training soreness and gets you moving properly again.',
     duration: 60,
-    price: 44,
+    price: 50,
     priceOptions: [
       { duration: 30, price: 30, label: '30 minutes — one or two areas' },
-      { duration: 45, price: 38, label: '45 minutes — multiple areas' },
-      { duration: 60, price: 44, label: '60 minutes — full treatment' },
+      { duration: 60, price: 50, label: '60 minutes — full treatment' },
     ],
     icon: 'hands',
     featured: true,
@@ -223,15 +220,15 @@ const treatments = [
   },
   {
     slug: 'deep-tissue-massage',
-    nav: 'Deep Tissue Massage',
-    title: 'Deep Tissue Massage',
-    metaTitle: 'Deep Tissue Massage Newcastle | Gosforth Clinic',
+    nav: 'Full Body Massage',
+    title: 'Full Body Massage',
+    metaTitle: 'Full Body & Deep Tissue Massage Newcastle | Gosforth',
     metaDescription:
       'Full body deep tissue massage in Gosforth, Newcastle. The same techniques as sports massage delivered across the whole body. 60-minute appointments, book online.',
     summary:
-      'The same techniques as sports massage, delivered as a full body treatment rather than a targeted one.',
-    duration: 60,
-    price: 44,
+      'The same techniques as sports massage, delivered across the whole body rather than one area.',
+    duration: 90,
+    price: 80,
     icon: 'wave',
     featured: true,
     intro:
@@ -266,8 +263,12 @@ const treatments = [
       'Follow-up injury treatment in Gosforth, Newcastle: acupuncture, joint mobilisation, ultrasound, electrotherapy and gym-based rehab. Book online.',
     summary:
       'Follow-up appointments that combine hands-on treatment with gym-based rehabilitation until you are properly back.',
-    duration: 45,
-    price: 38,
+    duration: 60,
+    price: 55,
+    priceOptions: [
+      { duration: 30, price: 35, label: '30 minutes — focused treatment' },
+      { duration: 60, price: 55, label: '60 minutes — treatment and rehab' },
+    ],
     icon: 'pulse',
     featured: true,
     intro:
@@ -307,7 +308,7 @@ const treatments = [
     summary:
       'An evidence-based approach to needling for pain and muscular tension, always following a proper assessment.',
     duration: 60,
-    price: 44,
+    price: 55,
     priceNote: 'Included within assessment and treatment appointments',
     icon: 'needle',
     intro:
@@ -346,8 +347,8 @@ const treatments = [
       'EMS and TENS electrotherapy at our Gosforth, Newcastle sports injury clinic — re-activating weak muscle, reducing swelling and relieving pain after injury.',
     summary:
       'EMS and TENS used to re-activate weak muscle, reduce swelling and manage pain during recovery.',
-    duration: 45,
-    price: 38,
+    duration: 60,
+    price: 55,
     priceNote: 'Used within injury treatment appointments',
     icon: 'bolt',
     intro:
@@ -382,8 +383,8 @@ const treatments = [
       'Therapeutic ultrasound in Gosforth, Newcastle upon Tyne — increasing blood flow, accelerating soft tissue healing and remodelling scar tissue after injury.',
     summary:
       'Therapeutic sound waves used to accelerate soft tissue repair and remodel scar tissue.',
-    duration: 45,
-    price: 38,
+    duration: 60,
+    price: 55,
     priceNote: 'Used within injury treatment appointments',
     icon: 'sound',
     intro:
@@ -419,7 +420,7 @@ const nav = [
   { label: 'Home', href: 'index.html' },
   { label: 'About', href: 'about-us.html' },
   {
-    label: 'Treatments',
+    label: 'Services',
     href: 'services.html',
     children: treatments.map((t) => ({
       label: t.nav,
@@ -428,8 +429,98 @@ const nav = [
       icon: t.icon,
     })),
   },
-  { label: 'Prices', href: 'services.html#prices' },
+  { label: 'Price list', href: 'price-list.html' },
+  { label: 'Reviews', href: 'reviews.html' },
+  { label: 'Offers', href: 'offers.html' },
   { label: 'Contact', href: 'contact.html' },
+];
+
+// ---------------------------------------------------------------------------
+// Extras that sit alongside the treatments — sold, but not treatments as such.
+// ---------------------------------------------------------------------------
+
+const extras = [
+  {
+    slug: 'block-bookings',
+    title: 'Block Bookings & Subscriptions',
+    summary:
+      'Five or ten sessions bought together, for anyone working through a rehabilitation plan or keeping on top of things month to month.',
+    priceText: 'Price depends on the service',
+    icon: 'calendar',
+    detail:
+      'If your recovery needs a run of appointments, or you come in regularly for maintenance, booking a block works out cheaper than paying session by session. Blocks are available in fives and tens across the treatments, and subscriptions can be set up monthly. Ask at your appointment or get in touch and it will be arranged around what you actually need.',
+  },
+  {
+    slug: 'gift-vouchers',
+    title: 'Gift Vouchers',
+    summary:
+      'A voucher towards any treatment — for the runner, lifter or desk-bound relative who will not book it for themselves.',
+    priceText: '£25 minimum spend',
+    icon: 'tag',
+    detail:
+      'Vouchers can be bought as a physical certificate collected from the clinic, or as an e-voucher sent straight to your inbox. They can be put towards any appointment and there is a £25 minimum spend.',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Current offer. Set `active: false` to take the promo bar down everywhere.
+// ---------------------------------------------------------------------------
+
+const offer = {
+  active: true,
+  code: 'JLNEW0029',
+  headline: '10% off your first appointment',
+  short: 'Get 10% off your first appointment',
+  detail:
+    'New to the clinic? Use the code at online checkout and 10% comes off your first appointment, whichever treatment you book.',
+  terms: [
+    'One use per person, for first-time clients.',
+    'Applied at online checkout — the code needs entering before payment.',
+    'Cannot be combined with block booking or subscription rates.',
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// Conditions treated. Each one is a phrase people actually search for.
+// ---------------------------------------------------------------------------
+
+const conditions = [
+  {
+    name: 'Knee pain',
+    icon: 'pulse',
+    blurb:
+      'Runner\'s knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.',
+  },
+  {
+    name: 'Muscular pain',
+    icon: 'hands',
+    blurb:
+      'Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.',
+  },
+  {
+    name: 'Neck pain',
+    icon: 'wave',
+    blurb:
+      'Stiffness and referred pain from desk posture, training, or sleeping awkwardly — including headaches that start in the neck.',
+  },
+  {
+    name: 'Nerve pain',
+    icon: 'bolt',
+    blurb:
+      'Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.',
+  },
+  {
+    name: 'Wrist pain',
+    icon: 'needle',
+    blurb:
+      'Tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.',
+  },
+  {
+    name: 'Back pain',
+    icon: 'shield',
+    blurb:
+      'Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.',
+  },
 ];
 
 const steps = [
@@ -539,6 +630,9 @@ module.exports = {
   site,
   reviewCount,
   treatments,
+  extras,
+  offer,
+  conditions,
   nav,
   steps,
   stats,

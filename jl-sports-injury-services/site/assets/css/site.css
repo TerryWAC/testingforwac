@@ -48,6 +48,7 @@
   --dur: 0.55s;
 
   --header-h: 78px;
+  --promo-h: 0px;
   --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
   --shadow-green: 0 18px 44px -18px var(--green-glow);
 }
@@ -80,6 +81,7 @@ body {
   font-synthesis-weight: none;
 }
 
+body.has-promo { --promo-h: 44px; }
 body.nav-open { overflow: hidden; }
 
 img, svg, video { display: block; max-width: 100%; }
@@ -262,6 +264,36 @@ p { text-wrap: pretty; }
    6. Header
    -------------------------------------------------------------------------- */
 
+/* Promo bar. Lives inside the fixed header and collapses once you scroll, so
+   it greets everyone on arrival without permanently eating the top of the
+   screen. `--promo-h` keeps the hero clear of it on first paint. */
+.promo {
+  background: linear-gradient(90deg, var(--green-700), var(--green-600));
+  color: #04150c;
+  max-height: 80px; overflow: hidden;
+  transition: max-height 0.45s var(--ease), opacity 0.3s;
+}
+.site-header.is-stuck .promo { max-height: 0; opacity: 0; }
+.promo-inner {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 0.4rem 1.25rem;
+  padding-block: 0.6rem;
+  text-align: center;
+}
+.promo p { font-size: 0.87rem; font-weight: 500; }
+.promo code {
+  font-family: var(--display); font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem; margin-inline: 0.15rem;
+  border-radius: 6px; background: rgba(4, 21, 12, 0.16);
+}
+.promo-cta {
+  display: inline-flex; align-items: center; gap: 0.35rem; min-height: 32px;
+  font-family: var(--display); font-size: 0.87rem; font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.promo-cta .icon { width: 15px; height: 15px; transition: transform 0.3s var(--ease); }
+.promo-cta:hover .icon { transform: translateX(4px); }
+
 .site-header {
   position: fixed; inset: 0 0 auto; z-index: 100;
   transition: background 0.4s var(--ease), border-color 0.4s, backdrop-filter 0.4s;
@@ -428,7 +460,7 @@ p { text-wrap: pretty; }
 
 .hero {
   position: relative;
-  padding-top: calc(var(--header-h) + clamp(2rem, 4.5vw, 3.25rem));
+  padding-top: calc(var(--header-h) + var(--promo-h) + clamp(2rem, 4.5vw, 3.25rem));
   padding-bottom: clamp(2.5rem, 5vw, 3.75rem);
   overflow: hidden;
   isolation: isolate;
@@ -852,6 +884,54 @@ p { text-wrap: pretty; }
 }
 
 /* --------------------------------------------------------------------------
+   12b. Photo rail
+   -------------------------------------------------------------------------- */
+
+.gallery-section { overflow: hidden; }
+
+.gallery-nav { display: flex; gap: 0.5rem; }
+.gallery-btn {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  color: var(--text-dim);
+  transition: border-color 0.3s, color 0.3s, background 0.3s, transform 0.3s var(--ease);
+}
+.gallery-btn:hover { border-color: var(--green); color: var(--green); background: rgba(0, 250, 130, 0.07); }
+.gallery-btn .icon { width: 20px; height: 20px; }
+.gallery-btn[data-gallery='prev'] .icon { transform: rotate(90deg); }
+.gallery-btn[data-gallery='next'] .icon { transform: rotate(-90deg); }
+.gallery-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.gallery-btn:disabled:hover { border-color: var(--line-strong); color: var(--text-dim); background: none; }
+
+.gallery-rail {
+  display: flex; gap: clamp(1rem, 2.5vw, 2rem);
+  padding: 0.5rem var(--gutter) 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+}
+.gallery-rail::-webkit-scrollbar { display: none; }
+.gallery-rail:focus-visible { outline: 2px solid var(--green); outline-offset: -4px; border-radius: var(--radius); }
+
+.gallery-item {
+  flex: none; width: clamp(200px, 24vw, 280px);
+  scroll-snap-align: center;
+  display: grid; gap: 1rem; justify-items: center; text-align: center;
+}
+.gallery-frame {
+  width: 100%; aspect-ratio: 1; border-radius: 50%;
+  transition: transform 0.5s var(--ease), border-color 0.4s;
+}
+.gallery-item:hover .gallery-frame { transform: translateY(-6px) scale(1.02); border-color: rgba(0, 250, 130, 0.4); }
+.gallery-item figcaption { font-size: 0.85rem; color: var(--text-faint); max-width: 26ch; line-height: 1.5; }
+
+/* Centre the rail's content when it is narrower than the viewport. */
+@media (min-width: 1500px) {
+  .gallery-rail { justify-content: center; }
+}
+
+/* --------------------------------------------------------------------------
    13. Reviews
    -------------------------------------------------------------------------- */
 
@@ -942,6 +1022,35 @@ p { text-wrap: pretty; }
   margin-top: 1.1rem; font-size: 0.85rem; color: var(--text-faint); text-align: center;
 }
 
+.price-amt-text { font-size: 0.95rem; font-weight: 500; color: var(--text-dim); }
+
+/* Offer callout on the price list */
+.offer-callout {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 1.25rem; margin-top: 2rem;
+  padding: 1.4rem clamp(1.2rem, 2.6vw, 1.9rem);
+  border: 1px solid rgba(0, 250, 130, 0.3); border-radius: var(--radius);
+  background: rgba(0, 250, 130, 0.06);
+}
+.offer-callout strong { display: block; font-family: var(--display); font-size: 1.1rem; }
+.offer-callout span { font-size: 0.9rem; color: var(--text-dim); }
+.offer-callout code, .code-card strong {
+  font-family: var(--display); font-weight: 700; letter-spacing: 0.06em; color: var(--green);
+}
+
+/* Offer code card */
+.code-card {
+  display: grid; gap: 0.5rem; justify-items: start;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid rgba(0, 250, 130, 0.3); border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, rgba(0, 250, 130, 0.1), rgba(178, 154, 158, 0.05));
+}
+.code-card > span {
+  font-size: 0.74rem; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--text-faint);
+}
+.code-card strong { font-size: clamp(1.6rem, 3.2vw, 2.2rem); letter-spacing: 0.08em; }
+
 /* --------------------------------------------------------------------------
    16. CTA band
    -------------------------------------------------------------------------- */
@@ -969,7 +1078,7 @@ p { text-wrap: pretty; }
 
 .page-head {
   position: relative; overflow: hidden; isolation: isolate;
-  padding-top: calc(var(--header-h) + clamp(2.75rem, 6vw, 4.5rem));
+  padding-top: calc(var(--header-h) + var(--promo-h) + clamp(2.75rem, 6vw, 4.5rem));
   padding-bottom: clamp(2.5rem, 5vw, 4rem);
 }
 /* Interior pages sit a step below the home hero in the type hierarchy. */
@@ -1433,7 +1542,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
    25. Responsive
    -------------------------------------------------------------------------- */
 
-@media (max-width: 1080px) {
+@media (max-width: 1200px) {
   .nav-desktop { display: none; }
   .nav-toggle { display: grid; }
   .btn-call span { display: none; }
@@ -1471,6 +1580,9 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 
 @media (max-width: 720px) {
   :root { --header-h: 66px; }
+  body.has-promo { --promo-h: 62px; }
+  .promo p { font-size: 0.8rem; }
+  .promo-inner { padding-block: 0.5rem; }
   .offer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .offer { padding: 0.9rem 0.95rem 2.4rem; }
   .header-inner { gap: 0.55rem; }

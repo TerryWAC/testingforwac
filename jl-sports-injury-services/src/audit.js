@@ -16,6 +16,7 @@ const PAGES = [
   'index.html', 'about-us.html', 'services.html', 'injury-assessment.html',
   'sports-massage.html', 'deep-tissue-massage.html', 'follow-up-treatment.html',
   'medical-acupuncture.html', 'electrotherapy.html', 'ultrasound-therapy.html',
+  'price-list.html', 'reviews.html', 'offers.html',
   'book.html', 'contact.html', 'privacy-policy.html', '404.html',
 ];
 
@@ -42,15 +43,34 @@ const AUDIT = () => {
   };
   const over = (fg, bg, alpha) => fg.map((c, i) => c * alpha + bg[i] * (1 - alpha));
 
+  // A gradient paints a real background even though backgroundColor is
+  // transparent. Take its darkest stop — the worst case for light text, and
+  // the closest thing to a single representative colour.
+  const gradientStop = (cs) => {
+    const img = cs.backgroundImage;
+    if (!img || img === 'none' || !/gradient/.test(img)) return null;
+    const stops = img.match(/rgba?\([^)]+\)/g);
+    if (!stops) return null;
+    const parsed = stops.map(parse).filter((c) => c && c.a > 0.5);
+    if (!parsed.length) return null;
+    return parsed.reduce((a, b) => (lum(a.rgb) < lum(b.rgb) ? a : b));
+  };
+
   // Effective background: walk up compositing translucent layers onto the root.
   const bgOf = (el) => {
     let node = el;
     const stack = [];
     while (node && node !== document.documentElement) {
-      const c = parse(getComputedStyle(node).backgroundColor);
+      const cs = getComputedStyle(node);
+      const c = parse(cs.backgroundColor);
       if (c && c.a > 0) {
         stack.push(c);
         if (c.a === 1) break;
+      }
+      const g = gradientStop(cs);
+      if (g) {
+        stack.push({ rgb: g.rgb, a: 1 });
+        break;
       }
       node = node.parentElement;
     }

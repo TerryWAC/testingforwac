@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { site, nav, treatments, reviewCount } = require('./content');
+const { site, nav, treatments, reviewCount, offer } = require('./content');
 const { icon, stars } = require('./icons');
 
 const esc = (s) =>
@@ -168,8 +168,21 @@ function header(current) {
     })
     .join('');
 
+  // The promo lives inside the fixed header and collapses once you scroll,
+  // so it is in front of everyone on arrival without permanently eating the
+  // top of every screen.
+  const promo = offer.active
+    ? `<div class="promo">
+    <div class="shell promo-inner">
+      <p>${esc(offer.short)} with code <code>${esc(offer.code)}</code> at online checkout</p>
+      <a class="promo-cta" href="offers.html">See the offer ${icon('arrow')}</a>
+    </div>
+  </div>`
+    : '';
+
   return `<a class="skip" href="#main">Skip to content</a>
 <header class="site-header" id="site-header">
+  ${promo}
   <div class="shell header-inner">
     ${logo('hdr')}
     <nav class="nav-desktop" aria-label="Primary">
@@ -213,6 +226,7 @@ function header(current) {
       <a class="btn btn-ghost btn-block" href="tel:${site.phoneHref}">${icon('phone')} ${esc(
     site.phone
   )}</a>
+      <a class="btn btn-ghost btn-block" href="offers.html#vouchers">${icon('tag')} Buy a gift voucher</a>
     </div>
     <p class="mobile-meta">${esc(addressOneLine)}<br>Mon–Thu, 9am–8pm</p>
   </div>
@@ -267,7 +281,10 @@ function footer() {
         <h3>Clinic</h3>
         <ul>
           <li><a href="about-us.html">About Jack</a></li>
-          <li><a href="services.html">Treatments &amp; prices</a></li>
+          <li><a href="price-list.html">Price list</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><a href="offers.html">Offers</a></li>
+          <li><a href="offers.html#vouchers">Gift vouchers</a></li>
           <li><a href="contact.html">Contact &amp; directions</a></li>
           <li><a href="book.html">Book an appointment</a></li>
           <li><a href="privacy-policy.html">Privacy policy</a></li>
@@ -454,7 +471,7 @@ ${schemas
   .map((s) => `<script type="application/ld+json">${JSON.stringify(s)}</script>`)
   .join('\n')}
 </head>
-<body class="${o.bodyClass || ''}">
+<body class="${[o.bodyClass, offer.active ? 'has-promo' : ''].filter(Boolean).join(' ')}">
 ${header(o.slug)}
 <main id="main">
 ${o.body}

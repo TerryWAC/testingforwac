@@ -16,6 +16,7 @@ const PAGES = [
   'index.html', 'about-us.html', 'services.html', 'injury-assessment.html',
   'sports-massage.html', 'deep-tissue-massage.html', 'follow-up-treatment.html',
   'medical-acupuncture.html', 'electrotherapy.html', 'ultrasound-therapy.html',
+  'price-list.html', 'reviews.html', 'offers.html',
   'book.html', 'contact.html', 'privacy-policy.html', '404.html',
 ];
 
@@ -92,7 +93,7 @@ const PAGES = [
   await page.waitForTimeout(400);
 
   const durCount = await page.locator('#duration-options .opt').count();
-  if (durCount !== 3) problems.push(`[booking] expected 3 duration options, got ${durCount}`);
+  if (durCount !== 2) problems.push(`[booking] expected 2 duration options, got ${durCount}`);
   // Select by value, not position — the options are re-rendered when the
   // treatment changes, so an index can race the rebuild.
   await page.click('#duration-options input[value="60"]', { force: true });
@@ -149,7 +150,7 @@ const PAGES = [
   const summary = await page.locator('#step-done [data-sum="treatment"]').textContent();
   if (summary !== 'Sports Massage') problems.push(`[booking] summary treatment = "${summary}"`);
   const sumPrice = await page.locator('#step-done [data-sum="price"]').textContent();
-  if (sumPrice !== '£44') problems.push(`[booking] summary price = "${sumPrice}", expected £44`);
+  if (sumPrice !== '£50') problems.push(`[booking] summary price = "${sumPrice}", expected £50`);
   const sumWhen = await page.locator('#step-done [data-sum="when"]').textContent();
   if (!/\d/.test(sumWhen)) problems.push(`[booking] summary when = "${sumWhen}"`);
 

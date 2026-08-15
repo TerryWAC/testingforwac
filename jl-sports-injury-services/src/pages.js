@@ -3,6 +3,7 @@ const path = require('path');
 
 const {
   site, treatments, steps, credentials, faqs, trustPoints, reviewCount,
+  extras, offer, conditions,
 } = require('./content');
 const { icon, stars } = require('./icons');
 const { esc, breadcrumbSchema, addressOneLine } = require('./layout');
@@ -48,7 +49,7 @@ function contourArt(name) {
   const rand = rng(seedFrom(name));
   const W = 400;
   const H = 400;
-  const LINES = 26;
+  const LINES = 20;
   const lines = [];
 
   const baseAmp = 26 + rand() * 20;
@@ -66,17 +67,17 @@ function contourArt(name) {
     const phase = phase0 + t * 2.4;
 
     let d = '';
-    for (let x = -20; x <= W + 20; x += 20) {
+    for (let x = -20; x <= W + 20; x += 25) {
       const px = x / W;
       const py =
         y +
         Math.sin(px * Math.PI * freq + phase) * amp +
         Math.sin(px * Math.PI * freq * 2.7 + phase * 1.6) * amp * 0.22 +
         px * skew;
-      d += (d ? ' L' : 'M') + x.toFixed(0) + ' ' + py.toFixed(1);
+      d += (d ? ' L' : 'M') + x.toFixed(0) + ' ' + py.toFixed(0);
     }
 
-    const accent = i % 7 === 3;
+    const accent = i % 6 === 2;
     lines.push(
       `<path d="${d}" stroke="${accent ? 'var(--green)' : 'currentColor'}" stroke-width="${
         accent ? 1.5 : 1
@@ -103,16 +104,21 @@ function findPhoto(name) {
  * and the photograph replaces the branded placeholder. No markup to edit — and
  * no broken request while the slot is still empty.
  */
+let photoUid = 0;
+
 const photo = (name, alt) => {
   const file = findPhoto(name);
+  // The mask id must be unique per instance, not per slot: the portrait
+  // appears both in the therapist section and in the photo rail.
+  const uid = `${name}-${++photoUid}`;
   const placeholder = `<div class="photo-slot" data-photo="${name}">
   ${contourArt(name)}
   <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
-    <mask id="ph-${name}"><circle cx="100" cy="100" r="96" fill="#fff"/>
+    <mask id="ph-${uid}"><circle cx="100" cy="100" r="96" fill="#fff"/>
       <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
       <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
     </mask>
-    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-${name})"/>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-${uid})"/>
   </svg>
 </div>`;
 
@@ -259,6 +265,44 @@ const mapCard = (id, variant = '') => `<div class="map-card ${variant}${
   </div>
 </div>`;
 
+/**
+ * Circular photo strip — the same idea as the carousel on the current site,
+ * rebuilt as a native scroll-snap rail so it works with a swipe, a trackpad,
+ * the arrow buttons or the keyboard, with no carousel library behind it.
+ */
+const GALLERY = [
+  ['clinic-room', 'The treatment room at the Gosforth clinic'],
+  ['jack-treating', 'Jack Laurie treating a client\'s forearm'],
+  ['jack-portrait', 'Jack Laurie, sports injury therapist'],
+  ['waiting-area', 'The waiting area at Hidden Strength, Gosforth'],
+  ['gym-floor', 'The gym floor used for rehabilitation'],
+  ['consultation', 'Talking through an injury at the initial assessment'],
+];
+
+const gallery = () => `<section class="section gallery-section" aria-labelledby="gallery-h">
+  <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2 id="gallery-h">Inside the clinic</h2>
+      <div class="gallery-nav">
+        <button class="gallery-btn" type="button" data-gallery="prev" aria-label="Previous photos">
+          ${icon('chevron')}
+        </button>
+        <button class="gallery-btn" type="button" data-gallery="next" aria-label="More photos">
+          ${icon('chevron')}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="gallery-rail" tabindex="0" role="group" aria-label="Photos of the clinic">
+    ${GALLERY.map(
+      ([name, alt]) => `<figure class="gallery-item">
+      <div class="frame gallery-frame">${photo(name, alt)}</div>
+      <figcaption>${esc(alt)}</figcaption>
+    </figure>`
+    ).join('')}
+  </div>
+</section>`;
+
 const heroBg = () => `<div class="hero-bg" aria-hidden="true">
   <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
 </div>
@@ -393,7 +437,35 @@ ${marquee()}
   </div>
 </section>
 
-<section class="section" id="treatments">
+<section class="section" id="conditions">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Conditions we treat</span>
+      <h2>If it hurts when you move, it is worth getting looked at.</h2>
+      <p class="lead">
+        Most people arrive with one of these. Whatever it is, the assessment finds the cause
+        before anything gets treated.
+      </p>
+    </div>
+    <div class="grid grid-3" data-stagger="70">
+      ${conditions
+        .map(
+          (c) => `<article class="card cond" data-reveal>
+        <div class="card-icon">${icon(c.icon)}</div>
+        <h3>${esc(c.name)}</h3>
+        <p>${esc(c.blurb)}</p>
+      </article>`
+        )
+        .join('')}
+    </div>
+    <p class="price-note" data-reveal>
+      Not on the list? It is still worth a call — ${icon('arrow')}
+      <a href="contact.html" style="color:var(--green)">ask about your injury</a>
+    </p>
+  </div>
+</section>
+
+<section class="section" id="treatments" style="padding-top:0">
   <div class="shell">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Treatments</span>
@@ -528,6 +600,7 @@ ${marquee()}
   </div>
 </section>
 
+${gallery()}
 ${faqSection()}
 ${ctaBand()}
 `;
@@ -1426,6 +1499,367 @@ ${ctaBand('Ready when you are.', 'Book online in under a minute, or call the cli
 }
 
 // ---------------------------------------------------------------------------
+// Price list
+// ---------------------------------------------------------------------------
+
+const priceRowsHtml = treatments
+  .flatMap((t) => {
+    if (t.priceOptions && t.priceOptions.length) {
+      return t.priceOptions.map((o, i) => ({
+        name: i === 0 ? t.title : '',
+        sub: o.label,
+        slug: t.slug,
+        dur: `${o.duration} min`,
+        price: `£${o.price}`,
+      }));
+    }
+    return [
+      {
+        name: t.title,
+        sub: t.priceNote || t.summary,
+        slug: t.slug,
+        dur: `${t.duration} min`,
+        price: `£${t.price}`,
+      },
+    ];
+  })
+  .map(
+    (r) => `<div class="price-row">
+      <div class="price-name">
+        ${r.name ? `<strong>${esc(r.name)}</strong>` : ''}
+        <span>${esc(r.sub)}</span>
+      </div>
+      <div class="price-dur">${esc(r.dur)}</div>
+      <div class="price-amt">${esc(r.price)}</div>
+      <a class="btn btn-ghost btn-sm" href="book.html?treatment=${r.slug}">Book</a>
+    </div>`
+  )
+  .join('');
+
+const extraRowsHtml = extras
+  .map(
+    (e) => `<div class="price-row">
+      <div class="price-name">
+        <strong>${esc(e.title)}</strong>
+        <span>${esc(e.summary)}</span>
+      </div>
+      <div class="price-dur"></div>
+      <div class="price-amt price-amt-text">${esc(e.priceText)}</div>
+      <a class="btn btn-ghost btn-sm" href="offers.html">Details</a>
+    </div>`
+  )
+  .join('');
+
+function priceList() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'Price list' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>${icon('tag')} Price list</span>
+        <h1 data-hero style="--d:80ms">Every price, in one place.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          Pay for the appointment you have, when you have it. No packages to commit to, no
+          joining fee, and no pressure to keep coming back once you are better.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge">${icon('check')} No referral needed</span>
+        <span class="badge">${icon('check')} No deposit to book</span>
+        <span class="badge">${icon('tag')} From £30</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2>Treatments</h2>
+      <a class="btn-link" href="services.html">What each one involves ${icon('arrow')}</a>
+    </div>
+    <div class="price-table" data-reveal>
+      <div class="price-row is-head">
+        <div>Treatment</div><div>Duration</div><div>Price</div><div></div>
+      </div>
+      ${priceRowsHtml}
+    </div>
+
+    <div class="offer-head" data-reveal style="margin-top:3rem">
+      <h2>Blocks and vouchers</h2>
+      <a class="btn-link" href="offers.html">See current offers ${icon('arrow')}</a>
+    </div>
+    <div class="price-table" data-reveal>
+      ${extraRowsHtml}
+    </div>
+
+    ${
+      offer.active
+        ? `<div class="offer-callout" data-reveal>
+      <div>
+        <strong>${esc(offer.headline)}</strong>
+        <span>Use code <code>${esc(offer.code)}</code> at online checkout.</span>
+      </div>
+      <a class="btn btn-primary" href="book.html" data-cta="pricelist-offer">Book an appointment ${icon('arrow')}</a>
+    </div>`
+        : ''
+    }
+  </div>
+</section>
+
+${faqSection(faqs.slice(0, 5), 'Before you book')}
+${ctaBand()}
+`;
+
+  return {
+    slug: 'price-list.html',
+    title: 'Price List | Sports Massage & Injury Treatment Newcastle',
+    desc:
+      'Prices for injury assessment, sports massage, full body massage and follow-up treatment at J.L. Sports Injury Services, Gosforth, Newcastle. From £30. Book online.',
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Price list', href: 'price-list.html' },
+      ]),
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+function reviews() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'Reviews' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>${icon('star')} Reviews</span>
+        <h1 data-hero style="--d:80ms">Rated 5.0 by everyone who has left a review.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          A five star record across Google, Fresha and Facebook, from clients across Newcastle
+          and North Tyneside — runners, lifters, rugby players and plenty of people who have
+          never set foot in a gym.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} average</span>
+        <span class="badge">${icon('check')} ${esc(reviewCount)}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="rating-panel" data-reveal>
+      <div class="rating-score">
+        <b>${site.reviews.rating}</b>
+        ${stars(5)}
+        <small>${esc(reviewCount)}</small>
+      </div>
+      <div class="rating-copy">
+        <h2 style="font-size:1.35rem">Read them for yourself.</h2>
+        <p class="muted tiny" style="margin-top:0.5rem">
+          Reviews live on the platforms clients left them on, where you can see who wrote them
+          and when — rather than being copied onto this page.
+        </p>
+      </div>
+      <div class="rating-platforms">
+        <a class="platform" href="${site.google.profileUrl}" target="_blank" rel="noopener">${icon(
+    'google'
+  )} Google</a>
+        <a class="platform" href="${site.bookingUrl}" target="_blank" rel="noopener">${icon('star')} Fresha</a>
+        <a class="platform" href="${site.social.facebook}" target="_blank" rel="noopener">${icon(
+    'facebook'
+  )} Facebook</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">What comes up</span>
+      <h2>The things clients mention most.</h2>
+      <p class="lead">
+        Across the reviews, the same few things keep being said — which is as good a summary of
+        the clinic as anything written here.
+      </p>
+    </div>
+    <div class="grid grid-4" data-stagger="80">
+      <article class="card" data-reveal>
+        <div class="card-icon">${icon('clipboard')}</div>
+        <h3>Actually explained</h3>
+        <p>Clients say they left understanding what was wrong and why — not just that something had been done to them.</p>
+      </article>
+      <article class="card" data-reveal>
+        <div class="card-icon">${icon('pulse')}</div>
+        <h3>It worked</h3>
+        <p>Long-standing niggles that had been managed for months finally settling once they were assessed properly.</p>
+      </article>
+      <article class="card" data-reveal>
+        <div class="card-icon">${icon('user')}</div>
+        <h3>Put at ease</h3>
+        <p>People who were nervous about being assessed, or had never seen a therapist before, saying it was straightforward.</p>
+      </article>
+      <article class="card" data-reveal>
+        <div class="card-icon">${icon('tag')}</div>
+        <h3>Worth the money</h3>
+        <p>Value comes up often — elite standard treatment at a price that does not need thinking twice about.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center">${icon('star')} Been in already?</span>
+      <h2 style="margin-top:1rem">Leave a review.</h2>
+      <p class="lead">
+        If the treatment helped, a couple of lines on Google genuinely makes a difference to a
+        clinic this size — and helps the next person with the same injury find it.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="${site.google.reviewsUrl}" target="_blank" rel="noopener">
+          ${icon('google')} Review on Google
+        </a>
+        <a class="btn btn-ghost btn-lg" href="${site.social.facebook}" target="_blank" rel="noopener">
+          ${icon('facebook')} Review on Facebook
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+${ctaBand()}
+`;
+
+  return {
+    slug: 'reviews.html',
+    title: 'Reviews | Sports Injury Clinic Gosforth, Newcastle',
+    desc: `Rated 5.0 across Google, Fresha and Facebook. Read reviews of J.L. Sports Injury Services, the sports injury and massage clinic in Gosforth, Newcastle upon Tyne.`,
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Reviews', href: 'reviews.html' },
+      ]),
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Offers
+// ---------------------------------------------------------------------------
+
+function offers() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'Offers' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>${icon('sparkle')} Offers</span>
+        <h1 data-hero style="--d:80ms">${esc(offer.headline)}.</h1>
+        <p class="lead" data-hero style="--d:160ms">${esc(offer.detail)}</p>
+      </div>
+      <div data-hero style="--d:260ms">
+        <div class="code-card">
+          <span>Your code</span>
+          <strong>${esc(offer.code)}</strong>
+          <button class="btn btn-ghost btn-sm" type="button" data-copy="${esc(offer.code)}">
+            ${icon('check')} Copy code
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="split">
+      <div class="split-copy">
+        <span class="eyebrow" data-reveal>How to use it</span>
+        <h2 data-reveal>Three steps.</h2>
+        <ul class="check-list" data-reveal style="margin-top:1.5rem">
+          <li>${icon('check')}<span>Pick your treatment and a time that suits you.</span></li>
+          <li>${icon('check')}<span>Enter <strong>${esc(
+    offer.code
+  )}</strong> at online checkout, before paying.</span></li>
+          <li>${icon('check')}<span>10% comes off — then come in and get seen.</span></li>
+        </ul>
+        <div class="btn-row" data-reveal style="margin-top:2rem">
+          <a class="btn btn-primary btn-lg" href="book.html" data-cta="offers">Book an appointment ${icon('arrow')}</a>
+        </div>
+        <p class="tiny muted" data-reveal style="margin-top:1.5rem">
+          ${offer.terms.map((t) => esc(t)).join('<br>')}
+        </p>
+      </div>
+      <div class="split-media" data-reveal="right">
+        <div class="frame frame-wide frame-glow">
+          ${photo('offers-clinic', 'The treatment room at J.L. Sports Injury Services, Gosforth')}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="vouchers" style="padding-top:0">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Also available</span>
+      <h2>Blocks, subscriptions and gift vouchers.</h2>
+    </div>
+    <div class="grid grid-2" data-stagger="90">
+      ${extras
+        .map(
+          (e) => `<article class="card" data-reveal>
+        <div class="card-icon">${icon(e.icon)}</div>
+        <h3>${esc(e.title)}</h3>
+        <p>${esc(e.detail)}</p>
+        <div class="t-card-meta">
+          <span class="price">${esc(e.priceText)}</span>
+        </div>
+        <a class="t-card-link" href="contact.html">Ask about this ${icon('arrow')}</a>
+      </article>`
+        )
+        .join('')}
+    </div>
+  </div>
+</section>
+
+${ctaBand(
+  'Claim the discount.',
+  `Book online, enter ${offer.code} at checkout and 10% comes off your first appointment.`
+)}
+`;
+
+  return {
+    slug: 'offers.html',
+    title: 'Offers | 10% Off Your First Appointment | Gosforth Clinic',
+    desc: `Get 10% off your first appointment at J.L. Sports Injury Services in Gosforth, Newcastle with code ${offer.code}. Block bookings and gift vouchers also available.`,
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Offers', href: 'offers.html' },
+      ]),
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Privacy + 404
 // ---------------------------------------------------------------------------
 
@@ -1540,6 +1974,9 @@ module.exports = {
     about(),
     services(),
     ...treatments.map(treatmentPage),
+    priceList(),
+    reviews(),
+    offers(),
     book(),
     contact(),
     privacy(),

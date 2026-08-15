@@ -257,6 +257,78 @@
   });
 
   // -------------------------------------------------------------------------
+  // Photo rail
+  // -------------------------------------------------------------------------
+
+  $$('.gallery-section').forEach(function (section) {
+    var rail = $('.gallery-rail', section);
+    var prev = $('[data-gallery="prev"]', section);
+    var next = $('[data-gallery="next"]', section);
+    if (!rail || !prev || !next) return;
+
+    var step = function () {
+      var item = $('.gallery-item', rail);
+      if (!item) return rail.clientWidth * 0.8;
+      var gap = parseFloat(getComputedStyle(rail).columnGap) || 0;
+      return item.getBoundingClientRect().width + gap;
+    };
+
+    var scrollBy = function (dir) {
+      rail.scrollBy({ left: dir * step(), behavior: reduced ? 'auto' : 'smooth' });
+    };
+
+    prev.addEventListener('click', function () { scrollBy(-1); });
+    next.addEventListener('click', function () { scrollBy(1); });
+
+    rail.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); scrollBy(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); scrollBy(-1); }
+    });
+
+    // Grey out an arrow once there is nothing further that way.
+    var sync = function () {
+      var max = rail.scrollWidth - rail.clientWidth;
+      prev.disabled = rail.scrollLeft < 8;
+      next.disabled = rail.scrollLeft > max - 8;
+    };
+    rail.addEventListener('scroll', function () {
+      window.requestAnimationFrame(sync);
+    }, { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
+  });
+
+  // -------------------------------------------------------------------------
+  // Copy the offer code
+  // -------------------------------------------------------------------------
+
+  $$('[data-copy]').forEach(function (btn) {
+    var original = btn.innerHTML;
+    btn.addEventListener('click', function () {
+      var code = btn.getAttribute('data-copy');
+      var done = function () {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.innerHTML = original; }, 2000);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done, function () {});
+      } else {
+        // Older Safari and any non-secure context.
+        var field = document.createElement('textarea');
+        field.value = code;
+        field.setAttribute('readonly', '');
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        field.remove();
+      }
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Google map, loaded on request
   //
   // Nothing from Google is fetched until someone asks for the map, so no

@@ -9,7 +9,8 @@ const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const ROUTES = [
   'index', 'about-us', 'services', 'injury-assessment', 'sports-massage',
   'deep-tissue-massage', 'follow-up-treatment', 'medical-acupuncture',
-  'electrotherapy', 'ultrasound-therapy', 'book', 'contact', 'privacy-policy',
+  'electrotherapy', 'ultrasound-therapy', 'price-list', 'reviews', 'offers',
+  'book', 'contact', 'privacy-policy',
 ];
 
 (async () => {
@@ -95,7 +96,7 @@ const ROUTES = [
   const done = await page.locator('#step-done.is-active').count();
   if (!done) problems.push('[booking] demo confirmation step did not show');
   const price = await page.locator('#step-done [data-sum="price"]').textContent();
-  if (price !== '£44') problems.push(`[booking] demo summary price "${price}"`);
+  if (price !== '£55') problems.push(`[booking] demo summary price "${price}"`);
 
   // FAQ accordions stay independent between the two pages that carry them.
   await page.goto(`${FILE}#/index`, { waitUntil: 'load' });

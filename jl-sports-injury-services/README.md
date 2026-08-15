@@ -51,6 +51,9 @@ Every page from the original site is here, plus a dedicated booking page.
 | Medical Acupuncture | `medical-acupuncture.html` | `/medical-acupuncture` |
 | Electrotherapy | `electrotherapy.html` | `/electrotherapy` |
 | Ultrasound Therapy | `ultrasound-therapy.html` | `/ultrasound-therapy` |
+| Price list | `price-list.html` | `/price-list` |
+| Reviews | `reviews.html` | `/reviews` |
+| Offers | `offers.html` | `/offers` |
 | Contact | `contact.html` | — |
 | Book online | `book.html` | new |
 | Privacy policy | `privacy-policy.html` | new |
@@ -110,12 +113,20 @@ The build finds the file, swaps it in over the placeholder and fades it in. Ther
 markup to edit, and while a slot is still empty nothing is requested, so there are no
 broken images and no failed requests.
 
-| Slot | Where it appears | Suggested shot |
+| Slot | Where it appears | Shape |
 |---|---|---|
-| `jack-portrait` | Home, "Meet your therapist" | Jack, portrait, 4:5 |
-| `jack-treating` | About | Treatment in progress |
-| `clinic-gym` | About | The gym floor at Hidden Strength, 16:10 |
+| `jack-portrait` | Home "Meet your therapist", photo rail | Portrait, 4:5 |
+| `jack-treating` | About, photo rail | Treatment in progress |
+| `clinic-gym` | About | The gym floor, 16:10 |
+| `clinic-room` | Photo rail | The treatment room |
+| `waiting-area` | Photo rail | The waiting area |
+| `gym-floor` | Photo rail | The gym floor |
+| `consultation` | Photo rail | Talking through an injury |
+| `offers-clinic` | Offers | Anything that reads as "the clinic", 16:10 |
 | `treatment-<slug>` | Each treatment page | That treatment being delivered, 16:10 |
+
+The photo rail crops to circles, so anything going in there wants its subject
+roughly centred.
 
 Good photography is the single biggest visual upgrade left on this site.
 
