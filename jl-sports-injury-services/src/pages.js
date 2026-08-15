@@ -447,20 +447,22 @@ ${marquee()}
         before anything gets treated.
       </p>
     </div>
-    <div class="grid grid-3" data-stagger="70">
+    <div class="cond-grid" data-stagger="60">
       ${conditions
         .map(
-          (c) => `<article class="card cond" data-reveal>
-        <div class="card-icon">${icon(c.icon)}</div>
-        <h3>${esc(c.name)}</h3>
-        <p>${esc(c.blurb)}</p>
+          (c) => `<article class="cond" data-reveal>
+        <span class="cond-icon">${icon(c.icon)}</span>
+        <div>
+          <h3>${esc(c.name)}</h3>
+          <p>${esc(c.blurb)}</p>
+        </div>
       </article>`
         )
         .join('')}
     </div>
     <p class="price-note" data-reveal>
-      Not on the list? It is still worth a call — ${icon('arrow')}
-      <a href="contact.html" style="color:var(--green)">ask about your injury</a>
+      Not on the list? It is still worth a call —
+      <a class="btn-link" href="contact.html">ask about your injury ${icon('arrow')}</a>
     </p>
   </div>
 </section>
@@ -475,11 +477,14 @@ ${marquee()}
         your injury, not sold from a menu.
       </p>
     </div>
-    <div class="grid grid-3" data-stagger="70">
-      ${treatments.map(treatmentCard).join('')}
+    <div class="grid grid-4" data-stagger="70">
+      ${treatments.filter((t) => t.featured).map(treatmentCard).join('')}
     </div>
     <div class="btn-row" style="margin-top:2.5rem" data-reveal>
-      <a class="btn btn-outline" href="services.html">All treatments &amp; prices ${icon('arrow')}</a>
+      <a class="btn btn-outline" href="services.html">All ${treatments.length} treatments ${icon(
+    'arrow'
+  )}</a>
+      <a class="btn btn-ghost" href="price-list.html">See the price list</a>
     </div>
   </div>
 </section>
@@ -541,10 +546,10 @@ ${marquee()}
 <section class="section-tight">
   <div class="shell">
     <div class="stats" data-reveal>
-      <div class="stat"><b data-count="10" data-suffix="+">0</b><span>Years in practice</span></div>
+      <div class="stat"><b data-count="10" data-suffix="+">10+</b><span>Years in practice</span></div>
       <div class="stat"><b>${site.founded}</b><span>Serving Gosforth</span></div>
-      <div class="stat"><b data-count="5" data-decimals="1" data-suffix="★">0</b><span>From ${reviewCount}</span></div>
-      <div class="stat"><b data-count="7">0</b><span>Treatments available</span></div>
+      <div class="stat"><b data-count="5" data-decimals="1" data-suffix="★">5.0★</b><span>From ${reviewCount}</span></div>
+      <div class="stat"><b data-count="7">7</b><span>Treatments available</span></div>
     </div>
   </div>
 </section>
@@ -879,9 +884,9 @@ function services() {
       ${priceRows}
     </div>
     <p class="price-note">
-      Not sure which to book? Start with an injury assessment — it includes treatment in the same
-      appointment. ${icon('arrow')}
-      <a href="injury-assessment.html" style="color:var(--green)">Read what happens</a>
+      Not sure which to book? Start with an initial assessment — it includes treatment in the same
+      appointment.
+      <a class="btn-link" href="injury-assessment.html">Read what happens ${icon('arrow')}</a>
     </p>
   </div>
 </section>
@@ -896,7 +901,7 @@ function services() {
       <article class="card" data-reveal>
         <div class="card-icon">${icon('clipboard')}</div>
         <h3>You are in pain or injured</h3>
-        <p>Book an <strong>injury assessment</strong>. You get physical testing, a diagnosis, treatment in the same session and a plan to follow.</p>
+        <p>Book an <strong>initial assessment</strong>. You get physical testing, a diagnosis, treatment in the same session and a plan to follow.</p>
         <a class="t-card-link" href="book.html?treatment=injury-assessment">Book assessment ${icon('arrow')}</a>
       </article>
       <article class="card" data-reveal>
@@ -1004,7 +1009,7 @@ function treatmentPage(t) {
           </ul>
           <p>
             If you are not sure, book an
-            <a href="injury-assessment.html">injury assessment</a> instead — it identifies exactly what
+            <a href="injury-assessment.html">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -1163,6 +1168,22 @@ function book() {
 <section class="section" style="padding-top:clamp(2rem,4vw,3rem)">
   <div class="shell">
     <div class="layout-aside">
+      <noscript>
+        <div class="noscript-note">
+          <strong>The step-by-step booking form needs JavaScript.</strong>
+          <p>
+            You can still book straight in the diary, or call the clinic during opening hours and
+            Jack will get you booked in.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="${site.bookingUrl}" target="_blank" rel="noopener">
+              Book in the diary
+            </a>
+            <a class="btn btn-ghost" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a>
+          </div>
+        </div>
+      </noscript>
+
       <div class="booking" id="booking">
         <div class="booking-head">
           <div class="progress">
@@ -1182,7 +1203,7 @@ function book() {
           <!-- 1 -->
           <div class="booking-step is-active" id="step-treatment">
             <h2>What do you need?</h2>
-            <p class="muted">Not sure? Pick the injury assessment — it works out what you need and treats it in the same appointment.</p>
+            <p class="muted">Not sure? Pick the initial assessment — it works out what you need and treats it in the same appointment.</p>
             <div class="opt-grid">${treatmentOptions}</div>
             <div class="booking-nav">
               <span class="spacer"></span>
@@ -1272,7 +1293,7 @@ function book() {
           <div class="booking-step" id="step-done">
             <div class="booking-done">
               <div class="done-mark">${icon('check')}</div>
-              <h2>Nearly there, <span data-done-name>there</span>.</h2>
+              <h2>Nearly there<span data-done-name></span>.</h2>
               <p class="lead" style="margin:1rem auto 0">
                 Here is your appointment. Send it across using whichever is easiest — Jack will confirm
                 it and you will get everything you need by email.
@@ -1415,6 +1436,16 @@ function contact() {
               </label>
             </div>
           </div>
+          <noscript>
+            <div class="noscript-note" style="margin-top:1.5rem">
+              <strong>This form needs JavaScript to send.</strong>
+              <p>
+                Email <a href="mailto:${site.email}">${esc(site.email)}</a> or call
+                <a href="tel:${site.phoneHref}">${esc(site.phone)}</a> and you will get a reply
+                the same day.
+              </p>
+            </div>
+          </noscript>
           <p id="contact-status" class="tiny muted" hidden style="margin-top:1rem"></p>
           <div class="btn-row" style="margin-top:1.5rem">
             <button class="btn btn-primary btn-lg" type="submit">Send message ${icon('arrow')}</button>
@@ -1721,26 +1752,30 @@ function reviews() {
 
 <section class="section" style="padding-top:0">
   <div class="shell">
-    <div class="cta-band" data-reveal="scale">
-      <span class="eyebrow" style="justify-content:center">${icon('star')} Been in already?</span>
-      <h2 style="margin-top:1rem">Leave a review.</h2>
-      <p class="lead">
-        If the treatment helped, a couple of lines on Google genuinely makes a difference to a
-        clinic this size — and helps the next person with the same injury find it.
-      </p>
+    <div class="review-ask" data-reveal>
+      <div>
+        <h2>Been in already? Leave a review.</h2>
+        <p class="muted">
+          A couple of lines on Google genuinely makes a difference to a clinic this size — and
+          helps the next person with the same injury find it.
+        </p>
+      </div>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="${site.google.reviewsUrl}" target="_blank" rel="noopener">
-          ${icon('google')} Review on Google
+        <a class="btn btn-ghost" href="${site.google.reviewsUrl}" target="_blank" rel="noopener">
+          ${icon('google')} Google
         </a>
-        <a class="btn btn-ghost btn-lg" href="${site.social.facebook}" target="_blank" rel="noopener">
-          ${icon('facebook')} Review on Facebook
+        <a class="btn btn-ghost" href="${site.social.facebook}" target="_blank" rel="noopener">
+          ${icon('facebook')} Facebook
         </a>
       </div>
     </div>
   </div>
 </section>
 
-${ctaBand()}
+${ctaBand(
+  'Join them.',
+  'Book an assessment, find out what is actually going on, and get a plan to fix it.'
+)}
 `;
 
   return {

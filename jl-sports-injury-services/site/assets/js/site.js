@@ -158,21 +158,33 @@
       requestAnimationFrame(tick);
     };
 
-    if (!('IntersectionObserver' in window)) {
-      counters.forEach(run);
-    } else {
-      var cio = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            run(entry.target);
-            cio.unobserve(entry.target);
-          });
-        },
-        { threshold: 0.5 }
-      );
-      counters.forEach(function (el) { cio.observe(el); });
+    if (!('IntersectionObserver' in window) || reduced) {
+      // The markup already carries the real figure, so with no observer and
+      // no motion there is nothing to do.
+      return;
     }
+
+    var cio = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          run(entry.target);
+          cio.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    counters.forEach(function (el) {
+      // Zero it now rather than at the moment it scrolls into view — otherwise
+      // the real figure is on screen first and visibly snaps back to zero.
+      var decimals = parseInt(el.getAttribute('data-decimals'), 10) || 0;
+      el.textContent =
+        (el.getAttribute('data-prefix') || '') +
+        (0).toFixed(decimals) +
+        (el.getAttribute('data-suffix') || '');
+      cio.observe(el);
+    });
   }
 
   // -------------------------------------------------------------------------

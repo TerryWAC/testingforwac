@@ -396,8 +396,10 @@
 
     // Summary on the done screen.
     var done = $('#step-done');
+    // Reads "Nearly there, Alex." with a name, "Nearly there." without one.
     var nameEl = $('[data-done-name]', done);
-    if (nameEl) nameEl.textContent = d.name.split(' ')[0] || 'there';
+    var first = d.name.trim().split(/\s+/)[0];
+    if (nameEl) nameEl.textContent = first ? ', ' + first : '';
     renderSummary();
 
     // Hand off to the live diary with as much context as the URL allows.

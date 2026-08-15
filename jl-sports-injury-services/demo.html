@@ -93,8 +93,13 @@ img, svg, video { display: block; max-width: 100%; }
 img { height: auto; }
 
 /* Icons size to their context unless a component overrides them. Without this
-   an inline SVG with no intrinsic size stretches to fill its container. */
-.icon { width: 1.15em; height: 1.15em; flex: none; }
+   an inline SVG with no intrinsic size stretches to fill its container.
+   inline-block keeps them on the line inside running text; flex children are
+   blockified anyway, so component layouts are unaffected. */
+.icon {
+  display: inline-block; vertical-align: middle;
+  width: 1.15em; height: 1.15em; flex: none;
+}
 
 a { color: inherit; text-decoration: none; }
 
@@ -192,8 +197,13 @@ p { text-wrap: pretty; }
 }
 .shell-wide { width: min(100% - (var(--gutter) * 2), var(--shell-wide)); }
 
-.section { padding-block: clamp(4.5rem, 9vw, 8rem); position: relative; }
-.section-tight { padding-block: clamp(3rem, 6vw, 5rem); }
+/* Generous, but 8rem top and bottom on thirteen sections adds a third of a
+   screen height in whitespace alone. */
+.section { padding-block: clamp(3.75rem, 7vw, 6.5rem); position: relative; }
+.section-tight { padding-block: clamp(2.75rem, 5vw, 4.25rem); }
+/* The footer brings its own top margin, so the last section must not add a
+   second gap on top of it. */
+main > section:last-child { padding-bottom: 0; }
 
 .section-head { max-width: 44rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
 .section-head.center { margin-inline: auto; text-align: center; }
@@ -770,6 +780,34 @@ p { text-wrap: pretty; }
   outline: 2px solid var(--green); outline-offset: -4px; border-radius: inherit;
 }
 
+/* Conditions — short entries, so a denser tile than the full card. */
+.cond-grid {
+  display: grid; gap: 1px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--line);
+  border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden;
+}
+.cond {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: clamp(1.25rem, 2.2vw, 1.6rem);
+  background: var(--ink-2);
+  transition: background 0.35s;
+}
+.cond:hover { background: rgba(0, 250, 130, 0.05); }
+.cond-icon {
+  display: grid; place-items: center; flex: none;
+  width: 40px; height: 40px; border-radius: 11px;
+  background: rgba(0, 250, 130, 0.1); color: var(--green);
+  transition: transform 0.4s var(--ease);
+}
+.cond:hover .cond-icon { transform: translateY(-2px) scale(1.05); }
+.cond-icon .icon { width: 20px; height: 20px; }
+.cond h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+.cond p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.5; }
+
+@media (max-width: 900px) { .cond-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .cond-grid { grid-template-columns: 1fr; } }
+
 /* --------------------------------------------------------------------------
    10. Stats
    -------------------------------------------------------------------------- */
@@ -966,6 +1004,17 @@ p { text-wrap: pretty; }
 .platform:hover { border-color: var(--green); color: var(--text); }
 .platform .icon { width: 18px; height: 18px; }
 .rating-copy { max-width: 34ch; }
+
+/* A quieter ask than a full CTA band — two of those in a row reads as nagging. */
+.review-ask {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 1.5rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.review-ask h2 { font-size: clamp(1.2rem, 2.2vw, 1.5rem); margin-bottom: 0.5rem; }
+.review-ask p { font-size: 0.92rem; max-width: 52ch; }
 
 /* --------------------------------------------------------------------------
    14. FAQ
@@ -1318,6 +1367,18 @@ p { text-wrap: pretty; }
 .mini-list li { display: flex; gap: 0.6rem; align-items: flex-start; }
 .mini-list .icon { width: 17px; height: 17px; color: var(--green); flex: none; margin-top: 3px; }
 
+/* Shown only when scripting is off — the wizard and the contact form both
+   need JS, so point people at the paths that do not. */
+.noscript-note {
+  display: grid; gap: 0.85rem; justify-items: start;
+  padding: 1.4rem 1.6rem; margin-bottom: 1.5rem;
+  border: 1px solid rgba(0, 250, 130, 0.3); border-radius: var(--radius);
+  background: rgba(0, 250, 130, 0.06);
+}
+.noscript-note strong { font-family: var(--display); font-size: 1.05rem; }
+.noscript-note p { font-size: 0.92rem; color: var(--text-dim); }
+.noscript-note a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+
 /* --------------------------------------------------------------------------
    21. Contact / location
    -------------------------------------------------------------------------- */
@@ -1577,10 +1638,19 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   .rating-panel { grid-template-columns: 1fr; text-align: center; }
   .rating-platforms { justify-content: center; }
   .rating-copy { max-width: none; margin-inline: auto; }
-  .price-row { grid-template-columns: 1fr auto; row-gap: 0.5rem; }
-  .price-row .price-dur { grid-column: 1; }
+  /* Two tidy rows — name over duration on the left, price over Book on the
+     right — instead of four stacked lines. */
+  .price-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    row-gap: 0.7rem; column-gap: 1rem;
+  }
   .price-row.is-head { display: none; }
-  .price-row .btn { grid-column: 2; grid-row: 1 / span 2; }
+  .price-name { grid-column: 1; grid-row: 1; }
+  .price-dur { grid-column: 1; grid-row: 2; }
+  .price-amt { grid-column: 2; grid-row: 1; justify-self: end; }
+  .price-amt-text { max-width: 12ch; text-align: right; line-height: 1.35; }
+  .price-row .btn { grid-column: 2; grid-row: 2; justify-self: end; }
 }
 
 @media (max-width: 720px) {
@@ -1915,36 +1985,48 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
         before anything gets treated.
       </p>
     </div>
-    <div class="grid grid-3" data-stagger="70">
-      <article class="card cond" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg></div>
-        <h3>Knee pain</h3>
-        <p>Runner's knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.</p>
-      </article><article class="card cond" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></div>
-        <h3>Muscular pain</h3>
-        <p>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</p>
-      </article><article class="card cond" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></div>
-        <h3>Neck pain</h3>
-        <p>Stiffness and referred pain from desk posture, training, or sleeping awkwardly — including headaches that start in the neck.</p>
-      </article><article class="card cond" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></div>
-        <h3>Nerve pain</h3>
-        <p>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</p>
-      </article><article class="card cond" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></div>
-        <h3>Wrist pain</h3>
-        <p>Tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</p>
-      </article><article class="card cond" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg></div>
-        <h3>Back pain</h3>
-        <p>Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.</p>
+    <div class="cond-grid" data-stagger="60">
+      <article class="cond" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg></span>
+        <div>
+          <h3>Knee pain</h3>
+          <p>Runner's knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.</p>
+        </div>
+      </article><article class="cond" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></span>
+        <div>
+          <h3>Muscular pain</h3>
+          <p>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</p>
+        </div>
+      </article><article class="cond" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></span>
+        <div>
+          <h3>Neck pain</h3>
+          <p>Stiffness and referred pain from desk posture, training, or sleeping awkwardly — including headaches that start in the neck.</p>
+        </div>
+      </article><article class="cond" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></span>
+        <div>
+          <h3>Nerve pain</h3>
+          <p>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</p>
+        </div>
+      </article><article class="cond" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></span>
+        <div>
+          <h3>Wrist pain</h3>
+          <p>Tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</p>
+        </div>
+      </article><article class="cond" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <div>
+          <h3>Back pain</h3>
+          <p>Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.</p>
+        </div>
       </article>
     </div>
     <p class="price-note" data-reveal>
-      Not on the list? It is still worth a call — <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-      <a href="#/contact" style="color:var(--green)">ask about your injury</a>
+      Not on the list? It is still worth a call —
+      <a class="btn-link" href="#/contact">ask about your injury <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
     </p>
   </div>
 </section>
@@ -1959,7 +2041,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
         your injury, not sold from a menu.
       </p>
     </div>
-    <div class="grid grid-3" data-stagger="70">
+    <div class="grid grid-4" data-stagger="70">
       <article class="card t-card card-stretch" data-reveal>
   <div class="t-card-top">
     <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg></div>
@@ -2016,52 +2098,11 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <span>30–60 min</span>
   </div>
   <span class="t-card-link">Read more <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-</article><article class="card t-card card-stretch" data-reveal>
-  <div class="t-card-top">
-    <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></div>
-    
-  </div>
-  <h3><a href="#/medical-acupuncture">Medical Acupuncture</a></h3>
-  <p>An evidence-based approach to needling for pain and muscular tension, always following a proper assessment.</p>
-  <div class="t-card-meta">
-    
-    <span class="price">£55</span>
-    <span class="sep">·</span>
-    <span>60 min</span>
-  </div>
-  <span class="t-card-link">Read more <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-</article><article class="card t-card card-stretch" data-reveal>
-  <div class="t-card-top">
-    <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></div>
-    
-  </div>
-  <h3><a href="#/electrotherapy">Electrotherapy</a></h3>
-  <p>EMS and TENS used to re-activate weak muscle, reduce swelling and manage pain during recovery.</p>
-  <div class="t-card-meta">
-    
-    <span class="price">£55</span>
-    <span class="sep">·</span>
-    <span>60 min</span>
-  </div>
-  <span class="t-card-link">Read more <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
-</article><article class="card t-card card-stretch" data-reveal>
-  <div class="t-card-top">
-    <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15 9.5a3.5 3.5 0 0 1 0 5"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></div>
-    
-  </div>
-  <h3><a href="#/ultrasound-therapy">Ultrasound Therapy</a></h3>
-  <p>Therapeutic sound waves used to accelerate soft tissue repair and remodel scar tissue.</p>
-  <div class="t-card-meta">
-    
-    <span class="price">£55</span>
-    <span class="sep">·</span>
-    <span>60 min</span>
-  </div>
-  <span class="t-card-link">Read more <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
 </article>
     </div>
     <div class="btn-row" style="margin-top:2.5rem" data-reveal>
-      <a class="btn btn-outline" href="#/services">All treatments &amp; prices <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      <a class="btn btn-outline" href="#/services">All 7 treatments <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      <a class="btn btn-ghost" href="#/price-list">See the price list</a>
     </div>
   </div>
 </section>
@@ -2142,10 +2183,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 <section class="section-tight">
   <div class="shell">
     <div class="stats" data-reveal>
-      <div class="stat"><b data-count="10" data-suffix="+">0</b><span>Years in practice</span></div>
+      <div class="stat"><b data-count="10" data-suffix="+">10+</b><span>Years in practice</span></div>
       <div class="stat"><b>2018</b><span>Serving Gosforth</span></div>
-      <div class="stat"><b data-count="5" data-decimals="1" data-suffix="★">0</b><span>From 27 reviews</span></div>
-      <div class="stat"><b data-count="7">0</b><span>Treatments available</span></div>
+      <div class="stat"><b data-count="5" data-decimals="1" data-suffix="★">5.0★</b><span>From 27 reviews</span></div>
+      <div class="stat"><b data-count="7">7</b><span>Treatments available</span></div>
     </div>
   </div>
 </section>
@@ -2361,7 +2402,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-2" role="region" aria-labelledby="index-faq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the injury assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-3" id="index-faq-b-3">
@@ -2817,9 +2858,9 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     </div>
     </div>
     <p class="price-note">
-      Not sure which to book? Start with an injury assessment — it includes treatment in the same
-      appointment. <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-      <a href="#/injury-assessment" style="color:var(--green)">Read what happens</a>
+      Not sure which to book? Start with an initial assessment — it includes treatment in the same
+      appointment.
+      <a class="btn-link" href="#/injury-assessment">Read what happens <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
     </p>
   </div>
 </section>
@@ -2834,7 +2875,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <article class="card" data-reveal>
         <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg></div>
         <h3>You are in pain or injured</h3>
-        <p>Book an <strong>injury assessment</strong>. You get physical testing, a diagnosis, treatment in the same session and a plan to follow.</p>
+        <p>Book an <strong>initial assessment</strong>. You get physical testing, a diagnosis, treatment in the same session and a plan to follow.</p>
         <a class="t-card-link" href="#/book?treatment=injury-assessment">Book assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
       </article>
       <article class="card" data-reveal>
@@ -2881,7 +2922,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="services-faq-p-2" role="region" aria-labelledby="services-faq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the injury assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="services-faq-p-3" id="services-faq-b-3">
@@ -2931,7 +2972,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div>
         <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Initial Assessment</span>
         <h1 data-hero style="--d:80ms">Initial Assessment</h1>
-        <p class="lead" data-hero style="--d:160ms">Every new client starts with an injury assessment. It is the difference between chasing symptoms and fixing the problem — and it means the treatment you get is built around your injury rather than a standard routine.</p>
+        <p class="lead" data-hero style="--d:160ms">Every new client starts with an initial assessment. It is the difference between chasing symptoms and fixing the problem — and it means the treatment you get is built around your injury rather than a standard routine.</p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
         <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> 60 minutes</span>
@@ -2968,7 +3009,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3092,7 +3133,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3213,7 +3254,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3333,11 +3374,11 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <h2>Is this right for you?</h2>
           <p>Injury Treatment is commonly the right choice if any of the following sound familiar:</p>
           <ul>
-            <li>Continuing care after an injury assessment</li><li>Rebuilding strength after a strain or sprain</li><li>Returning to sport safely after time out</li><li>Long-standing injuries that never fully settled</li>
+            <li>Continuing care after an initial assessment</li><li>Rebuilding strength after a strain or sprain</li><li>Returning to sport safely after time out</li><li>Long-standing injuries that never fully settled</li>
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3424,7 +3465,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div>
         <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg> Medical Acupuncture</span>
         <h1 data-hero style="--d:80ms">Medical Acupuncture</h1>
-        <p class="lead" data-hero style="--d:160ms">Medical acupuncture takes a more evidence based approach than traditional acupuncture, and is only ever administered following an injury assessment.</p>
+        <p class="lead" data-hero style="--d:160ms">Medical acupuncture takes a more evidence based approach than traditional acupuncture, and is only ever administered following an initial assessment.</p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
         <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> 60 minutes</span>
@@ -3461,7 +3502,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3582,7 +3623,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3703,7 +3744,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           </ul>
           <p>
             If you are not sure, book an
-            <a href="#/injury-assessment">injury assessment</a> instead — it identifies exactly what
+            <a href="#/injury-assessment">initial assessment</a> instead — it identifies exactly what
             you need and includes treatment in the same appointment.
           </p>
         </div>
@@ -3951,7 +3992,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="price-list-faq-p-2" role="region" aria-labelledby="price-list-faq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the injury assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="price-list-faq-p-3" id="price-list-faq-b-3">
@@ -4076,19 +4117,20 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 
 <section class="section" style="padding-top:0">
   <div class="shell">
-    <div class="cta-band" data-reveal="scale">
-      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg> Been in already?</span>
-      <h2 style="margin-top:1rem">Leave a review.</h2>
-      <p class="lead">
-        If the treatment helped, a couple of lines on Google genuinely makes a difference to a
-        clinic this size — and helps the next person with the same injury find it.
-      </p>
+    <div class="review-ask" data-reveal>
+      <div>
+        <h2>Been in already? Leave a review.</h2>
+        <p class="muted">
+          A couple of lines on Google genuinely makes a difference to a clinic this size — and
+          helps the next person with the same injury find it.
+        </p>
+      </div>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle" target="_blank" rel="noopener">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.06-1.35-.18-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.75 3-4.32 3-7.3Z"/><path d="M12 22c2.7 0 4.97-.9 6.6-2.43l-3.2-2.5c-.9.6-2.05.95-3.4.95-2.6 0-4.8-1.76-5.6-4.12H3.1v2.58A10 10 0 0 0 12 22Z"/><path d="M6.4 13.9a6 6 0 0 1 0-3.83V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z"/><path d="M12 5.95c1.47 0 2.79.5 3.83 1.5l2.84-2.84C16.96 2.99 14.7 2 12 2A10 10 0 0 0 3.1 7.5l3.3 2.57C7.2 7.71 9.4 5.95 12 5.95Z"/></svg> Review on Google
+        <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M21.6 12.2c0-.7-.06-1.35-.18-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.75 3-4.32 3-7.3Z"/><path d="M12 22c2.7 0 4.97-.9 6.6-2.43l-3.2-2.5c-.9.6-2.05.95-3.4.95-2.6 0-4.8-1.76-5.6-4.12H3.1v2.58A10 10 0 0 0 12 22Z"/><path d="M6.4 13.9a6 6 0 0 1 0-3.83V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z"/><path d="M12 5.95c1.47 0 2.79.5 3.83 1.5l2.84-2.84C16.96 2.99 14.7 2 12 2A10 10 0 0 0 3.1 7.5l3.3 2.57C7.2 7.71 9.4 5.95 12 5.95Z"/></svg> Google
         </a>
-        <a class="btn btn-ghost btn-lg" href="https://www.facebook.com/JLSportsInjuryServices/" target="_blank" rel="noopener">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14 9V7.2c0-.8.2-1.2 1.4-1.2H17V3h-2.6C11.5 3 10.5 4.4 10.5 6.9V9H8.5v3h2V21h3.5v-9h2.4l.4-3H14Z"/></svg> Review on Facebook
+        <a class="btn btn-ghost" href="https://www.facebook.com/JLSportsInjuryServices/" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14 9V7.2c0-.8.2-1.2 1.4-1.2H17V3h-2.6C11.5 3 10.5 4.4 10.5 6.9V9H8.5v3h2V21h3.5v-9h2.4l.4-3H14Z"/></svg> Facebook
         </a>
       </div>
     </div>
@@ -4099,8 +4141,8 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   <div class="shell">
     <div class="cta-band" data-reveal="scale">
       <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
-      <h2 style="margin-top:1rem">Stop training around it.</h2>
-      <p class="lead">Book an assessment and find out what is actually going on — then get a plan to fix it.</p>
+      <h2 style="margin-top:1rem">Join them.</h2>
+      <p class="lead">Book an assessment, find out what is actually going on, and get a plan to fix it.</p>
       <div class="btn-row">
         <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
@@ -4253,6 +4295,22 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 <section class="section" style="padding-top:clamp(2rem,4vw,3rem)">
   <div class="shell">
     <div class="layout-aside">
+      <noscript>
+        <div class="noscript-note">
+          <strong>The step-by-step booking form needs JavaScript.</strong>
+          <p>
+            You can still book straight in the diary, or call the clinic during opening hours and
+            Jack will get you booked in.
+          </p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="https://www.fresha.com/a/j-l-sports-injury-services-newcastle-upon-tyne-hidden-strength-lansdowne-court-gosforth-olaass6e" target="_blank" rel="noopener">
+              Book in the diary
+            </a>
+            <a class="btn btn-ghost" href="tel:+447460937648">Call +44 7460 937648</a>
+          </div>
+        </div>
+      </noscript>
+
       <div class="booking" id="booking">
         <div class="booking-head">
           <div class="progress">
@@ -4272,7 +4330,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <!-- 1 -->
           <div class="booking-step is-active" id="step-treatment">
             <h2>What do you need?</h2>
-            <p class="muted">Not sure? Pick the injury assessment — it works out what you need and treats it in the same appointment.</p>
+            <p class="muted">Not sure? Pick the initial assessment — it works out what you need and treats it in the same appointment.</p>
             <div class="opt-grid"><label class="opt">
       <input type="radio" name="treatment" value="injury-assessment">
       <span class="opt-face">
@@ -4437,7 +4495,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <div class="booking-step" id="step-done">
             <div class="booking-done">
               <div class="done-mark"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>
-              <h2>Nearly there, <span data-done-name>there</span>.</h2>
+              <h2>Nearly there<span data-done-name></span>.</h2>
               <p class="lead" style="margin:1rem auto 0">
                 Here is your appointment. Send it across using whichever is easiest — Jack will confirm
                 it and you will get everything you need by email.
@@ -4581,6 +4639,16 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
               </label>
             </div>
           </div>
+          <noscript>
+            <div class="noscript-note" style="margin-top:1.5rem">
+              <strong>This form needs JavaScript to send.</strong>
+              <p>
+                Email <a href="mailto:info@jlsportsinjuryservices.com">info@jlsportsinjuryservices.com</a> or call
+                <a href="tel:+447460937648">+44 7460 937648</a> and you will get a reply
+                the same day.
+              </p>
+            </div>
+          </noscript>
           <p id="contact-status" class="tiny muted" hidden style="margin-top:1rem"></p>
           <div class="btn-row" style="margin-top:1.5rem">
             <button class="btn btn-primary btn-lg" type="submit">Send message <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
@@ -5015,21 +5083,33 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       requestAnimationFrame(tick);
     };
 
-    if (!('IntersectionObserver' in window)) {
-      counters.forEach(run);
-    } else {
-      var cio = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            run(entry.target);
-            cio.unobserve(entry.target);
-          });
-        },
-        { threshold: 0.5 }
-      );
-      counters.forEach(function (el) { cio.observe(el); });
+    if (!('IntersectionObserver' in window) || reduced) {
+      // The markup already carries the real figure, so with no observer and
+      // no motion there is nothing to do.
+      return;
     }
+
+    var cio = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          run(entry.target);
+          cio.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    counters.forEach(function (el) {
+      // Zero it now rather than at the moment it scrolls into view — otherwise
+      // the real figure is on screen first and visibly snaps back to zero.
+      var decimals = parseInt(el.getAttribute('data-decimals'), 10) || 0;
+      el.textContent =
+        (el.getAttribute('data-prefix') || '') +
+        (0).toFixed(decimals) +
+        (el.getAttribute('data-suffix') || '');
+      cio.observe(el);
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -5717,8 +5797,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 
     // Summary on the done screen.
     var done = $('#step-done');
+    // Reads "Nearly there, Alex." with a name, "Nearly there." without one.
     var nameEl = $('[data-done-name]', done);
-    if (nameEl) nameEl.textContent = d.name.split(' ')[0] || 'there';
+    var first = d.name.trim().split(/\s+/)[0];
+    if (nameEl) nameEl.textContent = first ? ', ' + first : '';
     renderSummary();
 
     // Hand off to the live diary with as much context as the URL allows.

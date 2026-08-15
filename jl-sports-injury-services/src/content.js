@@ -147,7 +147,7 @@ const treatments = [
     icon: 'clipboard',
     featured: true,
     intro:
-      'Every new client starts with an injury assessment. It is the difference between chasing symptoms and fixing the problem — and it means the treatment you get is built around your injury rather than a standard routine.',
+      'Every new client starts with an initial assessment. It is the difference between chasing symptoms and fixing the problem — and it means the treatment you get is built around your injury rather than a standard routine.',
     body: [
       {
         h: 'What happens in the appointment',
@@ -292,7 +292,7 @@ const treatments = [
       },
     ],
     goodFor: [
-      'Continuing care after an injury assessment',
+      'Continuing care after an initial assessment',
       'Rebuilding strength after a strain or sprain',
       'Returning to sport safely after time out',
       'Long-standing injuries that never fully settled',
@@ -312,7 +312,7 @@ const treatments = [
     priceNote: 'Included within assessment and treatment appointments',
     icon: 'needle',
     intro:
-      'Medical acupuncture takes a more evidence based approach than traditional acupuncture, and is only ever administered following an injury assessment.',
+      'Medical acupuncture takes a more evidence based approach than traditional acupuncture, and is only ever administered following an initial assessment.',
     body: [
       {
         h: 'Assessment first, always',
@@ -546,13 +546,6 @@ const steps = [
   },
 ];
 
-const stats = [
-  { value: 10, suffix: '+', label: 'Years in practice' },
-  { value: 2018, prefix: 'Est. ', label: 'Serving Gosforth', raw: true },
-  { value: 5.0, suffix: '★', label: 'From over 30 reviews', decimals: 1 },
-  { value: 2, label: 'Elite clubs worked with' },
-];
-
 const credentials = [
   'Castleford Tigers R.L.F.C.',
   'Leicester Tigers',
@@ -574,7 +567,7 @@ const faqs = [
   },
   {
     q: 'Should I book an assessment or a sports massage?',
-    a: 'If you are in pain, have an injury or something keeps returning, book the injury assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.',
+    a: 'If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.',
   },
   {
     q: 'What should I wear?',
@@ -635,7 +628,6 @@ module.exports = {
   conditions,
   nav,
   steps,
-  stats,
   credentials,
   faqs,
   trustPoints,
