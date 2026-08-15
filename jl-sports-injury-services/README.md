@@ -88,15 +88,22 @@ it can be swapped in.
 
 ## Things to confirm before it goes live
 
-1. **Prices** — `src/content.js`. The 30-minute (£30) and 60-minute (£44) sports massage
-   rates come from your published full prices. The 45-minute and follow-up rates are
-   sensible mid-points and need your confirmation. Every price on the site, in the booking
-   flow and in the search-engine markup comes from this one file.
-2. **Email address** — currently `info@jlsportsinjuryservices.com`. Change it in
+1. **Prices** — taken from your published price list and set in `src/content.js`: initial
+   assessment £55, follow-up £55/£35, sports massage £50/£30, full body massage £80. Worth
+   a final read in case anything has moved. Every price on the site, in the booking flow
+   and in the search-engine markup comes from that one file.
+2. **Review count** — shows 27, matching the Google badge on your current site. If you would
+   rather not update it each time a review lands, set `reviews.countLabel` to something like
+   `'over 25'` and it will use that wording everywhere instead.
+3. **Email address** — currently `info@jlsportsinjuryservices.com`. Change it in
    `src/content.js` if enquiries should go elsewhere.
-3. **Instagram link** — a best guess at the handle. Correct or remove it in `src/content.js`.
-4. **Photography** — see below.
-5. **Privacy policy** — a plain-English starting point. Worth checking against your
+4. **Instagram link** — a best guess at the handle. Correct or remove it in `src/content.js`.
+5. **The offer** — 10% off with code `JLNEW0029` runs in the promo bar and on the offers
+   page. Set `offer.active` to `false` in `src/content.js` to take it down everywhere.
+6. **Block bookings and vouchers** — described in general terms because the exact block
+   rates were not published. Add them to `extras` in `src/content.js` when you have them.
+7. **Photography** — see below.
+8. **Privacy policy** — a plain-English starting point. Worth checking against your
    record-keeping and insurance requirements.
 
 ---
