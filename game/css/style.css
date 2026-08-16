@@ -1,0 +1,501 @@
+/* Striker Idle — mobile-first stadium-night theme.
+   Animation rule for this file: only transform and opacity are ever
+   transitioned, so every moving thing stays on the compositor. */
+
+:root {
+  --bg:        #08150f;
+  --bg-raise:  #0f2419;
+  --bg-row:    #122c1e;
+  --line:      #1d4230;
+  --turf:      #1c7a45;
+  --turf-lit:  #239854;
+  --ink:       #eaf5ee;
+  --ink-dim:   #8fb3a0;
+  --ink-faint: #5d7f6c;
+  --gold:      #ffc94d;
+  --gold-deep: #d99a12;
+  --can-buy:   #57e08b;
+  --danger:    #ff6b6b;
+
+  --ease-out:  cubic-bezier(.22,.61,.36,1);
+  --ease-back: cubic-bezier(.34,1.56,.64,1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ---------- HUD ---------- */
+
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 10px;
+  background: linear-gradient(180deg, var(--bg-raise), transparent);
+}
+
+.hud-goals {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hud-rate {
+  margin-top: 1px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--turf-lit);
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-row);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.chip-trophy { color: var(--gold); border-color: rgba(255,201,77,.28); }
+
+/* A trophy award pops the chip once, then settles. */
+.chip-trophy.is-pop { animation: chipPop .5s var(--ease-back); }
+@keyframes chipPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Stage ---------- */
+
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#pitch {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tap-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  pointer-events: none;
+  animation: hintBreathe 2.6s ease-in-out infinite;
+  transition: opacity .5s var(--ease-out);
+}
+
+.tap-hint.is-gone { opacity: 0; }
+
+@keyframes hintBreathe {
+  0%, 100% { opacity: .45; }
+  50%      { opacity: .9; }
+}
+
+/* ---------- Tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px;
+  background: var(--bg);
+}
+
+.tab {
+  flex: 1;
+  padding: 11px 0 9px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ink-faint);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color .18s var(--ease-out), border-color .18s var(--ease-out);
+}
+
+.tab.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--turf-lit);
+}
+
+/* ---------- Panel ---------- */
+
+.panel {
+  flex: 0 0 auto;
+  height: min(44vh, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+
+.tab-page { display: none; padding: 10px 12px 24px; }
+.tab-page.is-active { display: block; }
+
+.buy-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 2px 10px;
+}
+
+.buy-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.buy-opts { display: flex; gap: 4px; }
+
+.buy-opt {
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-row);
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s var(--ease-back), color .15s, border-color .15s;
+}
+
+.buy-opt:active { transform: scale(.93); }
+.buy-opt.is-active { color: var(--bg); background: var(--turf-lit); border-color: var(--turf-lit); }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- Rows ---------- */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-row);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .16s var(--ease-back), opacity .3s var(--ease-out),
+              border-color .2s var(--ease-out);
+  will-change: transform;
+}
+
+.row:active { transform: scale(.975); }
+.row.is-locked { opacity: .38; pointer-events: none; }
+.row.can-buy { border-color: rgba(87,224,139,.42); }
+
+/* Newly revealed rows slide in rather than snapping into the list. */
+.row.is-new { animation: rowIn .42s var(--ease-out) both; }
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Fires on purchase — a quick lift so buying feels physical. */
+.row.is-bought { animation: rowBuy .34s var(--ease-back); }
+@keyframes rowBuy {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+.row-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: linear-gradient(160deg, #1a3a28, #102418);
+  font-size: 20px;
+}
+
+.row-body { flex: 1 1 auto; min-width: 0; }
+
+.row-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.row-name { font-size: 14px; font-weight: 700; }
+
+.row-own {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.row-desc {
+  margin-top: 1px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-bot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.row-cost {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+  transition: color .2s var(--ease-out);
+}
+
+.row.can-buy .row-cost { color: var(--can-buy); }
+
+.row-rate {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--turf-lit);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Milestone progress — every 10 owned doubles down on output. */
+.row-mile {
+  position: relative;
+  height: 3px;
+  margin-top: 7px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.07);
+  overflow: hidden;
+}
+
+.row-mile-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform .45s var(--ease-out);
+}
+
+/* ---------- Cards ---------- */
+
+.card {
+  padding: 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-row);
+}
+
+.card h2 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+
+.card-copy { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 12px; }
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--ink-dim);
+  border-bottom: 1px solid rgba(255,255,255,.045);
+}
+
+.stat:last-of-type { border-bottom: 0; }
+.stat b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.bar {
+  height: 6px;
+  margin: 12px 0;
+  border-radius: 3px;
+  background: rgba(255,255,255,.07);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform .5s var(--ease-out);
+}
+
+.card-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .16s var(--ease-back), opacity .2s var(--ease-out);
+  will-change: transform;
+}
+
+.btn:active { transform: scale(.96); }
+.btn:disabled { opacity: .4; pointer-events: none; }
+
+.btn-primary { width: 100%; background: var(--turf-lit); color: #05180d; }
+
+.btn-prestige {
+  width: 100%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  color: #2a1c00;
+}
+
+/* Once a season is actually bankable the button won't sit still. */
+.btn-prestige:not(:disabled) { animation: prestigeGlow 2.2s ease-in-out infinite; }
+@keyframes prestigeGlow {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.022); }
+}
+
+.btn-ghost {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+}
+
+.btn-danger { color: var(--danger); border-color: rgba(255,107,107,.3); }
+
+/* ---------- Modal ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(4,10,7,.78);
+  backdrop-filter: blur(6px);
+  transition: opacity .28s var(--ease-out);
+}
+
+.modal.hidden { opacity: 0; pointer-events: none; }
+
+.modal-card {
+  width: 100%;
+  max-width: 320px;
+  padding: 26px 22px 20px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--bg-raise);
+  text-align: center;
+  animation: modalIn .4s var(--ease-back) both;
+}
+
+.modal.hidden .modal-card { animation: none; }
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(18px) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+
+.modal-emoji { font-size: 40px; margin-bottom: 6px; }
+.modal-card h2 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+.modal-time { font-size: 12.5px; color: var(--ink-faint); margin-bottom: 14px; }
+
+.modal-earn {
+  font-size: 15px;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+}
+
+.modal-earn b {
+  display: block;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--turf-lit);
+  font-variant-numeric: tabular-nums;
+}
+
+.modal-note {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  margin-bottom: 18px;
+  min-height: 1em;
+}
+
+/* Anyone who'd rather not have things moving gets a still game. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#08150f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Striker Idle</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <header class="hud">
+    <div class="hud-main">
+      <div class="hud-goals"><span id="goals">0</span><span class="hud-unit">goals</span></div>
+      <div class="hud-rate"><span id="rate">0</span> /sec</div>
+    </div>
+    <div class="hud-side">
+      <div class="chip" id="chipSeason">Season 1</div>
+      <div class="chip chip-trophy" id="chipTrophies">🏆 0</div>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="pitch"></canvas>
+    <div class="tap-hint" id="tapHint">Tap the pitch to shoot</div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab is-active" data-tab="squad">Squad</button>
+    <button class="tab" data-tab="training">Training</button>
+    <button class="tab" data-tab="season">Season</button>
+  </nav>
+
+  <main class="panel" id="panel">
+
+    <section class="tab-page is-active" id="page-squad">
+      <div class="buy-bar">
+        <span class="buy-label">Buy</span>
+        <div class="buy-opts">
+          <button class="buy-opt is-active" data-buy="1">×1</button>
+          <button class="buy-opt" data-buy="10">×10</button>
+          <button class="buy-opt" data-buy="max">Max</button>
+        </div>
+      </div>
+      <div class="list" id="squadList"></div>
+    </section>
+
+    <section class="tab-page" id="page-training">
+      <div class="list" id="trainingList"></div>
+    </section>
+
+    <section class="tab-page" id="page-season">
+      <div class="card">
+        <h2>End of Season</h2>
+        <p class="card-copy">Retire the squad and start over. You keep your trophies &mdash; each one permanently lifts everything you score.</p>
+        <div class="stat"><span>Scored this season</span><b id="seasonGoals">0</b></div>
+        <div class="stat"><span>Trophies waiting</span><b id="pendingTrophies">0</b></div>
+        <div class="stat"><span>Current bonus</span><b id="trophyBonus">+0%</b></div>
+        <div class="bar"><div class="bar-fill" id="seasonBar"></div></div>
+        <button class="btn btn-prestige" id="prestigeBtn" disabled>Score 1M this season</button>
+      </div>
+      <div class="card">
+        <h2>Save</h2>
+        <div class="stat"><span>Last saved</span><b id="lastSaved">just now</b></div>
+        <div class="stat"><span>Offline cap</span><b id="offlineCap">4h</b></div>
+        <div class="card-actions">
+          <button class="btn btn-ghost" id="saveBtn">Save now</button>
+          <button class="btn btn-ghost btn-danger" id="resetBtn">Wipe save</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<div class="modal hidden" id="offlineModal">
+  <div class="modal-card">
+    <div class="modal-emoji">🌙</div>
+    <h2>While you were away</h2>
+    <p class="modal-time" id="offlineTime">&mdash;</p>
+    <p class="modal-earn"><b id="offlineGoals">0</b> goals</p>
+    <p class="modal-note" id="offlineNote"></p>
+    <button class="btn btn-primary" id="offlineClose">Back to it</button>
+  </div>
+</div>
+
+<script src="js/format.js"></script>
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
