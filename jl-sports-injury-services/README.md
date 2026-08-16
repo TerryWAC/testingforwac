@@ -149,20 +149,35 @@ The build finds the file, swaps it in over the placeholder and fades it in. Ther
 markup to edit, and while a slot is still empty nothing is requested, so there are no
 broken images and no failed requests.
 
-| Slot | Where it appears | Shape |
-|---|---|---|
-| `jack-portrait` | Home "Meet your therapist", photo rail | Portrait, 4:5 |
-| `jack-treating` | About, photo rail | Treatment in progress |
-| `clinic-gym` | About | The gym floor, 16:10 |
-| `clinic-room` | Photo rail | The treatment room |
-| `waiting-area` | Photo rail | The waiting area |
-| `gym-floor` | Photo rail | The gym floor |
-| `consultation` | Photo rail | Talking through an injury |
-| `offers-clinic` | Offers | Anything that reads as "the clinic", 16:10 |
-| `treatment-<slug>` | Each treatment page | That treatment being delivered, 16:10 |
+### Getting the photos in
 
-The photo rail crops to circles, so anything going in there wants its subject
-roughly centred.
+The build environment cannot reach the images on the live site, and screenshots
+pasted into a chat cannot be saved to disk either. The one route that works:
+**commit the image files into `site/assets/img/` on GitHub** (drag and drop in
+the web UI is fine), then `npm run build`. Originals beat screenshots — a
+screenshot of the site is already compressed, and the carousel ones are already
+cropped to circles and slightly motion-blurred.
+
+| Slot | Where it appears | The photo on his current site |
+|---|---|---|
+| `clinic-room` | Photo rail | Treatment room, couch and muscle charts |
+| `jack-treating` | About, photo rail | Jack treating a client's forearm |
+| `jack-portrait` | Home, photo rail | Jack's headshot |
+| `waiting-area` | Photo rail | Sofa and table by the window |
+| `gym-floor` | Photo rail | Dumbbell racks and green turf |
+| `consultation` | Photo rail | Jack talking a client through it |
+| `clinic-gym` | About | Gym floor, 16:10 |
+| `first-visit` | Your first visit | Treatment room, portrait |
+| `gift-voucher` | Gift vouchers | The gift certificate |
+| `offers-clinic` | Offers | Anything that reads as "the clinic", 16:10 |
+| `treatment-medical-acupuncture` | Acupuncture page | The needles close-up |
+| `treatment-<slug>` | Each treatment page | That treatment being delivered, 16:10 |
+| `condition-<slug>` | Each condition page | Optional — the contour artwork holds up fine |
+
+`.webp`, `.jpg`, `.png` and `.avif` all work. The photo rail crops to circles,
+so centre the subject on anything going there. Nothing is requested for a slot
+that is still empty, so partial delivery is fine — add what exists and the rest
+keep their artwork.
 
 Good photography is the single biggest visual upgrade left on this site.
 
