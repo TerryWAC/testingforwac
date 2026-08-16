@@ -158,10 +158,12 @@ function header(current) {
         <a class="nav-link${active ? ' is-active' : ''}" href="${item.href}">
           ${esc(item.label)} ${icon('chevron', 'chev')}
         </a>
-        <div class="mega" role="group" aria-label="Treatments">
+        <div class="mega" role="group" aria-label="${esc(item.megaLabel || item.label)}">
           <ul class="mega-grid">${sub}</ul>
           <div class="mega-foot">
-            <a class="mega-all" href="services.html">All treatments &amp; prices ${icon('arrow')}</a>
+            <a class="mega-all" href="${item.megaAll.href}">${esc(item.megaAll.label)} ${icon(
+        'arrow'
+      )}</a>
           </div>
         </div>
       </li>`;
@@ -226,7 +228,7 @@ function header(current) {
       <a class="btn btn-ghost btn-block" href="tel:${site.phoneHref}">${icon('phone')} ${esc(
     site.phone
   )}</a>
-      <a class="btn btn-ghost btn-block" href="offers.html#vouchers">${icon('tag')} Buy a gift voucher</a>
+      <a class="btn btn-ghost btn-block" href="gift-vouchers.html">${icon('tag')} Buy a gift voucher</a>
     </div>
     <p class="mobile-meta">${esc(addressOneLine)}<br>Mon–Thu, 9am–8pm</p>
   </div>
@@ -284,7 +286,10 @@ function footer() {
           <li><a href="price-list.html">Price list</a></li>
           <li><a href="reviews.html">Reviews</a></li>
           <li><a href="offers.html">Offers</a></li>
-          <li><a href="offers.html#vouchers">Gift vouchers</a></li>
+          <li><a href="gift-vouchers.html">Gift vouchers</a></li>
+          <li><a href="first-visit.html">Your first visit</a></li>
+          <li><a href="faqs.html">FAQs</a></li>
+          <li><a href="conditions.html">Conditions we treat</a></li>
           <li><a href="contact.html">Contact &amp; directions</a></li>
           <li><a href="book.html">Book an appointment</a></li>
           <li><a href="privacy-policy.html">Privacy policy</a></li>

@@ -16,7 +16,11 @@ const PAGES = [
   'index.html', 'about-us.html', 'services.html', 'injury-assessment.html',
   'sports-massage.html', 'deep-tissue-massage.html', 'follow-up-treatment.html',
   'medical-acupuncture.html', 'electrotherapy.html', 'ultrasound-therapy.html',
-  'price-list.html', 'reviews.html', 'offers.html',
+  'conditions.html', 'knee-pain.html', 'back-pain.html', 'neck-pain.html',
+  'sciatica-nerve-pain.html', 'muscle-strains.html', 'shoulder-pain.html',
+  'wrist-elbow-pain.html',
+  'price-list.html', 'reviews.html', 'offers.html', 'gift-vouchers.html',
+  'first-visit.html', 'faqs.html',
   'book.html', 'contact.html', 'privacy-policy.html', '404.html',
 ];
 

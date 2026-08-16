@@ -450,13 +450,13 @@ ${marquee()}
     <div class="cond-grid" data-stagger="60">
       ${conditions
         .map(
-          (c) => `<article class="cond" data-reveal>
+          (c) => `<a class="cond" href="${c.slug}.html" data-reveal>
         <span class="cond-icon">${icon(c.icon)}</span>
         <div>
-          <h3>${esc(c.name)}</h3>
+          <h3>${esc(c.name)} ${icon('arrow')}</h3>
           <p>${esc(c.blurb)}</p>
         </div>
-      </article>`
+      </a>`
         )
         .join('')}
     </div>
@@ -1895,6 +1895,535 @@ ${ctaBand(
 }
 
 // ---------------------------------------------------------------------------
+// First visit — removes the friction that stops people booking
+// ---------------------------------------------------------------------------
+
+function firstVisit() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'Your first visit' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>${icon('user')} Your first visit</span>
+        <h1 data-hero style="--d:80ms">Exactly what happens when you come in.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          If you have never seen a sports injury therapist before, here is the whole thing —
+          where to go, what to wear, what gets done to you and what you leave with. No surprises.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge">${icon('clock')} 60 minutes</span>
+        <span class="badge">${icon('tag')} £55</span>
+        <span class="badge">${icon('check')} No referral needed</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">On the day</span>
+      <h2>The appointment, minute by minute.</h2>
+    </div>
+    <div class="steps" data-stagger="90">
+      <div class="step" data-reveal>
+        <div class="step-num">01</div>
+        <h3>Arriving</h3>
+        <p>The clinic is inside Hidden Strength on ${esc(addr.street)}. Come in through the main entrance and Jack will meet you. Five minutes early is plenty.</p>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-num">02</div>
+        <h3>Talking it through</h3>
+        <p>Roughly the first ten minutes. What happened, when, what makes it worse, what you have tried, and what you need to get back to. This is the part that shapes everything else.</p>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-num">03</div>
+        <h3>Being assessed</h3>
+        <p>Physical testing — movement, strength, joint stability, and how you load the area. You will be asked to move, and told what each test is looking for as it happens.</p>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-num">04</div>
+        <h3>Treatment and a plan</h3>
+        <p>Treatment happens in the same appointment, and you leave knowing what is wrong, roughly how long it will take, and what to do between now and next time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="split">
+      <div class="split-copy">
+        <span class="eyebrow" data-reveal>Practical</span>
+        <h2 data-reveal>The things people ask on the way in.</h2>
+        <ul class="check-list" data-reveal style="margin-top:1.5rem">
+          <li>${icon('check')}<span><strong>Wear something you can move in.</strong> Shorts for anything below the waist, a vest or t-shirt for shoulders and back. There is space to change.</span></li>
+          <li>${icon('check')}<span><strong>Parking is on site</strong> and on the surrounding streets, and Regent Centre Metro is a short walk.</span></li>
+          <li>${icon('check')}<span><strong>Bring anything relevant</strong> — scan or X-ray results, a letter from your GP, or the trainers you run in if it is a foot, ankle or knee problem.</span></li>
+          <li>${icon('check')}<span><strong>You do not need a referral</strong> and you do not need to be an athlete. Most clients are neither.</span></li>
+          <li>${icon('check')}<span><strong>Payment is at the appointment.</strong> No deposit to book.</span></li>
+          <li>${icon('check')}<span><strong>You can bring someone with you</strong> if you would rather not be assessed on your own.</span></li>
+        </ul>
+        <div class="btn-row" data-reveal style="margin-top:2rem">
+          <a class="btn btn-primary btn-lg" href="book.html?treatment=injury-assessment" data-cta="first-visit">
+            Book your first appointment ${icon('arrow')}
+          </a>
+        </div>
+      </div>
+      <div class="split-media" data-reveal="right">
+        <div class="frame frame-glow">
+          ${photo('first-visit', 'The treatment room where your first appointment takes place')}
+          <div class="frame-caption">
+            ${icon('pin')}
+            <span><b>${esc(addr.venue)}</b><span>${esc(addr.street)}, ${esc(addr.locality)}</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Straight answers</span>
+      <h2>Will it hurt?</h2>
+      <p class="lead">
+        Some of it is uncomfortable — that is honest rather than reassuring. Deep soft tissue work
+        on an irritable area can be intense, and a few of the assessment tests are designed to
+        reproduce your symptoms, because that is how we identify what is involved.
+      </p>
+      <p class="lead" style="margin-top:1rem">
+        What will not happen is anything you have not agreed to. You are told what is coming and
+        why before it happens, pressure is set by you, and saying stop stops it. Nobody gets talked
+        into anything here.
+      </p>
+    </div>
+  </div>
+</section>
+
+${ctaBand(
+  'Now you know what to expect.',
+  'Book the initial assessment and get a straight answer about what is going on.'
+)}
+`;
+
+  return {
+    slug: 'first-visit.html',
+    title: 'Your First Visit | Sports Injury Clinic Gosforth, Newcastle',
+    desc:
+      'What happens at your first appointment at our Gosforth, Newcastle sports injury clinic — what to wear, what gets assessed and what you leave with. Book online.',
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Your first visit', href: 'first-visit.html' },
+      ]),
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// FAQs
+// ---------------------------------------------------------------------------
+
+function faqPage() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'FAQs' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>FAQs</span>
+        <h1 data-hero style="--d:80ms">Questions, answered straight.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          Everything people ask before booking. If yours is not here, call or message and you will
+          get a real answer rather than a sales pitch.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <a class="badge" href="tel:${site.phoneHref}">${icon('phone')} ${esc(site.phone)}</a>
+        <a class="badge" href="contact.html">${icon('mail')} Send a message</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="faq" data-stagger="50">
+      ${faqs
+        .map(
+          (f, i) => `<div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-${i}" id="fq-b-${i}">
+          <span>${esc(f.q)}</span>${icon('chevron')}
+        </button>
+        <div class="faq-a" id="fq-p-${i}" role="region" aria-labelledby="fq-b-${i}" aria-hidden="true">
+          <div><p>${esc(f.a)}</p></div>
+        </div>
+      </div>`
+        )
+        .join('')}
+    </div>
+    <p class="price-note" data-reveal>
+      Still not sure what to book?
+      <a class="btn-link" href="first-visit.html">See what happens at a first visit ${icon('arrow')}</a>
+    </p>
+  </div>
+</section>
+
+${ctaBand()}
+`;
+
+  return {
+    slug: 'faqs.html',
+    title: 'FAQs | Sports Injury Clinic Gosforth, Newcastle',
+    desc:
+      'Common questions about sports massage and injury treatment at our Gosforth, Newcastle clinic — referrals, what to wear, how many sessions and cancellations.',
+    body,
+    schema: [
+      breadcrumbSchema([{ label: 'Home', href: 'index.html' }, { label: 'FAQs', href: 'faqs.html' }]),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Gift vouchers
+// ---------------------------------------------------------------------------
+
+function giftVouchers() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'Gift vouchers' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>${icon('tag')} Gift vouchers</span>
+        <h1 data-hero style="--d:80ms">For the one who will not book it themselves.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          A voucher towards any treatment at the clinic. Useful for the runner training through a
+          niggle, the parent who has been saying "it will settle" since March, or anyone who
+          would never spend it on themselves.
+        </p>
+        <div class="btn-row" data-hero style="--d:250ms;margin-top:2rem">
+          <a class="btn btn-primary btn-lg" href="${site.bookingUrl}" target="_blank" rel="noopener"
+            data-cta="voucher">Buy a voucher ${icon('arrow')}</a>
+          <a class="btn btn-ghost btn-lg" href="tel:${site.phoneHref}">${icon('phone')} Call the clinic</a>
+        </div>
+      </div>
+      <div class="fact-strip" data-hero style="--d:320ms">
+        <span class="badge">${icon('tag')} £25 minimum</span>
+        <span class="badge">${icon('check')} Any treatment</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2>Two ways to buy one</h2>
+      <a class="btn-link" href="price-list.html">See the price list ${icon('arrow')}</a>
+    </div>
+    <div class="grid grid-2" data-stagger="90">
+      <article class="card" data-reveal>
+        <div class="card-icon">${icon('mail')}</div>
+        <h3>E-voucher</h3>
+        <p>Bought online and sent straight to your inbox, so it works when you have left it late. Print it or forward it on.</p>
+        <div class="t-card-meta"><span class="price">From £25</span></div>
+        <a class="t-card-link" href="${site.bookingUrl}" target="_blank" rel="noopener">Buy online ${icon('arrow')}</a>
+      </article>
+      <article class="card" data-reveal>
+        <div class="card-icon">${icon('pin')}</div>
+        <h3>Physical certificate</h3>
+        <p>A printed gift certificate collected from the clinic — worth arranging in advance so it is ready when you get there.</p>
+        <div class="t-card-meta"><span class="price">From £25</span></div>
+        <a class="t-card-link" href="contact.html">Arrange collection ${icon('arrow')}</a>
+      </article>
+    </div>
+
+    <div class="split" style="margin-top:clamp(3rem,6vw,4.5rem)">
+      <div class="split-copy">
+        <span class="eyebrow" data-reveal>How it works</span>
+        <h2 data-reveal>Simple enough.</h2>
+        <ul class="check-list" data-reveal style="margin-top:1.5rem">
+          <li>${icon('check')}<span>Choose an amount — £25 is the minimum, and most people put it towards a specific treatment.</span></li>
+          <li>${icon('check')}<span>They book whichever appointment suits them and use the voucher against it.</span></li>
+          <li>${icon('check')}<span>It can go towards anything: an assessment, a sports massage, a full body massage.</span></li>
+          <li>${icon('check')}<span>If they have never been before, point them at <a href="first-visit.html">what happens on a first visit</a>.</span></li>
+        </ul>
+      </div>
+      <div class="split-media" data-reveal="right">
+        <div class="frame frame-wide frame-glow">
+          ${photo('gift-voucher', 'A J.L. Sports Injury Services gift certificate')}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+${ctaBand(
+  'Give something they will actually use.',
+  'Vouchers start at £25 and go towards any appointment at the clinic.'
+)}
+`;
+
+  return {
+    slug: 'gift-vouchers.html',
+    title: 'Gift Vouchers | Sports Massage Newcastle | Gosforth Clinic',
+    desc:
+      'Gift vouchers for sports massage and injury treatment at J.L. Sports Injury Services in Gosforth, Newcastle. E-voucher or physical certificate, from £25.',
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Gift vouchers', href: 'gift-vouchers.html' },
+      ]),
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Conditions — index and one page each
+// ---------------------------------------------------------------------------
+
+function conditionsIndex() {
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([{ label: 'Home', href: 'index.html' }, { label: 'Conditions' }])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">What is actually causing it?</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          Knee, back, neck, shoulder, nerve, muscle, wrist and elbow pain — assessed properly so
+          you know which tissue is involved and what will change it. Pick what sounds like yours.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge">${icon('check')} No referral needed</span>
+        <span class="badge">${icon('clock')} Seen within days</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2>Pick what sounds like yours</h2>
+      <a class="btn-link" href="services.html">Or see the treatments ${icon('arrow')}</a>
+    </div>
+    <div class="grid grid-3" data-stagger="70">
+      ${conditions
+        .map(
+          (c) => `<article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon">${icon(c.icon)}</div>
+        <h3><a href="${c.slug}.html">${esc(c.name)}</a></h3>
+        <p>${esc(c.blurb)}</p>
+        <span class="t-card-link">What to do about it ${icon('arrow')}</span>
+      </article>`
+        )
+        .join('')}
+    </div>
+    <p class="price-note" data-reveal>
+      Not sure which of these it is? That is what the assessment is for —
+      <a class="btn-link" href="book.html?treatment=injury-assessment">book an initial assessment ${icon(
+        'arrow'
+      )}</a>
+    </p>
+  </div>
+</section>
+
+${ctaBand(
+  'Stop guessing what it is.',
+  'One appointment tells you which tissue is involved, how long it will take and what actually needs to happen.'
+)}
+`;
+
+  return {
+    slug: 'conditions.html',
+    title: 'Conditions We Treat | Sports Injury Clinic Newcastle',
+    desc:
+      'Knee, back, neck, shoulder, sciatica, muscle strain and elbow pain assessed and treated at our Gosforth, Newcastle sports injury clinic. Book online.',
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Conditions', href: 'conditions.html' },
+      ]),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'Conditions treated',
+        itemListElement: conditions.map((c, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: c.name,
+          url: `${site.origin}/${c.slug}.html`,
+        })),
+      },
+    ],
+  };
+}
+
+function conditionPage(c) {
+  const related = c.related
+    .map((slug) => treatments.find((t) => t.slug === slug))
+    .filter(Boolean);
+  const others = conditions.filter((x) => x.slug !== c.slug).slice(0, 4);
+
+  const body = `
+<section class="page-head">
+  ${heroBg()}
+  <div class="shell">
+    ${crumbs([
+      { label: 'Home', href: 'index.html' },
+      { label: 'Conditions', href: 'conditions.html' },
+      { label: c.name },
+    ])}
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>${icon(c.icon)} Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">${esc(c.name)} in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">${esc(c.intro)}</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge">${icon('clipboard')} Assessed, not guessed</span>
+        <span class="badge">${icon('check')} No referral needed</span>
+        <span class="badge">${icon('tag')} From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul>${c.presentations.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>${esc(c.causes)}</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>${esc(c.assessment)}</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>${esc(c.treatment)}</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>${esc(c.timescale)}</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most ${esc(c.name.toLowerCase())} is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul>${c.redFlags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          ${photo(`condition-${c.slug}`, `Treatment for ${c.name.toLowerCase()} at the Gosforth clinic`)}
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="book.html?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment ${icon('arrow')}</a>
+          <a class="btn btn-ghost btn-block" href="tel:${site.phoneHref}">${icon('phone')} Call the clinic</a>
+          <div class="aside-meta">
+            <div>${icon('clock')}<span>Mon–Thu, 9am–8pm</span></div>
+            <div>${icon('pin')}<span>${esc(addr.venue)}, ${esc(addr.locality)}</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            ${related.map((t) => `<a href="${t.slug}.html">${esc(t.title)} ${icon('arrow')}</a>`).join('')}
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            ${others.map((o) => `<a href="${o.slug}.html">${esc(o.name)} ${icon('arrow')}</a>`).join('')}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+${ctaBand(
+  `Get your ${c.name.toLowerCase()} looked at.`,
+  'One appointment to find out what is going on, how long it will take, and what needs to happen next.'
+)}
+`;
+
+  return {
+    slug: `${c.slug}.html`,
+    title: c.metaTitle,
+    desc: c.metaDescription,
+    body,
+    schema: [
+      breadcrumbSchema([
+        { label: 'Home', href: 'index.html' },
+        { label: 'Conditions', href: 'conditions.html' },
+        { label: c.name, href: `${c.slug}.html` },
+      ]),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: `${c.name} treatment in Gosforth, Newcastle`,
+        description: c.metaDescription,
+        url: `${site.origin}/${c.slug}.html`,
+        about: { '@type': 'MedicalCondition', name: c.name },
+        provider: { '@id': `${site.origin}/#clinic` },
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Privacy + 404
 // ---------------------------------------------------------------------------
 
@@ -2009,9 +2538,14 @@ module.exports = {
     about(),
     services(),
     ...treatments.map(treatmentPage),
+    conditionsIndex(),
+    ...conditions.map(conditionPage),
     priceList(),
     reviews(),
     offers(),
+    giftVouchers(),
+    firstVisit(),
+    faqPage(),
     book(),
     contact(),
     privacy(),

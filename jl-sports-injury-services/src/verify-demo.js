@@ -9,7 +9,10 @@ const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const ROUTES = [
   'index', 'about-us', 'services', 'injury-assessment', 'sports-massage',
   'deep-tissue-massage', 'follow-up-treatment', 'medical-acupuncture',
-  'electrotherapy', 'ultrasound-therapy', 'price-list', 'reviews', 'offers',
+  'electrotherapy', 'ultrasound-therapy',
+  'conditions', 'knee-pain', 'back-pain', 'neck-pain', 'sciatica-nerve-pain',
+  'muscle-strains', 'shoulder-pain', 'wrist-elbow-pain',
+  'price-list', 'reviews', 'offers', 'gift-vouchers', 'first-visit', 'faqs',
   'book', 'contact', 'privacy-policy',
 ];
 

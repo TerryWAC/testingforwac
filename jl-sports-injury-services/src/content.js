@@ -416,12 +416,16 @@ const treatments = [
 // Reusable page furniture
 // ---------------------------------------------------------------------------
 
+const { conditions } = require('./conditions');
+
 const nav = [
   { label: 'Home', href: 'index.html' },
   { label: 'About', href: 'about-us.html' },
   {
     label: 'Services',
     href: 'services.html',
+    megaLabel: 'Treatments',
+    megaAll: { label: 'All treatments & prices', href: 'services.html' },
     children: treatments.map((t) => ({
       label: t.nav,
       href: `${t.slug}.html`,
@@ -429,7 +433,19 @@ const nav = [
       icon: t.icon,
     })),
   },
-  { label: 'Price list', href: 'price-list.html' },
+  {
+    label: 'Conditions',
+    href: 'conditions.html',
+    megaLabel: 'Conditions we treat',
+    megaAll: { label: 'All conditions we treat', href: 'conditions.html' },
+    children: conditions.map((c) => ({
+      label: c.nav,
+      href: `${c.slug}.html`,
+      summary: c.blurb,
+      icon: c.icon,
+    })),
+  },
+  { label: 'Prices', href: 'price-list.html' },
   { label: 'Reviews', href: 'reviews.html' },
   { label: 'Offers', href: 'offers.html' },
   { label: 'Contact', href: 'contact.html' },
@@ -479,49 +495,6 @@ const offer = {
     'Cannot be combined with block booking or subscription rates.',
   ],
 };
-
-// ---------------------------------------------------------------------------
-// Conditions treated. Each one is a phrase people actually search for.
-// ---------------------------------------------------------------------------
-
-const conditions = [
-  {
-    name: 'Knee pain',
-    icon: 'pulse',
-    blurb:
-      'Runner\'s knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.',
-  },
-  {
-    name: 'Muscular pain',
-    icon: 'hands',
-    blurb:
-      'Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.',
-  },
-  {
-    name: 'Neck pain',
-    icon: 'wave',
-    blurb:
-      'Stiffness and referred pain from desk posture, training, or sleeping awkwardly — including headaches that start in the neck.',
-  },
-  {
-    name: 'Nerve pain',
-    icon: 'bolt',
-    blurb:
-      'Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.',
-  },
-  {
-    name: 'Wrist pain',
-    icon: 'needle',
-    blurb:
-      'Tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.',
-  },
-  {
-    name: 'Back pain',
-    icon: 'shield',
-    blurb:
-      'Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.',
-  },
-];
 
 const steps = [
   {

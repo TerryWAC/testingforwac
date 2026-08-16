@@ -39,14 +39,14 @@ For a live URL in about thirty seconds: drag the `site/` folder onto
 
 Every page from the original site is here, plus a dedicated booking page.
 
-| Page | File | Original |
+| Page | File | On his current site |
 |---|---|---|
 | Home | `index.html` | `/` |
 | About Us | `about-us.html` | `/about-us` |
-| Treatments | `services.html` | `/services` |
-| Injury Assessment | `injury-assessment.html` | `/injury-assessment` |
+| Services | `services.html` | `/services` |
+| Initial Assessment | `injury-assessment.html` | `/injury-assessment` |
 | Sports Massage | `sports-massage.html` | `/sports-massage3` |
-| Deep Tissue Massage | `deep-tissue-massage.html` | `/deep-tissue-massage` |
+| Full Body Massage | `deep-tissue-massage.html` | `/deep-tissue-massage` |
 | Injury Treatment | `follow-up-treatment.html` | `/follow-up-treatment` |
 | Medical Acupuncture | `medical-acupuncture.html` | `/medical-acupuncture` |
 | Electrotherapy | `electrotherapy.html` | `/electrotherapy` |
@@ -54,10 +54,39 @@ Every page from the original site is here, plus a dedicated booking page.
 | Price list | `price-list.html` | `/price-list` |
 | Reviews | `reviews.html` | `/reviews` |
 | Offers | `offers.html` | `/offers` |
-| Contact | `contact.html` | — |
+| Conditions we treat | `conditions.html` | new |
+| Knee pain | `knee-pain.html` | new |
+| Back pain | `back-pain.html` | new |
+| Neck pain | `neck-pain.html` | new |
+| Sciatica & nerve pain | `sciatica-nerve-pain.html` | new |
+| Muscle strains | `muscle-strains.html` | new |
+| Shoulder pain | `shoulder-pain.html` | new |
+| Wrist & elbow pain | `wrist-elbow-pain.html` | new |
+| Gift vouchers | `gift-vouchers.html` | button only |
+| Your first visit | `first-visit.html` | new |
+| FAQs | `faqs.html` | new |
+| Contact | `contact.html` | new |
 | Book online | `book.html` | new |
 | Privacy policy | `privacy-policy.html` | new |
 | 404 | `404.html` | new |
+
+### Why the condition pages exist
+
+They are the biggest ranking opportunity the current site is missing. Nobody
+searches "sports injury clinic" when their knee hurts — they search "knee pain
+Newcastle" or "sciatica Gosforth". Each condition page targets one of those
+phrases and answers it properly: how it presents, what causes it, how it is
+assessed, how it is treated, how long it takes, and when to see a doctor
+instead.
+
+That last part matters. These pages carry red-flag warnings and a note that
+they are general information rather than a diagnosis. A health site that only
+sells and never says "this one is not for us" is one to be wary of, and Google
+judges medical content on exactly that.
+
+They are written to be genuinely useful, not stuffed with a keyword. Thin pages
+spun out of a list get ignored by readers and penalised in search. Copy lives in
+`src/conditions.js` — worth Jack reading through, since it speaks for him.
 
 **Redirects.** The old sports massage URL was `/sports-massage3`. Point it at
 `/sports-massage` with a 301 when you switch over so the existing ranking carries across.

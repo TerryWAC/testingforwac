@@ -1191,6 +1191,27 @@ main > section:last-child { padding-bottom: 0; }
 .related a:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 250, 130, 0.05); transform: translateX(4px); }
 .related .icon { width: 17px; height: 17px; color: var(--green); }
 
+/* Red-flag box on condition pages — this is the one place on the site where
+   the message is "do not book with us, go to a doctor", so it must not look
+   like every other panel. */
+.warn-box {
+  padding: clamp(1.4rem, 2.6vw, 2rem);
+  border: 1px solid rgba(178, 154, 158, 0.45); border-radius: var(--radius-lg);
+  background: rgba(178, 154, 158, 0.07);
+}
+.warn-box > * + * { margin-top: 1.1rem; }
+.warn-box h2 { color: var(--rose-soft); font-size: clamp(1.25rem, 2.2vw, 1.6rem); }
+.warn-box ul li::before { background: var(--rose); }
+
+/* Conditions tiles are links now. */
+a.cond { color: inherit; }
+a.cond h3 .icon {
+  width: 15px; height: 15px; color: var(--green);
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity 0.3s, transform 0.3s var(--ease);
+}
+a.cond:hover h3 .icon { opacity: 1; transform: translateX(0); }
+
 /* --------------------------------------------------------------------------
    19. Forms
    -------------------------------------------------------------------------- */
@@ -1775,7 +1796,38 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
             <a class="mega-all" href="#/services">All treatments &amp; prices <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
           </div>
         </div>
-      </li><li><a class="nav-link" href="#/price-list">Price list</a></li><li><a class="nav-link" href="#/reviews">Reviews</a></li><li><a class="nav-link" href="#/offers">Offers</a></li><li><a class="nav-link" href="#/contact">Contact</a></li></ul>
+      </li><li class="has-mega">
+        <a class="nav-link" href="#/conditions">
+          Conditions <svg class="icon chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </a>
+        <div class="mega" role="group" aria-label="Conditions we treat">
+          <ul class="mega-grid"><li><a class="mega-item" href="#/knee-pain">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg></span>
+            <span class="mega-text"><strong>Knee pain</strong><em>Runner's knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.</em></span>
+          </a></li><li><a class="mega-item" href="#/back-pain">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <span class="mega-text"><strong>Back pain</strong><em>Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.</em></span>
+          </a></li><li><a class="mega-item" href="#/neck-pain">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></span>
+            <span class="mega-text"><strong>Neck pain</strong><em>Stiffness and referred pain from desk posture, training or sleeping awkwardly — including headaches that start in the neck.</em></span>
+          </a></li><li><a class="mega-item" href="#/sciatica-nerve-pain">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></span>
+            <span class="mega-text"><strong>Sciatica &amp; nerve pain</strong><em>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</em></span>
+          </a></li><li><a class="mega-item" href="#/muscle-strains">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></span>
+            <span class="mega-text"><strong>Muscle strains</strong><em>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</em></span>
+          </a></li><li><a class="mega-item" href="#/shoulder-pain">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10v4"/><path d="M20.5 10v4"/><path d="M6.5 12h11"/></svg></span>
+            <span class="mega-text"><strong>Shoulder pain</strong><em>Rotator cuff irritation, impingement, pressing pain and shoulders that have lost range from overhead work or desk posture.</em></span>
+          </a></li><li><a class="mega-item" href="#/wrist-elbow-pain">
+            <span class="mega-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></span>
+            <span class="mega-text"><strong>Wrist &amp; elbow pain</strong><em>Tennis and golfer's elbow, tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</em></span>
+          </a></li></ul>
+          <div class="mega-foot">
+            <a class="mega-all" href="#/conditions">All conditions we treat <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </li><li><a class="nav-link" href="#/price-list">Prices</a></li><li><a class="nav-link" href="#/reviews">Reviews</a></li><li><a class="nav-link" href="#/offers">Offers</a></li><li><a class="nav-link" href="#/contact">Contact</a></li></ul>
     </nav>
     <div class="header-actions">
       <a class="btn btn-ghost btn-call" href="tel:+447460937648">
@@ -1797,13 +1849,16 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
         <li><a href="#/index" aria-current="page">Home</a></li><li><a href="#/about-us">About</a></li><li>
               <a href="#/services">Services</a>
               <ul class="mobile-sub"><li><a href="#/injury-assessment">Initial Assessment</a></li><li><a href="#/sports-massage">Sports Massage</a></li><li><a href="#/deep-tissue-massage">Full Body Massage</a></li><li><a href="#/follow-up-treatment">Injury Treatment</a></li><li><a href="#/medical-acupuncture">Medical Acupuncture</a></li><li><a href="#/electrotherapy">Electrotherapy</a></li><li><a href="#/ultrasound-therapy">Ultrasound Therapy</a></li></ul>
-            </li><li><a href="#/price-list">Price list</a></li><li><a href="#/reviews">Reviews</a></li><li><a href="#/offers">Offers</a></li><li><a href="#/contact">Contact</a></li>
+            </li><li>
+              <a href="#/conditions">Conditions</a>
+              <ul class="mobile-sub"><li><a href="#/knee-pain">Knee pain</a></li><li><a href="#/back-pain">Back pain</a></li><li><a href="#/neck-pain">Neck pain</a></li><li><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain</a></li><li><a href="#/muscle-strains">Muscle strains</a></li><li><a href="#/shoulder-pain">Shoulder pain</a></li><li><a href="#/wrist-elbow-pain">Wrist &amp; elbow pain</a></li></ul>
+            </li><li><a href="#/price-list">Prices</a></li><li><a href="#/reviews">Reviews</a></li><li><a href="#/offers">Offers</a></li><li><a href="#/contact">Contact</a></li>
       </ul>
     </nav>
     <div class="mobile-cta">
       <a class="btn btn-primary btn-block" href="#/book" data-cta="mobile-nav">Book an appointment</a>
       <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
-      <a class="btn btn-ghost btn-block" href="#/offers" data-scroll="vouchers"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> Buy a gift voucher</a>
+      <a class="btn btn-ghost btn-block" href="#/gift-vouchers"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> Buy a gift voucher</a>
     </div>
     <p class="mobile-meta">Hidden Strength, Lansdowne Court, Gosforth, Newcastle upon Tyne NE3 1HR<br>Mon–Thu, 9am–8pm</p>
   </div>
@@ -1986,43 +2041,49 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       </p>
     </div>
     <div class="cond-grid" data-stagger="60">
-      <article class="cond" data-reveal>
+      <a class="cond" href="#/knee-pain" data-reveal>
         <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg></span>
         <div>
-          <h3>Knee pain</h3>
+          <h3>Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
           <p>Runner's knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.</p>
         </div>
-      </article><article class="cond" data-reveal>
-        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></span>
-        <div>
-          <h3>Muscular pain</h3>
-          <p>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</p>
-        </div>
-      </article><article class="cond" data-reveal>
-        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></span>
-        <div>
-          <h3>Neck pain</h3>
-          <p>Stiffness and referred pain from desk posture, training, or sleeping awkwardly — including headaches that start in the neck.</p>
-        </div>
-      </article><article class="cond" data-reveal>
-        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></span>
-        <div>
-          <h3>Nerve pain</h3>
-          <p>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</p>
-        </div>
-      </article><article class="cond" data-reveal>
-        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></span>
-        <div>
-          <h3>Wrist pain</h3>
-          <p>Tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</p>
-        </div>
-      </article><article class="cond" data-reveal>
+      </a><a class="cond" href="#/back-pain" data-reveal>
         <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg></span>
         <div>
-          <h3>Back pain</h3>
+          <h3>Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
           <p>Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.</p>
         </div>
-      </article>
+      </a><a class="cond" href="#/neck-pain" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></span>
+        <div>
+          <h3>Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
+          <p>Stiffness and referred pain from desk posture, training or sleeping awkwardly — including headaches that start in the neck.</p>
+        </div>
+      </a><a class="cond" href="#/sciatica-nerve-pain" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></span>
+        <div>
+          <h3>Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
+          <p>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</p>
+        </div>
+      </a><a class="cond" href="#/muscle-strains" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></span>
+        <div>
+          <h3>Muscle strains &amp; tightness <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
+          <p>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</p>
+        </div>
+      </a><a class="cond" href="#/shoulder-pain" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10v4"/><path d="M20.5 10v4"/><path d="M6.5 12h11"/></svg></span>
+        <div>
+          <h3>Shoulder pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
+          <p>Rotator cuff irritation, impingement, pressing pain and shoulders that have lost range from overhead work or desk posture.</p>
+        </div>
+      </a><a class="cond" href="#/wrist-elbow-pain" data-reveal>
+        <span class="cond-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></span>
+        <div>
+          <h3>Wrist &amp; elbow pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></h3>
+          <p>Tennis and golfer's elbow, tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</p>
+        </div>
+      </a>
     </div>
     <p class="price-note" data-reveal>
       Not on the list? It is still worth a call —
@@ -3816,6 +3877,1024 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   </div>
 </section>
 </div>
+<div class="demo-page" data-route="conditions" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><span aria-current="page">Conditions</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">What is actually causing it?</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          Knee, back, neck, shoulder, nerve, muscle, wrist and elbow pain — assessed properly so
+          you know which tissue is involved and what will change it. Pick what sounds like yours.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> Seen within days</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2>Pick what sounds like yours</h2>
+      <a class="btn-link" href="#/services">Or see the treatments <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+    </div>
+    <div class="grid grid-3" data-stagger="70">
+      <article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg></div>
+        <h3><a href="#/knee-pain">Knee pain</a></h3>
+        <p>Runner's knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article><article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3><a href="#/back-pain">Back pain</a></h3>
+        <p>Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article><article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg></div>
+        <h3><a href="#/neck-pain">Neck pain</a></h3>
+        <p>Stiffness and referred pain from desk posture, training or sleeping awkwardly — including headaches that start in the neck.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article><article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg></div>
+        <h3><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain</a></h3>
+        <p>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article><article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg></div>
+        <h3><a href="#/muscle-strains">Muscle strains &amp; tightness</a></h3>
+        <p>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article><article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10v4"/><path d="M20.5 10v4"/><path d="M6.5 12h11"/></svg></div>
+        <h3><a href="#/shoulder-pain">Shoulder pain</a></h3>
+        <p>Rotator cuff irritation, impingement, pressing pain and shoulders that have lost range from overhead work or desk posture.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article><article class="card t-card card-stretch" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg></div>
+        <h3><a href="#/wrist-elbow-pain">Wrist &amp; elbow pain</a></h3>
+        <p>Tennis and golfer's elbow, tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</p>
+        <span class="t-card-link">What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </article>
+    </div>
+    <p class="price-note" data-reveal>
+      Not sure which of these it is? That is what the assessment is for —
+      <a class="btn-link" href="#/book?treatment=injury-assessment">book an initial assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Stop guessing what it is.</h2>
+      <p class="lead">One appointment tells you which tissue is involved, how long it will take and what actually needs to happen.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="knee-pain" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Knee pain</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Knee pain in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">Knee pain is the single most common thing walked into the clinic, and the label matters less than what is actually driving it. The knee sits between the hip and the ankle and takes the consequences of both, which is why treating the knee alone so often fails.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>Pain at the front of the knee going up or down stairs, or after sitting for a while</li><li>A sharp catch on the inside or outside of the joint when twisting or changing direction</li><li>Aching that builds through a run and settles with rest, then returns at the same distance</li><li>Swelling that comes up hours after activity rather than immediately</li><li>A feeling that the knee is not to be trusted on uneven ground</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Most knee pain seen here is load related rather than the result of one dramatic moment: training volume climbing faster than the tissue adapts, a return to running after time off, or a change in surface, shoes or session type. Where there was a specific incident — a twist, a tackle, a landing — the structures involved are different and the assessment changes accordingly.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>Assessment starts above and below the joint. Hip strength and control, ankle range, and how you actually load the leg in a squat, a step down and a single leg stance usually explain more than the knee itself does. From there, specific tests narrow down which structures are irritated — the patellar tendon, the joint line, the ligaments — and whether the problem is irritable enough to need calming down before it can be loaded.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>Treatment normally pairs hands-on work to settle the symptoms with loading that rebuilds capacity in the tissue that failed. Soft tissue work through the quadriceps, hamstrings and calf, joint mobilisation where movement is restricted, and progressive strength work on the gym floor — which is the part that makes the result hold.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>A recently irritated knee often settles noticeably within two to three weeks. Tendon problems are slower and more predictable: expect to be building for six to twelve weeks, with the improvement coming from consistent loading rather than from treatment alone. You will get a realistic estimate at your assessment rather than an open-ended course of appointments.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most knee pain is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>The knee gave way completely at the time of injury, or swelled up within an hour</li><li>You cannot put weight through it, or cannot straighten it fully</li><li>The joint is hot, red and you feel unwell with it</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-knee-pain">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -36 L5 -33 L30 -32 L55 -33 L80 -35 L105 -37 L130 -39 L155 -41 L180 -43 L205 -47 L230 -52 L255 -57 L280 -61 L305 -62 L330 -61 L355 -59 L380 -58 L405 -57" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 -7 L5 -3 L30 -1 L55 -4 L80 -7 L105 -10 L130 -13 L155 -15 L180 -20 L205 -28 L230 -35 L255 -40 L280 -40 L305 -37 L330 -34 L355 -32 L380 -31 L405 -29" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 22 L5 28 L30 28 L55 24 L80 19 L105 16 L130 13 L155 7 L180 -1 L205 -11 L230 -18 L255 -19 L280 -14 L305 -9 L330 -6 L355 -4 L380 -1 L405 5" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 52 L5 59 L30 57 L55 51 L80 45 L105 41 L130 36 L155 27 L180 15 L205 5 L230 2 L255 8 L280 15 L305 21 L330 23 L355 28 L380 36 L405 44" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 83 L5 89 L30 85 L55 76 L80 70 L105 65 L130 57 L155 44 L180 30 L205 24 L230 28 L255 38 L280 46 L305 50 L330 55 L355 64 L380 74 L405 76" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 113 L5 118 L30 111 L55 101 L80 94 L105 88 L130 76 L155 60 L180 47 L205 47 L230 58 L255 70 L280 76 L305 81 L330 90 L355 102 L380 106 L405 97" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 143 L5 146 L30 136 L55 124 L80 117 L105 109 L130 94 L155 76 L180 68 L205 75 L230 90 L255 101 L280 106 L305 114 L330 126 L355 135 L380 129 L405 110" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 173 L5 173 L30 160 L55 147 L80 140 L105 130 L130 112 L155 95 L180 93 L205 106 L230 122 L255 131 L280 136 L305 148 L330 160 L355 161 L380 145 L405 123" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 202 L5 198 L30 183 L55 170 L80 162 L105 150 L130 130 L155 116 L180 120 L205 137 L230 153 L255 160 L280 167 L305 180 L330 190 L355 182 L380 160 L405 140" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 229 L5 221 L30 205 L55 193 L80 184 L105 170 L130 150 L155 140 L180 149 L205 168 L230 182 L255 189 L280 197 L305 210 L330 215 L355 202 L380 177 L405 159" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 255 L5 244 L30 226 L55 215 L80 206 L105 191 L130 172 L155 166 L180 178 L205 198 L230 211 L255 216 L280 225 L305 237 L330 239 L355 222 L380 198 L405 181" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 279 L5 265 L30 248 L55 238 L80 229 L105 214 L130 196 L155 193 L180 207 L205 226 L230 238 L255 243 L280 252 L305 262 L330 263 L355 245 L380 221 L405 205" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 301 L5 286 L30 270 L55 260 L80 252 L105 237 L130 222 L155 220 L180 235 L205 254 L230 265 L255 269 L280 276 L305 286 L330 286 L355 270 L380 247 L405 230" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 322 L5 306 L30 292 L55 283 L80 276 L105 262 L130 249 L155 248 L180 262 L205 280 L230 290 L255 294 L280 299 L305 308 L330 309 L355 297 L380 275 L405 258" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 342 L5 327 L30 314 L55 307 L80 300 L105 289 L130 278 L155 277 L180 288 L205 305 L230 315 L255 319 L280 322 L305 328 L330 332 L355 324 L380 306 L405 288" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 361 L5 348 L30 337 L55 331 L80 325 L105 316 L130 307 L155 305 L180 315 L205 329 L230 339 L255 343 L280 344 L305 349 L330 353 L355 350 L380 338 L405 321" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 380 L5 369 L30 361 L55 356 L80 351 L105 344 L130 336 L155 334 L180 341 L205 352 L230 362 L255 366 L280 367 L305 369 L330 373 L355 373 L380 367 L405 354" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 400 L5 391 L30 385 L55 382 L80 378 L105 372 L130 366 L155 364 L180 368 L205 376 L230 384 L255 389 L280 390 L305 390 L330 392 L355 394 L380 393 L405 386" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 421 L5 414 L30 410 L55 407 L80 405 L105 400 L130 396 L155 394 L180 396 L205 401 L230 407 L255 411 L280 413 L305 413 L330 413 L355 414 L380 414 L405 412" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 443 L5 439 L30 436 L55 434 L80 432 L105 429 L130 426 L155 424 L180 424 L205 427 L230 430 L255 434 L280 435 L305 435 L330 435 L355 434 L380 434 L405 434" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-knee-pain-17"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-knee-pain-17)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-knee-pain.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sports-massage">Sports Massage <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/follow-up-treatment">Injury Treatment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/back-pain">Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/neck-pain">Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/muscle-strains">Muscle strains &amp; tightness <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your knee pain looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="back-pain" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Back pain</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Back pain in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">Back pain is common, usually not sinister, and very often badly explained. Most of what comes through the clinic settles well once someone works out which tissue is actually irritated and stops the person guessing.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>A sudden catch on bending or lifting that leaves you locked up for a few days</li><li>A deep ache low down and to one side that is worse after sitting</li><li>Stiffness first thing that eases once you are moving</li><li>Pain that spreads into the buttock or down the leg</li><li>A back that has been fine for years and has started grumbling since a change in training or work</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Lifting technique and load are the obvious ones, but a lot of back pain has more to do with what has changed recently — a new desk setup, a long drive, a stretch of poor sleep, a jump in training, or simply doing much less than usual for a couple of weeks. The tissue has not become weak overnight; the demand on it has changed faster than it adapted.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>The first job is working out whether the pain is coming from muscle, from the joints of the spine, or from an irritated nerve — because the three are treated very differently. That means movement testing in each direction, strength and control work through the hips and trunk, and neurological testing where symptoms travel into the leg.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>Soft tissue work and joint mobilisation to get movement back and settle the guarding, then loaded rehabilitation that rebuilds confidence in the positions that currently feel threatening. Where the pain is nerve related the emphasis shifts towards calming the irritation and restoring movement gradually rather than pushing into it.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>Simple mechanical back pain usually improves substantially within two to six weeks. The important part is not resting until it feels perfect — staying as active as the pain allows consistently produces better outcomes, and part of the job at your appointment is showing you what that looks like in your case.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most back pain is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>Numbness around the saddle area, or difficulty controlling your bladder or bowels — this needs urgent medical attention, not an appointment here</li><li>Weakness in a leg that is getting worse, rather than pain alone</li><li>Back pain alongside unexplained weight loss, fever, or a history of cancer</li><li>Significant back pain following a fall or a serious accident</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-back-pain">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -22 L5 -24 L30 -27 L55 -30 L80 -33 L105 -35 L130 -37 L155 -39 L180 -40 L205 -42 L230 -45 L255 -49 L280 -53 L305 -57 L330 -59 L355 -61 L380 -61 L405 -59" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 10 L5 7 L30 2 L55 -3 L80 -7 L105 -11 L130 -13 L155 -15 L180 -18 L205 -22 L230 -28 L255 -33 L280 -39 L305 -42 L330 -43 L355 -42 L380 -37 L405 -31" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 42 L5 36 L30 29 L55 22 L80 17 L105 13 L130 10 L155 6 L180 1 L205 -6 L230 -13 L255 -21 L280 -25 L305 -25 L330 -21 L355 -14 L380 -6 L405 3" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 73 L5 64 L30 54 L55 46 L80 40 L105 35 L130 31 L155 26 L180 18 L205 8 L230 -1 L255 -7 L280 -7 L305 -1 L330 9 L355 20 L380 31 L405 38" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 101 L5 90 L30 77 L55 68 L80 61 L105 56 L130 51 L155 43 L180 32 L205 21 L230 13 L255 12 L280 19 L305 31 L330 45 L355 58 L380 67 L405 72" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 128 L5 113 L30 99 L55 89 L80 82 L105 77 L130 69 L155 58 L180 45 L205 35 L230 31 L255 37 L280 51 L305 68 L330 84 L355 95 L380 102 L405 105" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 152 L5 135 L30 119 L55 109 L80 102 L105 96 L130 86 L155 73 L180 60 L205 53 L230 55 L255 68 L280 88 L305 107 L330 122 L355 130 L380 134 L405 138" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 174 L5 155 L30 139 L55 129 L80 123 L105 115 L130 103 L155 89 L180 78 L205 75 L230 84 L255 103 L280 126 L305 145 L330 156 L355 162 L380 165 L405 171" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 194 L5 174 L30 158 L55 149 L80 143 L105 134 L130 121 L155 107 L180 99 L205 101 L230 117 L255 140 L280 163 L305 180 L330 188 L355 192 L380 196 L405 202" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 213 L5 192 L30 178 L55 170 L80 163 L105 154 L130 140 L155 128 L180 123 L205 131 L230 150 L255 176 L280 198 L305 212 L330 218 L355 221 L380 225 L405 232" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 230 L5 211 L30 198 L55 191 L80 185 L105 175 L130 162 L155 151 L180 150 L205 162 L230 184 L255 209 L280 230 L305 242 L330 246 L355 248 L380 252 L405 259" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 247 L5 230 L30 219 L55 213 L80 207 L105 197 L130 186 L155 177 L180 179 L205 193 L230 216 L255 241 L280 260 L305 270 L330 273 L355 274 L380 277 L405 283" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 265 L5 250 L30 241 L55 236 L80 231 L105 222 L130 211 L155 205 L180 209 L205 224 L230 247 L255 270 L280 288 L305 296 L330 298 L355 299 L380 301 L405 305" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 283 L5 271 L30 265 L55 261 L80 255 L105 248 L130 239 L155 235 L180 240 L205 254 L230 275 L255 297 L280 313 L305 321 L330 323 L355 322 L380 323 L405 327" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 303 L5 294 L30 289 L55 286 L80 282 L105 275 L130 268 L155 266 L180 271 L205 284 L230 302 L255 322 L280 337 L305 344 L330 346 L355 345 L380 345 L405 347" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 324 L5 318 L30 315 L55 313 L80 309 L105 304 L130 299 L155 297 L180 301 L205 313 L230 328 L255 345 L280 359 L305 366 L330 369 L355 368 L380 367 L405 367" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 348 L5 344 L30 342 L55 340 L80 338 L105 334 L130 330 L155 329 L180 332 L205 341 L230 354 L255 368 L280 379 L305 387 L330 390 L355 390 L380 388 L405 387" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 374 L5 371 L30 370 L55 369 L80 367 L105 364 L130 362 L155 361 L180 364 L205 370 L230 379 L255 390 L280 400 L305 407 L330 411 L355 411 L380 410 L405 408" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 401 L5 400 L30 399 L55 398 L80 397 L105 395 L130 394 L155 393 L180 395 L205 399 L230 405 L255 413 L280 420 L305 426 L330 430 L355 431 L380 431 L405 430" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 429 L5 429 L30 429 L55 428 L80 427 L105 426 L130 425 L155 425 L180 426 L205 428 L230 432 L255 436 L280 441 L305 446 L330 449 L355 451 L380 451 L405 450" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-back-pain-18"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-back-pain-18)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-back-pain.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/follow-up-treatment">Injury Treatment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/deep-tissue-massage">Full Body Massage <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/knee-pain">Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/neck-pain">Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/muscle-strains">Muscle strains &amp; tightness <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your back pain looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="neck-pain" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Neck pain</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Neck pain in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">Neck problems rarely stay in the neck. They refer into the shoulder blade, up into the head and down the arm, which is why people are often surprised when the thing that helps is not where the pain is.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>Waking with the neck locked to one side and unable to turn properly</li><li>A constant ache between the shoulder blade and the spine that returns every working week</li><li>Headaches that start at the base of the skull and creep over one side of the head</li><li>Tightness through the tops of the shoulders that massage relieves for a day or two, then returns</li><li>Pins and needles or heaviness travelling into the arm</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Sustained postures do most of the damage — not because sitting is dangerous, but because holding any position for hours without variation loads the same tissue continuously. Add a heavy pressing session, a night on an unfamiliar pillow or a stressful few weeks with the shoulders held high, and the neck is the thing that complains.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>Movement in every direction is tested and compared side to side, along with the joints of the upper spine and the strength of the deep neck and shoulder blade muscles, which are almost always part of the picture. Where symptoms travel down the arm, neurological testing establishes whether a nerve is involved.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>Soft tissue work and joint mobilisation get movement back quickly, and for many people medical acupuncture is particularly effective through the neck and upper shoulders where tissue will not release with hands alone. The lasting change comes from strengthening the neck and shoulder blade, plus practical changes to how the day is broken up.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>An acutely locked neck often frees up substantially within a week or two. Long-standing desk-related neck pain takes longer to change for good — think six to eight weeks — because the aim is building tolerance to the position rather than avoiding it forever.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most neck pain is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>Neck pain after a significant impact, fall or road traffic accident</li><li>Weakness in the arm or hand that is getting worse, or clumsiness with fine movements</li><li>Neck stiffness with fever, a severe headache or feeling generally unwell</li><li>Dizziness, visual changes or slurred speech alongside the neck symptoms</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-neck-pain">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -28 L5 -26 L30 -27 L55 -29 L80 -31 L105 -33 L130 -35 L155 -36 L180 -38 L205 -41 L230 -45 L255 -49 L280 -53 L305 -56 L330 -55 L355 -53 L380 -49 L405 -46" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 4 L5 6 L30 4 L55 -0 L80 -4 L105 -7 L130 -9 L155 -11 L180 -15 L205 -21 L230 -29 L255 -34 L280 -37 L305 -36 L330 -31 L355 -25 L380 -20 L405 -17" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 36 L5 37 L30 33 L55 27 L80 22 L105 18 L130 15 L155 11 L180 3 L205 -6 L230 -15 L255 -18 L280 -16 L305 -9 L330 -1 L355 6 L380 10 L405 13" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 68 L5 67 L30 61 L55 52 L80 46 L105 42 L130 37 L155 29 L180 18 L205 7 L230 1 L255 3 L280 12 L305 23 L330 32 L355 37 L380 41 L405 47" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 100 L5 97 L30 87 L55 76 L80 69 L105 65 L130 57 L155 46 L180 32 L205 22 L230 22 L255 32 L280 46 L305 57 L330 64 L355 69 L380 76 L405 86" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 130 L5 124 L30 111 L55 99 L80 92 L105 86 L130 75 L155 60 L180 46 L205 41 L230 49 L255 65 L280 81 L305 91 L330 96 L355 103 L380 114 L405 125" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 159 L5 149 L30 134 L55 121 L80 114 L105 106 L130 92 L155 75 L180 63 L205 66 L230 81 L255 101 L280 115 L305 122 L330 129 L355 139 L380 151 L405 157" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 187 L5 173 L30 155 L55 143 L80 135 L105 125 L130 109 L155 91 L180 85 L205 94 L230 115 L255 135 L280 147 L305 153 L330 162 L355 174 L380 184 L405 180" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 212 L5 195 L30 176 L55 164 L80 156 L105 144 L130 126 L155 111 L180 110 L205 126 L230 150 L255 169 L280 178 L305 184 L330 194 L355 207 L380 211 L405 198" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 235 L5 216 L30 197 L55 185 L80 177 L105 164 L130 146 L155 133 L180 138 L205 158 L230 183 L255 200 L280 207 L305 214 L330 225 L355 235 L380 234 L405 214" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 257 L5 235 L30 217 L55 207 L80 199 L105 185 L130 167 L155 158 L180 167 L205 190 L230 215 L255 229 L280 235 L305 242 L330 253 L355 261 L380 255 L405 233" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 276 L5 254 L30 238 L55 229 L80 221 L105 207 L130 191 L155 185 L180 197 L205 221 L230 244 L255 257 L280 262 L305 268 L330 278 L355 284 L380 277 L405 254" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 295 L5 274 L30 259 L55 251 L80 243 L105 230 L130 217 L155 213 L180 226 L205 250 L230 272 L255 284 L280 288 L305 293 L330 301 L355 307 L380 300 L405 279" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 312 L5 293 L30 281 L55 275 L80 267 L105 256 L130 244 L155 243 L180 255 L205 277 L230 298 L255 309 L280 313 L305 316 L330 323 L355 328 L380 324 L405 307" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 330 L5 314 L30 304 L55 299 L80 293 L105 283 L130 273 L155 272 L180 284 L205 303 L230 322 L255 333 L280 337 L305 339 L330 343 L355 348 L380 348 L405 336" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 348 L5 335 L30 328 L55 324 L80 319 L105 311 L130 303 L155 303 L180 312 L205 328 L230 345 L255 356 L280 360 L305 361 L330 364 L355 368 L380 369 L405 364" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 368 L5 358 L30 353 L55 350 L80 346 L105 340 L130 334 L155 333 L180 340 L205 353 L230 367 L255 378 L280 383 L305 384 L330 384 L355 387 L380 389 L405 388" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 389 L5 382 L30 379 L55 377 L80 374 L105 369 L130 365 L155 364 L180 369 L205 378 L230 390 L255 399 L280 404 L305 406 L330 406 L355 407 L380 408 L405 409" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 411 L5 407 L30 405 L55 404 L80 402 L105 399 L130 396 L155 396 L180 398 L205 404 L230 412 L255 420 L280 425 L305 427 L330 428 L355 427 L380 428 L405 429" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 436 L5 434 L30 433 L55 432 L80 431 L105 429 L130 427 L155 427 L180 428 L205 431 L230 436 L255 442 L280 446 L305 448 L330 449 L355 449 L380 448 L405 449" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-neck-pain-19"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-neck-pain-19)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-neck-pain.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/medical-acupuncture">Medical Acupuncture <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/deep-tissue-massage">Full Body Massage <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/knee-pain">Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/back-pain">Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/muscle-strains">Muscle strains &amp; tightness <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your neck pain looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="sciatica-nerve-pain" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Sciatica &amp; nerve pain</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Sciatica &amp; nerve pain in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">Nerve pain behaves differently to muscular pain, and it worries people more — reasonably so, because it feels unlike anything else. The good news is that most nerve irritation settles well with time and the right approach, and the assessment can usually tell you early which sort you are dealing with.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>Pain travelling from the lower back or buttock down the back of the leg, sometimes past the knee</li><li>Pins and needles, numbness or a burning line rather than a dull ache</li><li>Symptoms that are worse sitting, or worse first thing, and change with position</li><li>A leg that feels heavy or slightly weak alongside the pain</li><li>The same pattern in the arm — from the neck into the shoulder, forearm or hand</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Nerve symptoms come from a nerve being compressed or irritated somewhere along its path — most often close to the spine, occasionally further along its route. What triggers it is usually mundane: a lift, a period of heavy sitting, or a gradual build-up that finally tips over.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>Neurological testing comes first — reflexes, sensation and strength — to establish whether the nerve is genuinely involved and how irritable it is. Movement testing then locates where the irritation is coming from, and tells us whether it responds better to movement in one particular direction, which shapes everything that follows.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>The early aim is to reduce irritation, not to stretch aggressively into it, which often makes nerve pain worse. That means positions and movements that settle symptoms, soft tissue work around the area rather than on the nerve itself, and a graded return to loading as the irritability drops. Progress is tracked by whether symptoms are moving closer to the spine rather than further down the limb.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>Most nerve irritation improves over six to twelve weeks, and the pattern is usually gradual rather than sudden. It is a slower recovery than a muscular strain and it is worth knowing that at the outset rather than losing confidence at week three.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most sciatica &amp; nerve pain is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>Numbness around the saddle area, or loss of bladder or bowel control — go to A&amp;E, this is an emergency</li><li>Weakness that is clearly getting worse, or a foot that catches when you walk</li><li>Symptoms in both legs at once</li><li>Nerve symptoms following a significant accident or fall</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-sciatica-nerve-pain">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -54 L5 -52 L30 -51 L55 -51 L80 -50 L105 -49 L130 -46 L155 -41 L180 -34 L205 -27 L230 -20 L255 -15 L280 -13 L305 -12 L330 -13 L355 -14 L380 -14 L405 -14" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 -35 L5 -33 L30 -31 L55 -31 L80 -30 L105 -27 L130 -21 L155 -11 L180 -0 L205 10 L230 17 L255 19 L280 19 L305 17 L330 15 L355 14 L380 13 L405 12" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 -16 L5 -13 L30 -11 L55 -10 L80 -8 L105 -2 L130 9 L155 24 L180 38 L205 48 L230 52 L255 50 L280 46 L305 43 L330 41 L355 40 L380 37 L405 30" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 4 L5 8 L30 10 L55 11 L80 16 L105 27 L130 44 L155 63 L180 77 L205 83 L230 82 L255 76 L280 71 L305 67 L330 65 L355 61 L380 51 L405 37" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 25 L5 30 L30 32 L55 35 L80 44 L105 60 L130 82 L155 103 L180 114 L205 115 L230 108 L255 99 L280 94 L305 91 L330 85 L355 74 L380 56 L405 39" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 47 L5 53 L30 55 L55 61 L80 74 L105 97 L130 122 L155 141 L180 147 L205 141 L230 130 L255 121 L280 116 L305 111 L330 99 L355 79 L380 59 L405 47" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 71 L5 77 L30 80 L55 89 L80 108 L105 135 L130 162 L155 176 L180 175 L205 163 L230 150 L255 143 L280 137 L305 126 L330 107 L355 84 L380 67 L405 66" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 95 L5 102 L30 107 L55 119 L80 143 L105 173 L130 198 L155 207 L180 199 L205 183 L230 171 L255 163 L280 155 L305 138 L330 114 L355 92 L380 85 L405 96" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 122 L5 129 L30 135 L55 151 L80 179 L105 210 L130 232 L155 234 L180 220 L205 203 L230 191 L255 183 L280 172 L305 150 L330 125 L355 108 L380 110 L405 130" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 149 L5 156 L30 165 L55 184 L80 214 L105 245 L130 261 L155 258 L180 240 L205 222 L230 211 L255 203 L280 188 L305 165 L330 141 L355 130 L380 140 L405 165" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 178 L5 185 L30 196 L55 217 L80 248 L105 276 L130 288 L155 279 L180 260 L205 242 L230 232 L255 223 L280 207 L305 183 L330 161 L355 156 L380 171 L405 198" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 207 L5 215 L30 227 L55 250 L80 280 L105 305 L130 312 L155 300 L180 280 L205 263 L230 253 L255 244 L280 228 L305 205 L330 186 L355 183 L380 200 L405 228" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 238 L5 246 L30 259 L55 282 L80 310 L105 330 L130 334 L155 320 L180 300 L205 284 L230 275 L255 266 L280 251 L305 231 L330 214 L355 211 L380 228 L405 254" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 268 L5 276 L30 290 L55 312 L80 337 L105 353 L130 354 L155 341 L180 321 L205 306 L230 297 L255 290 L280 278 L305 260 L330 244 L355 240 L380 254 L405 278" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 299 L5 307 L30 320 L55 340 L80 361 L105 375 L130 374 L155 361 L180 343 L205 329 L230 321 L255 315 L280 305 L305 291 L330 277 L355 271 L380 279 L405 299" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 329 L5 337 L30 349 L55 367 L80 384 L105 394 L130 393 L155 381 L180 366 L205 353 L230 345 L255 341 L280 334 L305 323 L330 311 L355 304 L380 306 L405 320" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 359 L5 366 L30 377 L55 391 L80 405 L105 412 L130 411 L155 402 L180 389 L205 378 L230 371 L255 367 L280 363 L305 356 L330 346 L355 338 L380 337 L405 344" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 387 L5 394 L30 403 L55 414 L80 424 L105 430 L130 429 L155 422 L180 412 L205 403 L230 396 L255 393 L280 391 L305 387 L330 381 L355 374 L380 370 L405 372" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 415 L5 420 L30 428 L55 436 L80 443 L105 447 L130 446 L155 442 L180 435 L205 428 L230 423 L255 420 L280 418 L305 417 L330 414 L355 410 L380 406 L405 405" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 442 L5 446 L30 451 L55 456 L80 461 L105 463 L130 463 L155 461 L180 457 L205 453 L230 449 L255 447 L280 446 L305 446 L330 445 L355 443 L380 441 L405 439" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-sciatica-nerve-pain-20"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-sciatica-nerve-pain-20)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-sciatica-nerve-pain.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/follow-up-treatment">Injury Treatment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/electrotherapy">Electrotherapy <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/knee-pain">Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/back-pain">Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/neck-pain">Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/muscle-strains">Muscle strains &amp; tightness <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your sciatica &amp; nerve pain looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="muscle-strains" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Muscle strains &amp; tightness</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Muscle strains &amp; tightness in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">A pulled muscle is the most familiar sports injury there is, and also the most commonly rushed. The difference between a strain that resolves and one that recurs every season is almost entirely in how the last third of the rehabilitation is handled.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>A sudden sharp pain mid-sprint or mid-lift that stopped you immediately</li><li>Tightness that has crept in over weeks and no longer releases with stretching</li><li>Bruising appearing a day or two after the injury</li><li>Pain on contracting the muscle against resistance, not just on stretching it</li><li>A hamstring or calf that has now gone three times in the same place</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Strains happen when demand briefly exceeds what the tissue can tolerate — a sprint from a standing start, a change of direction, fatigue late in a game, or a jump in training load. Recurrent strains almost always point to strength that was never fully restored after the first one.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>The muscle is tested through length, strength and contraction to grade how much tissue is involved and what stage of healing it is at. Just as importantly, the assessment looks at why it happened — strength deficits, side-to-side differences and the loads you have been putting through it.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>Early on the work is about protecting the healing tissue and keeping the area moving without pulling it apart. As it settles, soft tissue work and ultrasound therapy support tissue quality, and then loading becomes the main event: progressive strength through full range, then speed and change of direction before returning to sport.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>A minor strain often settles in two to three weeks. A more significant one is six weeks or more, and returning at four because the pain has gone is the single most common cause of the same injury reappearing. You will be told what needs to be true before it is safe to go back.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most muscle strains &amp; tightness is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>You heard or felt a pop and cannot contract the muscle at all</li><li>Immediate, significant swelling and extensive bruising</li><li>A visible gap or lump in the muscle</li><li>Severe calf pain and swelling with warmth or breathlessness — seek urgent medical advice</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-muscle-strains">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -46 L5 -45 L30 -44 L55 -43 L80 -41 L105 -39 L130 -35 L155 -32 L180 -29 L205 -27 L230 -26 L255 -27 L280 -28 L305 -30 L330 -33 L355 -34 L380 -36 L405 -37" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 -23 L5 -21 L30 -20 L55 -17 L80 -14 L105 -9 L130 -4 L155 1 L180 4 L205 5 L230 4 L255 1 L280 -2 L305 -6 L330 -9 L355 -11 L380 -12 L405 -14" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 2 L5 4 L30 6 L55 10 L80 16 L105 23 L130 29 L155 34 L180 36 L205 35 L230 31 L255 26 L280 21 L305 16 L330 14 L355 12 L380 9 L405 6" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 27 L5 29 L30 33 L55 39 L80 48 L105 56 L130 63 L155 67 L180 66 L205 61 L230 54 L255 47 L280 42 L305 38 L330 35 L355 32 L380 27 L405 21" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 53 L5 56 L30 62 L55 70 L80 80 L105 90 L130 96 L155 97 L180 92 L205 84 L230 75 L255 67 L280 62 L305 59 L330 55 L355 50 L380 42 L405 34" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 79 L5 84 L30 91 L55 102 L80 114 L105 123 L130 127 L155 124 L180 115 L205 104 L230 94 L255 87 L280 83 L305 79 L330 73 L355 65 L380 56 L405 49" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 107 L5 113 L30 122 L55 134 L80 147 L105 155 L130 155 L155 148 L180 135 L205 123 L230 113 L255 107 L280 103 L305 98 L330 89 L355 80 L380 72 L405 70" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 135 L5 142 L30 153 L55 167 L80 179 L105 184 L130 180 L155 169 L180 155 L205 142 L230 133 L255 128 L280 123 L305 116 L330 106 L355 97 L380 93 L405 97" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 163 L5 172 L30 184 L55 198 L80 209 L105 211 L130 203 L155 189 L180 173 L205 161 L230 154 L255 149 L280 143 L305 135 L330 125 L355 118 L380 118 L405 128" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 192 L5 202 L30 215 L55 228 L80 236 L105 235 L130 225 L155 208 L180 192 L205 181 L230 175 L255 171 L280 164 L305 155 L330 146 L355 142 L380 146 L405 160" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 221 L5 231 L30 244 L55 256 L80 262 L105 258 L130 245 L155 228 L180 213 L205 203 L230 197 L255 193 L280 187 L305 178 L330 170 L355 168 L380 176 L405 192" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 250 L5 260 L30 273 L55 283 L80 286 L105 279 L130 265 L155 248 L180 234 L205 225 L230 220 L255 217 L280 210 L305 202 L330 195 L355 195 L380 204 L405 221" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 279 L5 289 L30 300 L55 308 L80 308 L105 300 L130 285 L155 269 L180 256 L205 248 L230 244 L255 241 L280 236 L305 228 L330 223 L355 223 L380 232 L405 248" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 306 L5 316 L30 325 L55 331 L80 329 L105 320 L130 306 L155 291 L180 279 L205 273 L230 269 L255 267 L280 262 L305 256 L330 251 L355 252 L380 259 L405 273" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 333 L5 341 L30 349 L55 352 L80 350 L105 340 L130 327 L155 314 L180 304 L205 298 L230 295 L255 293 L280 290 L305 285 L330 281 L355 280 L380 286 L405 297" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 359 L5 366 L30 371 L55 373 L80 369 L105 361 L130 349 L155 338 L180 329 L205 324 L230 322 L255 320 L280 318 L305 315 L330 311 L355 310 L380 313 L405 321" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 384 L5 389 L30 392 L55 393 L80 389 L105 381 L130 372 L155 362 L180 355 L205 350 L230 349 L255 348 L280 347 L305 344 L330 342 L355 340 L380 341 L405 345" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 407 L5 411 L30 413 L55 412 L80 409 L105 402 L130 395 L155 387 L180 381 L205 378 L230 376 L255 376 L280 375 L305 374 L330 372 L355 371 L380 370 L405 372" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 429 L5 432 L30 432 L55 431 L80 428 L105 424 L130 418 L155 413 L180 409 L205 406 L230 404 L255 404 L280 404 L305 403 L330 403 L355 401 L380 401 L405 401" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 451 L5 452 L30 452 L55 451 L80 449 L105 446 L130 442 L155 439 L180 436 L205 434 L230 433 L255 432 L280 432 L305 432 L330 432 L355 432 L380 431 L405 431" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-muscle-strains-21"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-muscle-strains-21)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-muscle-strains.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sports-massage">Sports Massage <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/ultrasound-therapy">Ultrasound Therapy <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/knee-pain">Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/back-pain">Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/neck-pain">Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your muscle strains &amp; tightness looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="shoulder-pain" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Shoulder pain</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10v4"/><path d="M20.5 10v4"/><path d="M6.5 12h11"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Shoulder pain in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">The shoulder trades stability for range of movement, which makes it superb at what it does and easy to irritate. Most shoulder pain seen here is not damage so much as tissue being asked for more than it currently has.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>A painful arc reaching out to the side, roughly between shoulder and head height</li><li>Pain pressing overhead or on the bench, but nothing at rest</li><li>Difficulty sleeping on that side</li><li>Struggling to reach behind your back — a seatbelt, a bra strap, a back pocket</li><li>Weakness or a dead-arm feeling rather than pain</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Usually a change in demand: more pressing volume, a return to overhead sport, a decorating weekend, or months of a desk setup that keeps the shoulder rounded forward. Occasionally a specific fall or wrench.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>Range of movement is compared side to side, then the rotator cuff is tested position by position to find what is irritated and what is weak. The shoulder blade matters as much as the joint itself — if it is not moving well the shoulder has less room to work with — so its control is assessed too.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>Soft tissue work and joint mobilisation to restore range, medical acupuncture where the cuff or upper back will not release, and then loading. Rotator cuff and shoulder blade strength work is what changes the picture, progressed from positions that do not provoke it towards the ones that currently do.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>Irritable shoulders take patience. Expect meaningful change over six to twelve weeks, with the earliest wins being sleep and range rather than full strength. Rushing back to heavy overhead work is the reliable way to restart the cycle.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most shoulder pain is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>Shoulder pain immediately after a fall, with obvious deformity or an inability to lift the arm at all</li><li>Pain with pins and needles down the whole arm, or weakness that is worsening</li><li>Shoulder or upper arm pain that comes on with exertion and settles with rest, especially with chest tightness or breathlessness — seek urgent medical advice</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-shoulder-pain">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -31 L5 -29 L30 -29 L55 -32 L80 -35 L105 -38 L130 -41 L155 -43 L180 -46 L205 -51 L230 -56 L255 -62 L280 -66 L305 -68 L330 -67 L355 -65 L380 -63 L405 -62" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 0 L5 3 L30 1 L55 -3 L80 -8 L105 -12 L130 -15 L155 -18 L180 -24 L205 -32 L230 -40 L255 -46 L280 -47 L305 -45 L330 -41 L355 -37 L380 -35 L405 -34" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 31 L5 34 L30 31 L55 24 L80 18 L105 14 L130 10 L155 3 L180 -6 L205 -17 L230 -25 L255 -27 L280 -22 L305 -16 L330 -10 L355 -8 L380 -6 L405 -2" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 63 L5 65 L30 59 L55 50 L80 43 L105 38 L130 32 L155 22 L180 9 L205 -3 L230 -6 L255 -1 L280 8 L305 16 L330 20 L355 23 L380 28 L405 37" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 95 L5 95 L30 86 L55 75 L80 67 L105 61 L130 52 L155 38 L180 23 L205 15 L230 19 L255 30 L280 41 L305 47 L330 51 L355 57 L380 67 L405 75" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 126 L5 123 L30 111 L55 98 L80 90 L105 83 L130 70 L155 52 L180 39 L205 38 L230 49 L255 64 L280 74 L305 78 L330 85 L355 95 L380 105 L405 105" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 156 L5 149 L30 134 L55 121 L80 113 L105 103 L130 86 L155 68 L180 58 L205 65 L230 82 L255 97 L280 105 L305 110 L330 120 L355 132 L380 136 L405 124" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 184 L5 174 L30 157 L55 143 L80 134 L105 122 L130 103 L155 85 L180 82 L205 97 L230 116 L255 129 L280 135 L305 143 L330 155 L355 164 L380 158 L405 136" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 211 L5 197 L30 178 L55 165 L80 156 L105 141 L130 121 L155 106 L180 110 L205 129 L230 149 L255 160 L280 166 L305 175 L330 188 L355 191 L380 175 L405 148" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 236 L5 219 L30 199 L55 186 L80 177 L105 161 L130 141 L155 130 L180 139 L205 161 L230 181 L255 189 L280 195 L305 206 L330 216 L355 214 L380 192 L405 163" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 259 L5 240 L30 220 L55 208 L80 198 L105 182 L130 163 L155 156 L180 169 L205 193 L230 210 L255 218 L280 223 L305 234 L330 242 L355 235 L380 211 L405 183" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 281 L5 260 L30 241 L55 230 L80 221 L105 204 L130 187 L155 183 L180 199 L205 222 L230 239 L255 245 L280 250 L305 259 L330 266 L355 258 L380 233 L405 205" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 300 L5 279 L30 262 L55 253 L80 243 L105 228 L130 213 L155 212 L180 228 L205 250 L230 265 L255 271 L280 275 L305 283 L330 289 L355 281 L380 258 L405 232" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 319 L5 299 L30 284 L55 276 L80 267 L105 253 L130 241 L155 241 L180 256 L205 277 L230 291 L255 296 L280 299 L305 305 L330 310 L355 306 L380 286 L405 261" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 337 L5 319 L30 307 L55 300 L80 292 L105 280 L130 270 L155 270 L180 283 L205 302 L230 315 L255 320 L280 322 L305 326 L330 331 L355 329 L380 316 L405 293" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 355 L5 340 L30 331 L55 325 L80 318 L105 308 L130 300 L155 299 L180 310 L205 326 L230 339 L255 344 L280 345 L305 347 L330 350 L355 352 L380 344 L405 327" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 374 L5 362 L30 355 L55 350 L80 345 L105 337 L130 330 L155 329 L180 337 L205 349 L230 361 L255 367 L280 368 L305 368 L330 370 L355 372 L380 369 L405 359" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 395 L5 386 L30 380 L55 377 L80 372 L105 366 L130 361 L155 359 L180 364 L205 373 L230 383 L255 389 L280 390 L305 390 L330 390 L355 391 L380 391 L405 387" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 416 L5 410 L30 406 L55 403 L80 400 L105 396 L130 392 L155 390 L180 392 L205 398 L230 405 L255 410 L280 412 L305 412 L330 411 L355 410 L380 411 L405 410" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 440 L5 436 L30 433 L55 431 L80 428 L105 425 L130 422 L155 421 L180 421 L205 424 L230 428 L255 431 L280 433 L305 434 L330 433 L355 431 L380 431 L405 430" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-shoulder-pain-22"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-shoulder-pain-22)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-shoulder-pain.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sports-massage">Sports Massage <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/medical-acupuncture">Medical Acupuncture <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/knee-pain">Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/back-pain">Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/neck-pain">Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your shoulder pain looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="wrist-elbow-pain" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><a href="#/conditions">Conditions</a><span class="sep">/</span><span aria-current="page">Wrist &amp; elbow pain</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg> Conditions we treat</span>
+        <h1 data-hero style="--d:80ms">Wrist &amp; elbow pain in Gosforth, Newcastle</h1>
+        <p class="lead" data-hero style="--d:160ms">Elbow and wrist problems are tendon problems far more often than not, and tendons follow rules. They respond poorly to rest and well to the right amount of load, which is the opposite of what most people try first.</p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Assessed, not guessed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> From £55</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="layout-aside">
+      <div class="prose">
+        <div data-reveal>
+          <h2>How it usually shows up</h2>
+          <p>Any of these will be familiar if this is what you are dealing with:</p>
+          <ul><li>Pain on the outside of the elbow gripping, lifting a kettle or shaking hands</li><li>Pain on the inside of the elbow pulling, rowing or gripping heavy</li><li>Wrist pain at the base of the thumb, or on the little finger side rotating the forearm</li><li>Symptoms that are worst first thing and warm up with use, then flare later</li><li>Grip strength that has quietly dropped off</li></ul>
+        </div>
+
+        <div data-reveal>
+          <h2>What tends to cause it</h2>
+          <p>Repetition with insufficient recovery: a block of pull-ups or deadlifts, a new racket or grip size, a climbing trip, a house move, or a keyboard and mouse setup that has not changed while the hours have gone up.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is assessed</h2>
+          <p>The specific tendon is identified by resisted testing and palpation, and the neck is screened where symptoms are vague or travel, because irritation there can present as elbow and forearm pain. Grip strength is measured so progress can be tracked with a number rather than a feeling.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How it is treated</h2>
+          <p>Hands-on work and electrotherapy help settle an irritable tendon, but the treatment that changes tendons is graded loading — isometric holds early for pain relief, progressing into heavier, slower strength work. Practical changes to grip, equipment or workstation usually come into it too.</p>
+        </div>
+
+        <div data-reveal>
+          <h2>How long it takes</h2>
+          <p>Tendons are slow. Six to twelve weeks is normal, and occasionally longer for a stubborn elbow that has been there a year. The improvement is steady rather than dramatic, and it does depend on doing the loading between appointments.</p>
+        </div>
+
+        <div class="warn-box" data-reveal>
+          <h2 style="margin-top:0">When to see a doctor instead</h2>
+          <p>
+            Most wrist &amp; elbow pain is mechanical and safe to treat here. Book with your
+            GP, or go to A&amp;E where it says so, if any of the following apply:
+          </p>
+          <ul><li>Pain after a fall onto an outstretched hand, especially with swelling around the wrist — this needs imaging to rule out a fracture</li><li>Numbness in the hand that wakes you at night or does not settle</li><li>A hot, swollen joint alongside feeling unwell</li></ul>
+          <p class="tiny muted">
+            This page is general information about a common problem, not a diagnosis of yours.
+            If you are worried about your symptoms, get them looked at.
+          </p>
+        </div>
+
+        <div class="frame frame-wide frame-glow" data-reveal style="margin-top:2.5rem">
+          <div class="photo-slot" data-photo="condition-wrist-elbow-pain">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -34 L5 -31 L30 -30 L55 -30 L80 -30 L105 -31 L130 -32 L155 -32 L180 -33 L205 -33 L230 -34 L255 -34 L280 -35 L305 -36 L330 -38 L355 -41 L380 -43 L405 -45" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 -4 L5 -1 L30 0 L55 0 L80 -1 L105 -3 L130 -4 L155 -6 L180 -6 L205 -7 L230 -8 L255 -10 L280 -12 L305 -15 L330 -19 L355 -23 L380 -26 L405 -27" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 26 L5 29 L30 30 L55 29 L80 26 L105 24 L130 22 L155 20 L180 19 L205 18 L230 16 L255 12 L280 7 L305 2 L330 -3 L355 -6 L380 -7 L405 -6" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 57 L5 60 L30 59 L55 57 L80 53 L105 49 L130 47 L155 45 L180 44 L205 41 L230 37 L255 31 L280 24 L305 18 L330 14 L355 13 L380 16 L405 20" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 88 L5 89 L30 87 L55 83 L80 78 L105 74 L130 71 L155 69 L180 66 L205 62 L230 55 L255 47 L280 40 L305 35 L330 34 L355 37 L380 44 L405 51" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 118 L5 118 L30 114 L55 108 L80 102 L105 98 L130 95 L155 92 L180 88 L205 81 L230 72 L255 63 L280 57 L305 55 L330 59 L355 66 L380 75 L405 83" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 147 L5 145 L30 140 L55 132 L80 126 L105 121 L130 118 L155 114 L180 108 L205 99 L230 89 L255 80 L280 77 L305 80 L330 88 L355 98 L380 107 L405 114" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 175 L5 171 L30 164 L55 155 L80 148 L105 144 L130 141 L155 135 L180 127 L205 116 L230 106 L255 100 L280 101 L305 108 L330 119 L355 130 L380 139 L405 145" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 201 L5 196 L30 187 L55 177 L80 171 L105 167 L130 163 L155 156 L180 146 L205 135 L230 127 L255 123 L280 128 L305 138 L330 150 L355 162 L380 169 L405 174" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 226 L5 219 L30 209 L55 199 L80 193 L105 189 L130 184 L155 177 L180 167 L205 156 L230 149 L255 149 L280 156 L305 168 L330 181 L355 192 L380 198 L405 203" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 250 L5 241 L30 230 L55 221 L80 216 L105 212 L130 206 L155 198 L180 188 L205 178 L230 173 L255 176 L280 185 L305 198 L330 211 L355 221 L380 227 L405 230" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 272 L5 262 L30 251 L55 243 L80 238 L105 234 L130 229 L155 221 L180 211 L205 203 L230 200 L255 204 L280 214 L305 227 L330 240 L355 249 L380 254 L405 257" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 293 L5 282 L30 272 L55 265 L80 261 L105 257 L130 252 L155 244 L180 236 L205 229 L230 227 L255 232 L280 242 L305 255 L330 267 L355 275 L380 280 L405 283" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 313 L5 303 L30 294 L55 288 L80 284 L105 281 L130 276 L155 269 L180 262 L205 256 L230 255 L255 260 L280 270 L305 282 L330 293 L355 301 L380 305 L405 308" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 332 L5 323 L30 316 L55 311 L80 308 L105 305 L130 301 L155 295 L180 289 L205 284 L230 283 L255 288 L280 296 L305 307 L330 318 L355 325 L380 330 L405 332" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 352 L5 344 L30 339 L55 335 L80 332 L105 330 L130 327 L155 322 L180 317 L205 313 L230 312 L255 316 L280 323 L305 332 L330 342 L355 349 L380 354 L405 356" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 372 L5 366 L30 362 L55 359 L80 357 L105 356 L130 353 L155 349 L180 346 L205 343 L230 342 L255 344 L280 350 L305 357 L330 365 L355 372 L380 377 L405 380" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 393 L5 389 L30 386 L55 384 L80 383 L105 382 L130 380 L155 377 L180 375 L205 372 L230 372 L255 373 L280 377 L305 382 L330 389 L355 395 L380 399 L405 403" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 416 L5 413 L30 411 L55 410 L80 409 L105 409 L130 407 L155 406 L180 404 L205 402 L230 402 L255 403 L280 405 L305 408 L330 413 L355 417 L380 422 L405 425" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 439 L5 438 L30 437 L55 436 L80 436 L105 436 L130 435 L155 434 L180 433 L205 432 L230 432 L255 432 L280 433 L305 435 L330 438 L355 441 L380 444 L405 447" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-condition-wrist-elbow-pain-23"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-condition-wrist-elbow-pain-23)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/condition-wrist-elbow-pain.jpg and rebuild -->
+        </div>
+      </div>
+
+      <aside class="booking-aside">
+        <div class="aside-card">
+          <h3>Get it assessed</h3>
+          <div class="aside-price"><b>£55</b><span>· 60 min</span></div>
+          <p class="tiny muted">Assessment and first treatment in the same appointment.</p>
+          <a class="btn btn-primary btn-block" href="#/book?treatment=injury-assessment"
+            data-cta="condition-aside">Book an assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-block" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+          <div class="aside-meta">
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg><span>Mon–Thu, 9am–8pm</span></div>
+            <div><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Hidden Strength, Gosforth</span></div>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Treatments used for this</h3>
+          <div class="related">
+            <a href="#/injury-assessment">Initial Assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/electrotherapy">Electrotherapy <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/follow-up-treatment">Injury Treatment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Other conditions</h3>
+          <div class="related">
+            <a href="#/knee-pain">Knee pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/back-pain">Back pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/neck-pain">Neck pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a><a href="#/sciatica-nerve-pain">Sciatica &amp; nerve pain <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Get your wrist &amp; elbow pain looked at.</h2>
+      <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
 <div class="demo-page" data-route="price-list" hidden>
 <section class="page-head">
   <div class="hero-bg" aria-hidden="true">
@@ -4206,11 +5285,11 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
     fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -28 L5 -26 L30 -25 L55 -26 L80 -26 L105 -27 L130 -28 L155 -29 L180 -29 L205 -29 L230 -29 L255 -29 L280 -30 L305 -32 L330 -34 L355 -36 L380 -39 L405 -40" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 4 L5 5 L30 5 L55 4 L80 2 L105 0 L130 -2 L155 -2 L180 -3 L205 -4 L230 -5 L255 -7 L280 -10 L305 -14 L330 -18 L355 -21 L380 -23 L405 -22" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 36 L5 37 L30 35 L55 32 L80 29 L105 26 L130 24 L155 23 L180 21 L205 19 L230 16 L255 11 L280 6 L305 0 L330 -4 L355 -5 L380 -4 L405 1" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 67 L5 67 L30 64 L55 59 L80 54 L105 50 L130 48 L155 46 L180 44 L205 40 L230 34 L255 26 L280 19 L305 14 L330 13 L355 16 L380 22 L405 31" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 98 L5 96 L30 91 L55 84 L80 78 L105 74 L130 71 L155 69 L180 64 L205 57 L230 49 L255 40 L280 34 L305 32 L330 36 L355 44 L380 54 L405 65" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 128 L5 124 L30 116 L55 107 L80 101 L105 96 L130 93 L155 89 L180 83 L205 73 L230 63 L255 55 L280 52 L305 55 L330 64 L355 77 L380 89 L405 99" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 156 L5 149 L30 139 L55 130 L80 123 L105 118 L130 115 L155 109 L180 100 L205 88 L230 78 L255 73 L280 75 L305 84 L330 97 L355 112 L380 124 L405 132" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 183 L5 173 L30 161 L55 151 L80 144 L105 140 L130 135 L155 127 L180 116 L205 105 L230 96 L255 95 L280 102 L305 116 L330 132 L355 147 L380 157 L405 164" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 207 L5 195 L30 182 L55 172 L80 166 L105 161 L130 155 L155 146 L180 134 L205 123 L230 117 L255 120 L280 132 L305 149 L330 167 L355 180 L380 189 L405 194" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 229 L5 216 L30 202 L55 193 L80 187 L105 183 L130 176 L155 166 L180 154 L205 144 L230 142 L255 149 L280 164 L305 182 L330 199 L355 211 L380 218 L405 223" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 250 L5 235 L30 223 L55 214 L80 209 L105 204 L130 197 L155 186 L180 175 L205 168 L230 168 L255 178 L280 195 L305 214 L330 230 L355 241 L380 247 L405 251" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 269 L5 255 L30 243 L55 235 L80 231 L105 226 L130 219 L155 209 L180 199 L205 194 L230 196 L255 208 L280 226 L305 244 L330 259 L355 269 L380 274 L405 278" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 288 L5 274 L30 264 L55 257 L80 253 L105 249 L130 242 L155 233 L180 225 L205 221 L230 225 L255 238 L280 255 L305 273 L330 287 L355 295 L380 300 L405 303" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 306 L5 294 L30 285 L55 280 L80 277 L105 273 L130 267 L155 259 L180 252 L205 250 L230 255 L255 266 L280 283 L305 299 L330 312 L355 321 L380 325 L405 328" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 324 L5 314 L30 307 L55 304 L80 301 L105 298 L130 293 L155 286 L180 281 L205 280 L230 284 L255 295 L280 309 L305 324 L330 337 L355 345 L380 349 L405 351" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 343 L5 335 L30 331 L55 328 L80 326 L105 324 L130 320 L155 315 L180 311 L205 310 L230 314 L255 323 L280 335 L305 348 L330 360 L355 368 L380 373 L405 375" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 364 L5 358 L30 355 L55 353 L80 352 L105 351 L130 348 L155 344 L180 341 L205 341 L230 344 L255 351 L280 360 L305 372 L330 382 L355 390 L380 395 L405 398" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 386 L5 382 L30 380 L55 380 L80 379 L105 378 L130 376 L155 374 L180 372 L205 372 L230 374 L255 379 L280 386 L305 395 L330 404 L355 411 L380 416 L405 419" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 409 L5 408 L30 407 L55 407 L80 407 L105 406 L130 405 L155 404 L180 403 L205 403 L230 405 L255 408 L280 413 L305 419 L330 426 L355 432 L380 437 L405 441" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 435 L5 434 L30 434 L55 435 L80 435 L105 435 L130 435 L155 434 L180 434 L205 434 L230 435 L255 438 L280 441 L305 445 L330 449 L355 454 L380 458 L405 461" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
   <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
-    <mask id="ph-offers-clinic-17"><circle cx="100" cy="100" r="96" fill="#fff"/>
+    <mask id="ph-offers-clinic-24"><circle cx="100" cy="100" r="96" fill="#fff"/>
       <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
       <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
     </mask>
-    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-offers-clinic-17)"/>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-offers-clinic-24)"/>
   </svg>
 </div>
 <!-- photo slot: add site/assets/img/offers-clinic.jpg and rebuild -->
@@ -4254,6 +5333,358 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
       <h2 style="margin-top:1rem">Claim the discount.</h2>
       <p class="lead">Book online, enter JLNEW0029 at checkout and 10% comes off your first appointment.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="gift-vouchers" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><span aria-current="page">Gift vouchers</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> Gift vouchers</span>
+        <h1 data-hero style="--d:80ms">For the one who will not book it themselves.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          A voucher towards any treatment at the clinic. Useful for the runner training through a
+          niggle, the parent who has been saying "it will settle" since March, or anyone who
+          would never spend it on themselves.
+        </p>
+        <div class="btn-row" data-hero style="--d:250ms;margin-top:2rem">
+          <a class="btn btn-primary btn-lg" href="https://www.fresha.com/a/j-l-sports-injury-services-newcastle-upon-tyne-hidden-strength-lansdowne-court-gosforth-olaass6e" target="_blank" rel="noopener"
+            data-cta="voucher">Buy a voucher <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> Call the clinic</a>
+        </div>
+      </div>
+      <div class="fact-strip" data-hero style="--d:320ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> £25 minimum</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Any treatment</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="offer-head" data-reveal>
+      <h2>Two ways to buy one</h2>
+      <a class="btn-link" href="#/price-list">See the price list <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+    </div>
+    <div class="grid grid-2" data-stagger="90">
+      <article class="card" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg></div>
+        <h3>E-voucher</h3>
+        <p>Bought online and sent straight to your inbox, so it works when you have left it late. Print it or forward it on.</p>
+        <div class="t-card-meta"><span class="price">From £25</span></div>
+        <a class="t-card-link" href="https://www.fresha.com/a/j-l-sports-injury-services-newcastle-upon-tyne-hidden-strength-lansdowne-court-gosforth-olaass6e" target="_blank" rel="noopener">Buy online <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      </article>
+      <article class="card" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+        <h3>Physical certificate</h3>
+        <p>A printed gift certificate collected from the clinic — worth arranging in advance so it is ready when you get there.</p>
+        <div class="t-card-meta"><span class="price">From £25</span></div>
+        <a class="t-card-link" href="#/contact">Arrange collection <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      </article>
+    </div>
+
+    <div class="split" style="margin-top:clamp(3rem,6vw,4.5rem)">
+      <div class="split-copy">
+        <span class="eyebrow" data-reveal>How it works</span>
+        <h2 data-reveal>Simple enough.</h2>
+        <ul class="check-list" data-reveal style="margin-top:1.5rem">
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span>Choose an amount — £25 is the minimum, and most people put it towards a specific treatment.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span>They book whichever appointment suits them and use the voucher against it.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span>It can go towards anything: an assessment, a sports massage, a full body massage.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span>If they have never been before, point them at <a href="#/first-visit">what happens on a first visit</a>.</span></li>
+        </ul>
+      </div>
+      <div class="split-media" data-reveal="right">
+        <div class="frame frame-wide frame-glow">
+          <div class="photo-slot" data-photo="gift-voucher">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -34 L5 -39 L30 -42 L55 -43 L80 -44 L105 -46 L130 -48 L155 -51 L180 -53 L205 -52 L230 -47 L255 -41 L280 -34 L305 -28 L330 -24 L355 -22 L380 -21 L405 -19" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 -9 L5 -16 L30 -20 L55 -22 L80 -24 L105 -27 L130 -31 L155 -35 L180 -34 L205 -29 L230 -19 L255 -8 L280 0 L305 5 L330 8 L355 9 L380 11 L405 15" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 15 L5 6 L30 1 L55 -1 L80 -5 L105 -10 L130 -15 L155 -17 L180 -11 L205 2 L230 16 L255 29 L280 35 L305 38 L330 39 L355 42 L380 46 L405 47" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 37 L5 26 L30 21 L55 18 L80 13 L105 6 L130 2 L155 6 L180 19 L205 38 L230 55 L255 65 L280 68 L305 69 L330 72 L355 75 L380 75 L405 67" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 58 L5 46 L30 41 L55 38 L80 31 L105 23 L130 22 L155 34 L180 56 L205 78 L230 93 L255 98 L280 98 L305 100 L330 104 L355 104 L380 93 L405 72" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 78 L5 65 L30 61 L55 57 L80 49 L105 42 L130 47 L155 68 L180 95 L205 117 L230 127 L255 127 L280 128 L305 132 L330 132 L355 121 L380 98 L405 71" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 97 L5 85 L30 81 L55 76 L80 68 L105 64 L130 77 L155 105 L180 135 L205 154 L230 157 L255 156 L280 157 L305 160 L330 152 L355 129 L380 99 L405 77" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 115 L5 105 L30 102 L55 97 L80 88 L105 90 L130 110 L155 144 L180 173 L205 186 L230 185 L255 183 L280 185 L305 183 L330 165 L355 134 L380 105 L405 93" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 134 L5 126 L30 124 L55 118 L80 111 L105 118 L130 146 L155 182 L180 208 L205 215 L230 211 L255 210 L280 211 L305 202 L330 176 L355 141 L380 118 L405 116" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 154 L5 148 L30 147 L55 141 L80 137 L105 149 L130 181 L155 218 L180 240 L205 242 L230 236 L255 235 L280 234 L305 219 L330 188 L355 154 L380 137 L405 143" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 175 L5 172 L30 171 L55 166 L80 164 L105 181 L130 216 L155 251 L180 268 L205 267 L230 260 L255 259 L280 255 L305 237 L330 204 L355 173 L380 161 L405 170" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 197 L5 196 L30 196 L55 192 L80 194 L105 214 L130 249 L155 281 L180 295 L205 291 L230 284 L255 281 L280 277 L305 258 L330 225 L355 196 L380 186 L405 197" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 221 L5 223 L30 223 L55 220 L80 224 L105 246 L130 279 L155 308 L180 319 L205 314 L230 307 L255 303 L280 298 L305 281 L330 251 L355 223 L380 213 L405 223" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 247 L5 250 L30 251 L55 249 L80 255 L105 276 L130 308 L155 333 L180 343 L205 337 L230 329 L255 325 L280 321 L305 306 L330 280 L355 253 L380 241 L405 248" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 275 L5 279 L30 279 L55 279 L80 286 L105 306 L130 334 L155 356 L180 365 L205 360 L230 352 L255 347 L280 343 L305 333 L330 312 L355 287 L380 272 L405 274" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 304 L5 308 L30 309 L55 310 L80 317 L105 335 L130 358 L155 378 L180 386 L205 382 L230 374 L255 369 L280 366 L305 359 L330 344 L355 324 L380 307 L405 302" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 335 L5 338 L30 339 L55 341 L80 348 L105 363 L130 382 L155 398 L180 406 L205 403 L230 397 L255 391 L280 388 L305 384 L330 375 L355 360 L380 344 L405 335" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 366 L5 369 L30 370 L55 372 L80 378 L105 389 L130 404 L155 417 L180 424 L205 424 L230 419 L255 413 L280 410 L305 408 L330 403 L355 395 L380 383 L405 372" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 397 L5 399 L30 401 L55 403 L80 407 L105 416 L130 427 L155 436 L180 442 L205 443 L230 440 L255 436 L280 433 L305 431 L330 429 L355 425 L380 418 L405 410" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 428 L5 430 L30 431 L55 433 L80 436 L105 442 L130 449 L155 456 L180 460 L205 462 L230 461 L255 458 L280 456 L305 454 L330 453 L355 452 L380 449 L405 445" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-gift-voucher-25"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-gift-voucher-25)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/gift-voucher.jpg and rebuild -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Give something they will actually use.</h2>
+      <p class="lead">Vouchers start at £25 and go towards any appointment at the clinic.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="first-visit" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><span aria-current="page">Your first visit</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg> Your first visit</span>
+        <h1 data-hero style="--d:80ms">Exactly what happens when you come in.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          If you have never seen a sports injury therapist before, here is the whole thing —
+          where to go, what to wear, what gets done to you and what you leave with. No surprises.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> 60 minutes</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg> £55</span>
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">On the day</span>
+      <h2>The appointment, minute by minute.</h2>
+    </div>
+    <div class="steps" data-stagger="90">
+      <div class="step" data-reveal>
+        <div class="step-num">01</div>
+        <h3>Arriving</h3>
+        <p>The clinic is inside Hidden Strength on Lansdowne Court. Come in through the main entrance and Jack will meet you. Five minutes early is plenty.</p>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-num">02</div>
+        <h3>Talking it through</h3>
+        <p>Roughly the first ten minutes. What happened, when, what makes it worse, what you have tried, and what you need to get back to. This is the part that shapes everything else.</p>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-num">03</div>
+        <h3>Being assessed</h3>
+        <p>Physical testing — movement, strength, joint stability, and how you load the area. You will be asked to move, and told what each test is looking for as it happens.</p>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-num">04</div>
+        <h3>Treatment and a plan</h3>
+        <p>Treatment happens in the same appointment, and you leave knowing what is wrong, roughly how long it will take, and what to do between now and next time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="split">
+      <div class="split-copy">
+        <span class="eyebrow" data-reveal>Practical</span>
+        <h2 data-reveal>The things people ask on the way in.</h2>
+        <ul class="check-list" data-reveal style="margin-top:1.5rem">
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span><strong>Wear something you can move in.</strong> Shorts for anything below the waist, a vest or t-shirt for shoulders and back. There is space to change.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span><strong>Parking is on site</strong> and on the surrounding streets, and Regent Centre Metro is a short walk.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span><strong>Bring anything relevant</strong> — scan or X-ray results, a letter from your GP, or the trainers you run in if it is a foot, ankle or knee problem.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span><strong>You do not need a referral</strong> and you do not need to be an athlete. Most clients are neither.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span><strong>Payment is at the appointment.</strong> No deposit to book.</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg><span><strong>You can bring someone with you</strong> if you would rather not be assessed on your own.</span></li>
+        </ul>
+        <div class="btn-row" data-reveal style="margin-top:2rem">
+          <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="first-visit">
+            Book your first appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="split-media" data-reveal="right">
+        <div class="frame frame-glow">
+          <div class="photo-slot" data-photo="first-visit">
+  <svg class="contours" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"
+    fill="none" stroke-linecap="round" aria-hidden="true"><path d="M-20 -50 L5 -49 L30 -47 L55 -47 L80 -46 L105 -45 L130 -44 L155 -42 L180 -39 L205 -35 L230 -30 L255 -25 L280 -21 L305 -18 L330 -16 L355 -16 L380 -16 L405 -16" stroke="currentColor" stroke-width="1" opacity="0.16"/><path d="M-20 -29 L5 -27 L30 -26 L55 -25 L80 -25 L105 -24 L130 -21 L155 -17 L180 -11 L205 -5 L230 2 L255 8 L280 12 L305 13 L330 13 L355 13 L380 12 L405 11" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 -8 L5 -6 L30 -4 L55 -4 L80 -3 L105 -0 L130 4 L155 11 L180 20 L205 29 L230 37 L255 41 L280 43 L305 42 L330 40 L355 39 L380 38 L405 37" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 14 L5 16 L30 18 L55 19 L80 20 L105 25 L130 32 L155 43 L180 55 L205 64 L230 71 L255 73 L280 71 L305 68 L330 65 L355 64 L380 63 L405 61" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 36 L5 39 L30 41 L55 42 L80 45 L105 52 L130 64 L155 77 L180 90 L205 99 L230 102 L255 100 L280 96 L305 92 L330 89 L355 88 L380 86 L405 80" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 59 L5 62 L30 64 L55 67 L80 72 L105 83 L130 97 L155 113 L180 125 L205 131 L230 130 L255 125 L280 119 L305 115 L330 113 L355 110 L380 104 L405 94" stroke="currentColor" stroke-width="1" opacity="0.31"/><path d="M-20 83 L5 87 L30 89 L55 93 L80 101 L105 115 L130 132 L155 148 L180 158 L205 159 L230 155 L255 147 L280 141 L305 138 L330 135 L355 129 L380 119 L405 105" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 108 L5 112 L30 115 L55 120 L80 131 L105 148 L130 166 L155 181 L180 188 L205 185 L230 177 L255 169 L280 163 L305 160 L330 155 L355 146 L380 132 L405 118" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 133 L5 138 L30 141 L55 149 L80 162 L105 181 L130 200 L155 212 L180 215 L205 209 L230 199 L255 190 L280 185 L305 181 L330 174 L355 162 L380 147 L405 134" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 160 L5 165 L30 169 L55 178 L80 194 L105 213 L130 231 L155 241 L180 240 L205 231 L230 220 L255 212 L280 207 L305 202 L330 194 L355 180 L380 165 L405 155" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 188 L5 192 L30 198 L55 208 L80 225 L105 245 L130 260 L155 267 L180 263 L205 253 L230 242 L255 234 L280 229 L305 224 L330 214 L355 200 L380 186 L405 179" stroke="currentColor" stroke-width="1" opacity="0.36"/><path d="M-20 216 L5 221 L30 227 L55 239 L80 256 L105 274 L130 287 L155 291 L180 285 L205 274 L230 263 L255 256 L280 252 L305 246 L330 236 L355 223 L380 210 L405 205" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M-20 244 L5 249 L30 256 L55 268 L80 285 L105 302 L130 313 L155 314 L180 307 L205 296 L230 286 L255 279 L280 275 L305 269 L330 260 L355 248 L380 237 L405 232" stroke="currentColor" stroke-width="1" opacity="0.34"/><path d="M-20 273 L5 278 L30 286 L55 298 L80 313 L105 327 L130 336 L155 336 L180 329 L205 318 L230 309 L255 302 L280 298 L305 294 L330 286 L355 276 L380 266 L405 261" stroke="currentColor" stroke-width="1" opacity="0.33"/><path d="M-20 302 L5 307 L30 315 L55 326 L80 339 L105 351 L130 358 L155 358 L180 351 L205 341 L230 332 L255 326 L280 322 L305 319 L330 313 L355 305 L380 296 L405 290" stroke="var(--green)" stroke-width="1.5" opacity="0.50"/><path d="M-20 331 L5 336 L30 343 L55 353 L80 364 L105 374 L130 379 L155 379 L180 373 L205 364 L230 356 L255 351 L280 347 L305 345 L330 341 L355 335 L380 328 L405 322" stroke="currentColor" stroke-width="1" opacity="0.28"/><path d="M-20 359 L5 364 L30 370 L55 379 L80 388 L105 396 L130 400 L155 399 L180 394 L205 387 L230 381 L255 375 L280 373 L305 371 L330 368 L355 365 L380 359 L405 354" stroke="currentColor" stroke-width="1" opacity="0.26"/><path d="M-20 387 L5 391 L30 397 L55 404 L80 411 L105 417 L130 420 L155 419 L180 416 L205 411 L230 405 L255 401 L280 398 L305 397 L330 396 L355 394 L380 391 L405 387" stroke="currentColor" stroke-width="1" opacity="0.22"/><path d="M-20 414 L5 418 L30 422 L55 427 L80 433 L105 437 L130 439 L155 439 L180 437 L205 433 L230 430 L255 426 L280 424 L305 423 L330 423 L355 422 L380 421 L405 419" stroke="currentColor" stroke-width="1" opacity="0.19"/><path d="M-20 441 L5 443 L30 447 L55 450 L80 454 L105 457 L130 458 L155 459 L180 458 L205 456 L230 454 L255 452 L280 450 L305 449 L330 449 L355 449 L380 449 L405 449" stroke="currentColor" stroke-width="1" opacity="0.16"/></svg>
+  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
+    <mask id="ph-first-visit-26"><circle cx="100" cy="100" r="96" fill="#fff"/>
+      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
+      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
+    </mask>
+    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-first-visit-26)"/>
+  </svg>
+</div>
+<!-- photo slot: add site/assets/img/first-visit.jpg and rebuild -->
+          <div class="frame-caption">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <span><b>Hidden Strength</b><span>Lansdowne Court, Gosforth</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">Straight answers</span>
+      <h2>Will it hurt?</h2>
+      <p class="lead">
+        Some of it is uncomfortable — that is honest rather than reassuring. Deep soft tissue work
+        on an irritable area can be intense, and a few of the assessment tests are designed to
+        reproduce your symptoms, because that is how we identify what is involved.
+      </p>
+      <p class="lead" style="margin-top:1rem">
+        What will not happen is anything you have not agreed to. You are told what is coming and
+        why before it happens, pressure is set by you, and saying stop stops it. Nobody gets talked
+        into anything here.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Now you know what to expect.</h2>
+      <p class="lead">Book the initial assessment and get a straight answer about what is going on.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+      </div>
+      <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="demo-page" data-route="faqs" hidden>
+<section class="page-head">
+  <div class="hero-bg" aria-hidden="true">
+  <span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span>
+</div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+  <div class="shell">
+    <nav class="crumbs" aria-label="Breadcrumb">
+  <a href="#/index">Home</a><span class="sep">/</span><span aria-current="page">FAQs</span>
+</nav>
+    <div class="page-head-grid">
+      <div>
+        <span class="eyebrow" data-hero>FAQs</span>
+        <h1 data-hero style="--d:80ms">Questions, answered straight.</h1>
+        <p class="lead" data-hero style="--d:160ms">
+          Everything people ask before booking. If yours is not here, call or message and you will
+          get a real answer rather than a sales pitch.
+        </p>
+      </div>
+      <div class="fact-strip" data-hero style="--d:260ms">
+        <a class="badge" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
+        <a class="badge" href="#/contact"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg> Send a message</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="faq" data-stagger="50">
+      <div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-0" id="fq-b-0">
+          <span>Do I need a referral to be seen?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-0" role="region" aria-labelledby="fq-b-0" aria-hidden="true">
+          <div><p>No. You can book directly online and be seen without a GP referral or any paperwork. If your problem turns out to need onward referral, you will be told at your assessment and pointed in the right direction.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-1" id="fq-b-1">
+          <span>Do I have to play sport to come here?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-1" role="region" aria-labelledby="fq-b-1" aria-hidden="true">
+          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are treated in exactly the same way — the assessment and the rehab simply reflect what your day actually involves.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-2" id="fq-b-2">
+          <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-2" role="region" aria-labelledby="fq-b-2" aria-hidden="true">
+          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-3" id="fq-b-3">
+          <span>What should I wear?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-3" role="region" aria-labelledby="fq-b-3" aria-hidden="true">
+          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders and back. There is space to change at the clinic.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-4" id="fq-b-4">
+          <span>How many sessions will I need?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-4" role="region" aria-labelledby="fq-b-4" aria-hidden="true">
+          <div><p>That depends entirely on the injury, how long you have had it and what you need to get back to. You will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-5" id="fq-b-5">
+          <span>Will the treatment hurt?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-5" role="region" aria-labelledby="fq-b-5" aria-hidden="true">
+          <div><p>Some techniques are intense, but nothing happens without your say-so. Pressure is matched to you and adjusted throughout, and you are told what is coming and why before it happens.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-6" id="fq-b-6">
+          <span>Where exactly are you and is there parking?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-6" role="region" aria-labelledby="fq-b-6" aria-hidden="true">
+          <div><p>The clinic is inside Hidden Strength on Lansdowne Court, Gosforth — a short walk from Gosforth High Street, with parking available on site and on the surrounding streets.</p></div>
+        </div>
+      </div><div class="faq-item" data-reveal>
+        <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-7" id="fq-b-7">
+          <span>What is your cancellation policy?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="faq-a" id="fq-p-7" role="region" aria-labelledby="fq-b-7" aria-hidden="true">
+          <div><p>Please give as much notice as you can if you need to move or cancel an appointment so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.</p></div>
+        </div>
+      </div>
+    </div>
+    <p class="price-note" data-reveal>
+      Still not sure what to book?
+      <a class="btn-link" href="#/first-visit">See what happens at a first visit <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="cta-band" data-reveal="scale">
+      <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
+      <h2 style="margin-top:1rem">Stop training around it.</h2>
+      <p class="lead">Book an assessment and find out what is actually going on — then get a plan to fix it.</p>
       <div class="btn-row">
         <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
@@ -4862,7 +6293,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <li><a href="#/price-list">Price list</a></li>
           <li><a href="#/reviews">Reviews</a></li>
           <li><a href="#/offers">Offers</a></li>
-          <li><a href="#/offers" data-scroll="vouchers">Gift vouchers</a></li>
+          <li><a href="#/gift-vouchers">Gift vouchers</a></li>
+          <li><a href="#/first-visit">Your first visit</a></li>
+          <li><a href="#/faqs">FAQs</a></li>
+          <li><a href="#/conditions">Conditions we treat</a></li>
           <li><a href="#/contact">Contact &amp; directions</a></li>
           <li><a href="#/book">Book an appointment</a></li>
           <li><a href="#/privacy-policy">Privacy policy</a></li>
