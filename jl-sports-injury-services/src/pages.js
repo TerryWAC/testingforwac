@@ -173,7 +173,7 @@ const faqSection = (items = faqs, heading = 'Questions people ask before booking
 
 const ctaBand = (
   title = 'Stop training around it.',
-  copy = 'Book an assessment and find out what is actually going on — then get a plan to fix it.'
+  copy = 'One 60-minute assessment tells you which structures are involved, what caused it, and a realistic timescale to get back. Treatment is included the same day.'
 ) => `<section class="section">
   <div class="shell">
     <div class="cta-band" data-reveal="scale">
@@ -181,7 +181,7 @@ const ctaBand = (
       <h2 style="margin-top:1rem">${esc(title)}</h2>
       <p class="lead">${esc(copy)}</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="book.html" data-cta="band">Book an appointment ${icon('arrow')}</a>
+        <a class="btn btn-primary btn-lg" href="book.html?treatment=injury-assessment" data-cta="band">Book your assessment ${icon('arrow')}</a>
         <a class="btn btn-ghost btn-lg" href="tel:${site.phoneHref}">${icon('phone')} ${esc(site.phone)}</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · ${esc(addr.venue)}, ${esc(addr.locality)} · No referral needed</p>
@@ -329,14 +329,20 @@ function home() {
           Sports Injury Clinic &amp;<br><span class="grad">Sports Massage</span> in Gosforth, Newcastle
         </h1>
         <p class="lead" data-hero style="--d:170ms">
-          Injury assessment, sports massage, deep tissue massage, medical acupuncture, electrotherapy,
-          ultrasound therapy and gym-based rehabilitation — elite level treatment from a therapist with
-          ten years in professional rugby. <strong>No referral needed. Book online in 60 seconds.</strong>
+          Assessment, diagnosis and hands-on treatment of neuromusculoskeletal injury — sports massage,
+          medical acupuncture, electrotherapy and gym-based rehabilitation, from a therapist who spent a
+          decade in professional rugby. <strong>You leave your first appointment knowing what is wrong,
+          what caused it, and how long it takes to fix.</strong>
         </p>
         <div class="btn-row" data-hero style="--d:250ms">
-          <a class="btn btn-primary btn-lg" href="book.html" data-cta="hero">Book an appointment ${icon('arrow')}</a>
+          <a class="btn btn-primary btn-lg" href="book.html?treatment=injury-assessment" data-cta="hero">
+            Book your assessment ${icon('arrow')}
+          </a>
           <a class="btn btn-ghost btn-lg" href="tel:${site.phoneHref}">${icon('phone')} ${esc(site.phone)}</a>
         </div>
+        <p class="cta-micro" data-hero style="--d:290ms">
+          60 minutes · £55 · assessment and treatment in the same appointment · no referral, no deposit
+        </p>
         <div class="hero-badges" data-hero style="--d:330ms">
           <span class="badge badge-rating">${stars(5)} ${site.reviews.rating} from ${reviewCount}</span>
           <span class="badge">${icon('check')} No referral needed</span>
@@ -416,11 +422,12 @@ ${marquee()}
 <section class="section">
   <div class="shell">
     <div class="section-head" data-reveal>
-      <span class="eyebrow">Why J.L.</span>
-      <h2>Professional sport standards, on your high street.</h2>
+      <span class="eyebrow">Why this clinic</span>
+      <h2>Most massage clinics treat where it hurts. This one finds out why.</h2>
       <p class="lead">
-        J.L. Sports Injury Services was set up in ${site.founded} with one aim: make the standard of care
-        found inside professional clubs available to everyone in Newcastle.
+        Set up in ${site.founded} to bring the assessment-led standard used inside professional clubs to
+        everyone in Newcastle — because the reason an injury keeps returning is almost never the place
+        it is felt.
       </p>
     </div>
     <div class="grid grid-4" data-stagger="90">
@@ -441,10 +448,10 @@ ${marquee()}
   <div class="shell">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Conditions we treat</span>
-      <h2>If it hurts when you move, it is worth getting looked at.</h2>
+      <h2>Find out which tissue is actually involved.</h2>
       <p class="lead">
-        Most people arrive with one of these. Whatever it is, the assessment finds the cause
-        before anything gets treated.
+        Muscular, joint, tendon or nerve — the three are treated very differently, and guessing wrong
+        is why an injury drags on for months. Most people arrive with one of these.
       </p>
     </div>
     <div class="cond-grid" data-stagger="60">

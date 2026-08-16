@@ -270,6 +270,13 @@ main > section:last-child { padding-bottom: 0; }
 
 .btn-row { display: flex; flex-wrap: wrap; gap: 0.85rem; }
 
+/* The line under a primary CTA that answers "what am I committing to?" —
+   price, length and the absence of friction, where the hesitation happens. */
+.cta-micro {
+  font-size: 0.85rem; color: var(--text-faint);
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.5rem;
+}
+
 /* --------------------------------------------------------------------------
    6. Header
    -------------------------------------------------------------------------- */

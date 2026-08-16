@@ -275,6 +275,13 @@ main > section:last-child { padding-bottom: 0; }
 
 .btn-row { display: flex; flex-wrap: wrap; gap: 0.85rem; }
 
+/* The line under a primary CTA that answers "what am I committing to?" —
+   price, length and the absence of friction, where the hesitation happens. */
+.cta-micro {
+  font-size: 0.85rem; color: var(--text-faint);
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.5rem;
+}
+
 /* --------------------------------------------------------------------------
    6. Header
    -------------------------------------------------------------------------- */
@@ -1881,14 +1888,20 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           Sports Injury Clinic &amp;<br><span class="grad">Sports Massage</span> in Gosforth, Newcastle
         </h1>
         <p class="lead" data-hero style="--d:170ms">
-          Injury assessment, sports massage, deep tissue massage, medical acupuncture, electrotherapy,
-          ultrasound therapy and gym-based rehabilitation — elite level treatment from a therapist with
-          ten years in professional rugby. <strong>No referral needed. Book online in 60 seconds.</strong>
+          Assessment, diagnosis and hands-on treatment of neuromusculoskeletal injury — sports massage,
+          medical acupuncture, electrotherapy and gym-based rehabilitation, from a therapist who spent a
+          decade in professional rugby. <strong>You leave your first appointment knowing what is wrong,
+          what caused it, and how long it takes to fix.</strong>
         </p>
         <div class="btn-row" data-hero style="--d:250ms">
-          <a class="btn btn-primary btn-lg" href="#/book" data-cta="hero">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+          <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="hero">
+            Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </a>
           <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
         </div>
+        <p class="cta-micro" data-hero style="--d:290ms">
+          60 minutes · £55 · assessment and treatment in the same appointment · no referral, no deposit
+        </p>
         <div class="hero-badges" data-hero style="--d:330ms">
           <span class="badge badge-rating"><span class="stars" role="img" aria-label="5 out of 5 stars"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg></span> 5.0 from 27 reviews</span>
           <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg> No referral needed</span>
@@ -1993,7 +2006,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 <div class="marquee" aria-hidden="true">
   <div class="marquee-track">
     <div class="marquee-group">
-      <span class="marquee-item">Castleford Tigers R.L.F.C.</span><span class="marquee-item">Leicester Tigers</span><span class="marquee-item">Elite Rugby Union</span><span class="marquee-item">Neuromusculoskeletal Specialism</span><span class="marquee-item">Medical Acupuncture</span><span class="marquee-item">Gym-Based Rehabilitation</span><span class="marquee-item">Practising Since 2015</span>
+      <span class="marquee-item">Leicester Tigers</span><span class="marquee-item">Castleford Tigers R.L.F.C.</span><span class="marquee-item">Elite Rugby Union</span><span class="marquee-item">Neuromusculoskeletal Specialism</span><span class="marquee-item">Medical Acupuncture</span><span class="marquee-item">Gym-Based Rehabilitation</span><span class="marquee-item">Practising Since 2015</span>
     </div>
   </div>
 </div>
@@ -2001,30 +2014,31 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
 <section class="section">
   <div class="shell">
     <div class="section-head" data-reveal>
-      <span class="eyebrow">Why J.L.</span>
-      <h2>Professional sport standards, on your high street.</h2>
+      <span class="eyebrow">Why this clinic</span>
+      <h2>Most massage clinics treat where it hurts. This one finds out why.</h2>
       <p class="lead">
-        J.L. Sports Injury Services was set up in 2018 with one aim: make the standard of care
-        found inside professional clubs available to everyone in Newcastle.
+        Set up in 2018 to bring the assessment-led standard used inside professional clubs to
+        everyone in Newcastle — because the reason an injury keeps returning is almost never the place
+        it is felt.
       </p>
     </div>
     <div class="grid grid-4" data-stagger="90">
       <article class="card" data-reveal>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg></div>
+        <h3>Assessment before treatment, every time</h3>
+        <p>Most soft tissue clinics start treating within two minutes of you lying down. Here, nothing is treated until it has been tested — range of motion, strength, joint stability and functional movement — because treating the painful area rarely addresses what caused it.</p>
+      </article><article class="card" data-reveal>
         <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg></div>
-        <h3>Elite sport experience</h3>
-        <p>Over a decade in practice, including time in elite Rugby Union and Rugby League with Leicester Tigers and Castleford Tigers R.L.F.C.</p>
+        <h3>Trained in elite sport</h3>
+        <p>Over a decade in neuromusculoskeletal practice, including time in professional Rugby Union and Rugby League with Leicester Tigers and Castleford Tigers R.L.F.C. The clinical standard is the one used on players whose living depends on the outcome.</p>
       </article><article class="card" data-reveal>
         <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10v4"/><path d="M20.5 10v4"/><path d="M6.5 12h11"/></svg></div>
-        <h3>A proper gym, not a treatment room</h3>
-        <p>Based inside Hidden Strength Gosforth, so your rehabilitation is loaded and coached on real equipment rather than prescribed on paper.</p>
+        <h3>Loaded rehabilitation, not an exercise sheet</h3>
+        <p>Tissue adapts to load, not to advice. Rehabilitation is coached and progressed on a full gym floor with real equipment, so the strength you rebuild is measurable and holds when you return to sport.</p>
       </article><article class="card" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 12.5 12.5 20a2 2 0 0 1-2.8 0l-6-6A2 2 0 0 1 3 12.6V5a2 2 0 0 1 2-2h7.6a2 2 0 0 1 1.4.6l6 6a2 2 0 0 1 0 2.9Z"/><circle cx="8" cy="8" r="1.2"/></svg></div>
-        <h3>Elite treatment, affordable price</h3>
-        <p>The standard of care found in professional sport, priced for the general public. That has been the point of the clinic since 2018.</p>
-      </article><article class="card" data-reveal>
-        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.2-5.4-2.9-5.4 2.9 1-6.2L3.2 9.5l6.1-.9L12 3Z"/></svg></div>
-        <h3>Rated 5.0 from over 30 reviews</h3>
-        <p>A five star record across Google, Fresha and Facebook from clients across Newcastle and North Tyneside.</p>
+        <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>
+        <h3>Discharged, not retained</h3>
+        <p>You get a realistic timescale at your assessment and you are told when you no longer need to come in. No block packages to commit to, no open-ended course of appointments, and an honest referral onward if the problem is not one for this clinic.</p>
       </article>
     </div>
   </div>
@@ -2034,10 +2048,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   <div class="shell">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Conditions we treat</span>
-      <h2>If it hurts when you move, it is worth getting looked at.</h2>
+      <h2>Find out which tissue is actually involved.</h2>
       <p class="lead">
-        Most people arrive with one of these. Whatever it is, the assessment finds the cause
-        before anything gets treated.
+        Muscular, joint, tendon or nerve — the three are treated very differently, and guessing wrong
+        is why an injury drags on for months. Most people arrive with one of these.
       </p>
     </div>
     <div class="cond-grid" data-stagger="60">
@@ -2222,20 +2236,20 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <div class="steps" data-stagger="100">
       <div class="step" data-reveal>
         <div class="step-num">01</div>
-        <h3>Book in two minutes</h3>
-        <p>Pick a treatment and a time that works. Instant confirmation, no waiting for a callback, no deposit.</p>
+        <h3>Book in under two minutes</h3>
+        <p>Choose a treatment and a time online, day or night. Written confirmation straight away, no deposit, no waiting on a callback and no referral needed.</p>
       </div><div class="step" data-reveal>
         <div class="step-num">02</div>
-        <h3>Get assessed properly</h3>
-        <p>A full hands-on assessment finds the cause, not just the sore bit. You get a clear diagnosis and a realistic timescale.</p>
+        <h3>Get a diagnosis, not a guess</h3>
+        <p>A 60-minute assessment: history, physical testing and functional movement, to identify the injured structures and the mechanism behind them. You leave knowing what is wrong and why it happened.</p>
       </div><div class="step" data-reveal>
         <div class="step-num">03</div>
-        <h3>Treat and rehabilitate</h3>
-        <p>Hands-on treatment plus loaded, coached rehab on the gym floor — so the fix holds when you go back to training.</p>
+        <h3>Treated in the same appointment</h3>
+        <p>Hands-on treatment is delivered the same day — soft tissue work, joint mobilisation, medical acupuncture or electrotherapy, selected for your findings rather than run as a routine.</p>
       </div><div class="step" data-reveal>
         <div class="step-num">04</div>
-        <h3>Back to full training</h3>
-        <p>We re-test as you go and discharge you when you are ready. The aim is to get you out the door, not to keep you coming back.</p>
+        <h3>Rebuilt and re-tested</h3>
+        <p>Progressive loading on the gym floor, re-tested each visit against the measures taken at your assessment, so progress is a number rather than a feeling — and so it holds when you go back to training.</p>
       </div>
     </div>
   </div>
@@ -2449,56 +2463,56 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Do I need a referral to be seen?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-0" role="region" aria-labelledby="index-faq-b-0" aria-hidden="true">
-          <div><p>No. You can book directly online and be seen without a GP referral or any paperwork. If your problem turns out to need onward referral, you will be told at your assessment and pointed in the right direction.</p></div>
+          <div><p>No. You can book directly online and be seen without a GP referral, a diagnosis or any paperwork. If your assessment suggests something that needs onward referral or imaging, you will be told plainly and pointed in the right direction.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-1" id="index-faq-b-1">
           <span>Do I have to play sport to come here?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-1" role="region" aria-labelledby="index-faq-b-1" aria-hidden="true">
-          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are treated in exactly the same way — the assessment and the rehab simply reflect what your day actually involves.</p></div>
+          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are assessed and treated in exactly the same way — the rehabilitation simply reflects the demands of your day rather than a pitch.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-2" id="index-faq-b-2">
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-2" role="region" aria-labelledby="index-faq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury, or something keeps returning, book the initial assessment — it identifies the structures involved and includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-3" id="index-faq-b-3">
           <span>What should I wear?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-3" role="region" aria-labelledby="index-faq-b-3" aria-hidden="true">
-          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders and back. There is space to change at the clinic.</p></div>
+          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders, neck and back. There is space to change at the clinic.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-4" id="index-faq-b-4">
           <span>How many sessions will I need?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-4" role="region" aria-labelledby="index-faq-b-4" aria-hidden="true">
-          <div><p>That depends entirely on the injury, how long you have had it and what you need to get back to. You will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
+          <div><p>That depends on the tissue involved, how long you have had it and what you need to return to. Soft tissue injuries and tendon problems have different healing rates, and you will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-5" id="index-faq-b-5">
           <span>Will the treatment hurt?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-5" role="region" aria-labelledby="index-faq-b-5" aria-hidden="true">
-          <div><p>Some techniques are intense, but nothing happens without your say-so. Pressure is matched to you and adjusted throughout, and you are told what is coming and why before it happens.</p></div>
+          <div><p>Some techniques are intense, and a few assessment tests are designed to reproduce your symptoms because that is how the involved structures are identified. Nothing happens without your say-so — pressure is set by you, you are told what is coming and why, and saying stop stops it.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-6" id="index-faq-b-6">
           <span>Where exactly are you and is there parking?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-6" role="region" aria-labelledby="index-faq-b-6" aria-hidden="true">
-          <div><p>The clinic is inside Hidden Strength on Lansdowne Court, Gosforth — a short walk from Gosforth High Street, with parking available on site and on the surrounding streets.</p></div>
+          <div><p>The clinic is inside Hidden Strength on Lansdowne Court, Gosforth — a short walk from Gosforth High Street and Regent Centre Metro, with parking on site and on the surrounding streets.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="index-faq-p-7" id="index-faq-b-7">
           <span>What is your cancellation policy?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="index-faq-p-7" role="region" aria-labelledby="index-faq-b-7" aria-hidden="true">
-          <div><p>Please give as much notice as you can if you need to move or cancel an appointment so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.</p></div>
+          <div><p>Please give as much notice as you can if you need to move or cancel so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.</p></div>
         </div>
       </div>
     </div>
@@ -2509,9 +2523,9 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <div class="cta-band" data-reveal="scale">
       <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
       <h2 style="margin-top:1rem">Stop training around it.</h2>
-      <p class="lead">Book an assessment and find out what is actually going on — then get a plan to fix it.</p>
+      <p class="lead">One 60-minute assessment tells you which structures are involved, what caused it, and a realistic timescale to get back. Treatment is included the same day.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -2682,7 +2696,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get an honest answer about your injury.</h2>
       <p class="lead">Book an assessment and find out what is going on, how long it will take, and exactly what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -2969,35 +2983,35 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Do I need a referral to be seen?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="services-faq-p-0" role="region" aria-labelledby="services-faq-b-0" aria-hidden="true">
-          <div><p>No. You can book directly online and be seen without a GP referral or any paperwork. If your problem turns out to need onward referral, you will be told at your assessment and pointed in the right direction.</p></div>
+          <div><p>No. You can book directly online and be seen without a GP referral, a diagnosis or any paperwork. If your assessment suggests something that needs onward referral or imaging, you will be told plainly and pointed in the right direction.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="services-faq-p-1" id="services-faq-b-1">
           <span>Do I have to play sport to come here?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="services-faq-p-1" role="region" aria-labelledby="services-faq-b-1" aria-hidden="true">
-          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are treated in exactly the same way — the assessment and the rehab simply reflect what your day actually involves.</p></div>
+          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are assessed and treated in exactly the same way — the rehabilitation simply reflects the demands of your day rather than a pitch.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="services-faq-p-2" id="services-faq-b-2">
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="services-faq-p-2" role="region" aria-labelledby="services-faq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury, or something keeps returning, book the initial assessment — it identifies the structures involved and includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="services-faq-p-3" id="services-faq-b-3">
           <span>What should I wear?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="services-faq-p-3" role="region" aria-labelledby="services-faq-b-3" aria-hidden="true">
-          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders and back. There is space to change at the clinic.</p></div>
+          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders, neck and back. There is space to change at the clinic.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="services-faq-p-4" id="services-faq-b-4">
           <span>How many sessions will I need?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="services-faq-p-4" role="region" aria-labelledby="services-faq-b-4" aria-hidden="true">
-          <div><p>That depends entirely on the injury, how long you have had it and what you need to get back to. You will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
+          <div><p>That depends on the tissue involved, how long you have had it and what you need to return to. Soft tissue injuries and tendon problems have different healing rates, and you will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
         </div>
       </div>
     </div>
@@ -3008,9 +3022,9 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <div class="cta-band" data-reveal="scale">
       <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
       <h2 style="margin-top:1rem">Stop training around it.</h2>
-      <p class="lead">Book an assessment and find out what is actually going on — then get a plan to fix it.</p>
+      <p class="lead">One 60-minute assessment tells you which structures are involved, what caused it, and a realistic timescale to get back. Treatment is included the same day.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3033,7 +3047,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div>
         <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="m8.5 13 2 2 4-4"/></svg> Initial Assessment</span>
         <h1 data-hero style="--d:80ms">Initial Assessment</h1>
-        <p class="lead" data-hero style="--d:160ms">Every new client starts with an initial assessment. It is the difference between chasing symptoms and fixing the problem — and it means the treatment you get is built around your injury rather than a standard routine.</p>
+        <p class="lead" data-hero style="--d:160ms">Every new client starts here. Sixty minutes of history, physical testing and functional movement analysis to identify the injured structures and the mechanism that loaded them — because the site of pain and the source of the problem are frequently not the same thing. Treatment is delivered in the same appointment.</p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
         <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> 60 minutes</span>
@@ -3050,13 +3064,13 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div class="prose">
         <div data-reveal>
           <h2>What happens in the appointment</h2>
-          <p>We begin by gathering your personal details, training history and a full picture of the problem: when it started, what aggravates it, what you have already tried and what you need to get back to. That conversation usually tells us more than any single test.</p>
+          <p>A structured history comes first: onset, mechanism of injury, aggravating and easing factors, previous episodes, training load, and the demands you need to return to. In neuromusculoskeletal practice the history typically narrows the diagnosis further than any individual test does — the testing then confirms or rules out what it suggested.</p>
         </div><div data-reveal>
           <h2>Physical testing</h2>
-          <p>A thorough injury assessment is then carried out using a series of physical tests — range of movement, strength, joint stability, muscle length and functional movement — to identify the injured structures and, just as importantly, the movement patterns that led to the injury in the first place.</p>
+          <p>Objective testing follows: active and passive range of motion, resisted strength testing, joint stability, muscle length, palpation and — where symptoms travel — neurological screening. Functional movement is then assessed through the whole kinetic chain, because a knee, shoulder or lower back is very often paying for what the segment above or below it is not doing.</p>
         </div><div data-reveal>
           <h2>Diagnosis and a plan</h2>
-          <p>You will leave knowing what is wrong, how long it is likely to take, and exactly what happens next. Where treatment is appropriate it is delivered in the same session, and you go home with a rehabilitation plan you can actually follow.</p>
+          <p>You leave with a working diagnosis explained in plain terms, the baseline measurements taken on the day, a realistic timescale based on the tissue involved and its healing rates, and a rehabilitation plan you can actually execute. Those baselines are what every subsequent appointment is re-tested against.</p>
         </div><div data-reveal>
           <h2>Referral when it is needed</h2>
           <p>If your symptoms suggest something that sits outside the scope of the clinic, you will be told plainly and pointed towards the right professional. Honest advice is part of the service.</p>
@@ -3134,7 +3148,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your initial assessment.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3157,7 +3171,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div>
         <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg> Sports Massage</span>
         <h1 data-hero style="--d:80ms">Sports Massage</h1>
-        <p class="lead" data-hero style="--d:160ms">Sports massage is used to target specific muscle groups with the aim of aiding healing of the surrounding tissues, reducing muscle tension, improving muscle performance and accelerating recovery time after exercise.</p>
+        <p class="lead" data-hero style="--d:160ms">Targeted soft tissue therapy applied to specific muscle groups to reduce tone and myofascial restriction, improve tissue extensibility and accelerate recovery between training sessions. Depth and technique are selected for the tissue and the stage it is at, not applied as a fixed routine.</p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
         <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> 60 minutes</span>
@@ -3174,7 +3188,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div class="prose">
         <div data-reveal>
           <h2>What it helps with</h2>
-          <p>Sports massage is highly effective for muscular discomfort arising from delayed onset muscle soreness (DOMS), trigger points, muscle tightness and muscle imbalances. If you finish a session or a match feeling locked up, this is the treatment that unlocks it.</p>
+          <p>Effective for delayed onset muscle soreness (DOMS), myofascial trigger points, restricted tissue extensibility and the tonal imbalances that develop between agonist and antagonist groups under repetitive load. If you finish a session or a match feeling locked up, this is the treatment that releases it.</p>
         </div><div data-reveal>
           <h2>Recovery between sessions</h2>
           <p>Used regularly, sports massage speeds up recovery after exercise. That matters most when your training load is high — pre-season, marathon blocks, a run of fixtures — and the time between sessions is the thing limiting your progress.</p>
@@ -3258,7 +3272,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your sports massage.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3379,7 +3393,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your full body massage.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3402,7 +3416,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <div>
         <span class="eyebrow" data-hero><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg> Injury Treatment</span>
         <h1 data-hero style="--d:80ms">Injury Treatment</h1>
-        <p class="lead" data-hero style="--d:160ms">Once your injury has been assessed, follow-up appointments are where the recovery actually happens. Each session combines the treatment your injury needs on the day with progressive rehabilitation you can keep building on.</p>
+        <p class="lead" data-hero style="--d:160ms">Once a diagnosis is established, follow-up appointments are where the recovery is actually delivered. Each session re-tests your baseline measures, applies the treatment indicated by that day's findings, and progresses your loading — the combination that changes tissue capacity rather than just symptoms.</p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
         <span class="badge"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/></svg> 60 minutes</span>
@@ -3422,7 +3436,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <p>Follow-up treatments can include medical acupuncture, joint mobilisation, ultrasound therapy, electrotherapy, soft tissue work and kinesiotaping. Which of those you receive depends entirely on your injury and where you are in your recovery.</p>
         </div><div data-reveal>
           <h2>Gym-based rehabilitation</h2>
-          <p>This is the part most clinics skip. Using Hidden Strength Gosforth's gym floor and equipment, your rehab is loaded, coached and progressed properly — so you rebuild strength in the movements you actually need rather than working through a printed sheet at home.</p>
+          <p>This is the part most clinics skip. Tissue adapts to mechanical load, and no amount of hands-on work substitutes for it. Using Hidden Strength Gosforth's gym floor, rehabilitation is loaded, coached and progressed under supervision — graded exposure back into the ranges and movements you actually need, rather than a printed sheet worked through at home.</p>
         </div><div data-reveal>
           <h2>Progress you can measure</h2>
           <p>Each appointment starts by re-testing what we measured last time. You should be able to see your range, strength and pain changing week to week, and the plan is adjusted to match.</p>
@@ -3503,7 +3517,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your injury treatment.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3627,7 +3641,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your medical acupuncture.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3748,7 +3762,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your electrotherapy.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3869,7 +3883,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Book your ultrasound therapy.</h2>
       <p class="lead">Pick a time that suits you and get it seen to properly. Mon–Thu, 9am–8pm in Gosforth.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -3963,7 +3977,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Stop guessing what it is.</h2>
       <p class="lead">One appointment tells you which tissue is involved, how long it will take and what actually needs to happen.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4095,7 +4109,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your knee pain looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4227,7 +4241,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your back pain looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4359,7 +4373,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your neck pain looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4491,7 +4505,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your sciatica &amp; nerve pain looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4623,7 +4637,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your muscle strains &amp; tightness looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4755,7 +4769,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your shoulder pain looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -4887,7 +4901,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Get your wrist &amp; elbow pain looked at.</h2>
       <p class="lead">One appointment to find out what is going on, how long it will take, and what needs to happen next.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -5057,35 +5071,35 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Do I need a referral to be seen?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="price-list-faq-p-0" role="region" aria-labelledby="price-list-faq-b-0" aria-hidden="true">
-          <div><p>No. You can book directly online and be seen without a GP referral or any paperwork. If your problem turns out to need onward referral, you will be told at your assessment and pointed in the right direction.</p></div>
+          <div><p>No. You can book directly online and be seen without a GP referral, a diagnosis or any paperwork. If your assessment suggests something that needs onward referral or imaging, you will be told plainly and pointed in the right direction.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="price-list-faq-p-1" id="price-list-faq-b-1">
           <span>Do I have to play sport to come here?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="price-list-faq-p-1" role="region" aria-labelledby="price-list-faq-b-1" aria-hidden="true">
-          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are treated in exactly the same way — the assessment and the rehab simply reflect what your day actually involves.</p></div>
+          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are assessed and treated in exactly the same way — the rehabilitation simply reflects the demands of your day rather than a pitch.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="price-list-faq-p-2" id="price-list-faq-b-2">
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="price-list-faq-p-2" role="region" aria-labelledby="price-list-faq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury, or something keeps returning, book the initial assessment — it identifies the structures involved and includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="price-list-faq-p-3" id="price-list-faq-b-3">
           <span>What should I wear?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="price-list-faq-p-3" role="region" aria-labelledby="price-list-faq-b-3" aria-hidden="true">
-          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders and back. There is space to change at the clinic.</p></div>
+          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders, neck and back. There is space to change at the clinic.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="price-list-faq-p-4" id="price-list-faq-b-4">
           <span>How many sessions will I need?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="price-list-faq-p-4" role="region" aria-labelledby="price-list-faq-b-4" aria-hidden="true">
-          <div><p>That depends entirely on the injury, how long you have had it and what you need to get back to. You will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
+          <div><p>That depends on the tissue involved, how long you have had it and what you need to return to. Soft tissue injuries and tendon problems have different healing rates, and you will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
         </div>
       </div>
     </div>
@@ -5096,9 +5110,9 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <div class="cta-band" data-reveal="scale">
       <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
       <h2 style="margin-top:1rem">Stop training around it.</h2>
-      <p class="lead">Book an assessment and find out what is actually going on — then get a plan to fix it.</p>
+      <p class="lead">One 60-minute assessment tells you which structures are involved, what caused it, and a realistic timescale to get back. Treatment is included the same day.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -5223,7 +5237,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Join them.</h2>
       <p class="lead">Book an assessment, find out what is actually going on, and get a plan to fix it.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -5334,7 +5348,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Claim the discount.</h2>
       <p class="lead">Book online, enter JLNEW0029 at checkout and 10% comes off your first appointment.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -5437,7 +5451,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Give something they will actually use.</h2>
       <p class="lead">Vouchers start at £25 and go towards any appointment at the clinic.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -5575,7 +5589,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Now you know what to expect.</h2>
       <p class="lead">Book the initial assessment and get a straight answer about what is going on.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -5619,56 +5633,56 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
           <span>Do I need a referral to be seen?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-0" role="region" aria-labelledby="fq-b-0" aria-hidden="true">
-          <div><p>No. You can book directly online and be seen without a GP referral or any paperwork. If your problem turns out to need onward referral, you will be told at your assessment and pointed in the right direction.</p></div>
+          <div><p>No. You can book directly online and be seen without a GP referral, a diagnosis or any paperwork. If your assessment suggests something that needs onward referral or imaging, you will be told plainly and pointed in the right direction.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-1" id="fq-b-1">
           <span>Do I have to play sport to come here?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-1" role="region" aria-labelledby="fq-b-1" aria-hidden="true">
-          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are treated in exactly the same way — the assessment and the rehab simply reflect what your day actually involves.</p></div>
+          <div><p>Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are assessed and treated in exactly the same way — the rehabilitation simply reflects the demands of your day rather than a pitch.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-2" id="fq-b-2">
           <span>Should I book an assessment or a sports massage?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-2" role="region" aria-labelledby="fq-b-2" aria-hidden="true">
-          <div><p>If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
+          <div><p>If you are in pain, have an injury, or something keeps returning, book the initial assessment — it identifies the structures involved and includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-3" id="fq-b-3">
           <span>What should I wear?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-3" role="region" aria-labelledby="fq-b-3" aria-hidden="true">
-          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders and back. There is space to change at the clinic.</p></div>
+          <div><p>Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders, neck and back. There is space to change at the clinic.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-4" id="fq-b-4">
           <span>How many sessions will I need?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-4" role="region" aria-labelledby="fq-b-4" aria-hidden="true">
-          <div><p>That depends entirely on the injury, how long you have had it and what you need to get back to. You will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
+          <div><p>That depends on the tissue involved, how long you have had it and what you need to return to. Soft tissue injuries and tendon problems have different healing rates, and you will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-5" id="fq-b-5">
           <span>Will the treatment hurt?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-5" role="region" aria-labelledby="fq-b-5" aria-hidden="true">
-          <div><p>Some techniques are intense, but nothing happens without your say-so. Pressure is matched to you and adjusted throughout, and you are told what is coming and why before it happens.</p></div>
+          <div><p>Some techniques are intense, and a few assessment tests are designed to reproduce your symptoms because that is how the involved structures are identified. Nothing happens without your say-so — pressure is set by you, you are told what is coming and why, and saying stop stops it.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-6" id="fq-b-6">
           <span>Where exactly are you and is there parking?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-6" role="region" aria-labelledby="fq-b-6" aria-hidden="true">
-          <div><p>The clinic is inside Hidden Strength on Lansdowne Court, Gosforth — a short walk from Gosforth High Street, with parking available on site and on the surrounding streets.</p></div>
+          <div><p>The clinic is inside Hidden Strength on Lansdowne Court, Gosforth — a short walk from Gosforth High Street and Regent Centre Metro, with parking on site and on the surrounding streets.</p></div>
         </div>
       </div><div class="faq-item" data-reveal>
         <button class="faq-q" type="button" aria-expanded="false" aria-controls="fq-p-7" id="fq-b-7">
           <span>What is your cancellation policy?</span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div class="faq-a" id="fq-p-7" role="region" aria-labelledby="fq-b-7" aria-hidden="true">
-          <div><p>Please give as much notice as you can if you need to move or cancel an appointment so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.</p></div>
+          <div><p>Please give as much notice as you can if you need to move or cancel so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.</p></div>
         </div>
       </div>
     </div>
@@ -5684,9 +5698,9 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
     <div class="cta-band" data-reveal="scale">
       <span class="eyebrow" style="justify-content:center"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Book online</span>
       <h2 style="margin-top:1rem">Stop training around it.</h2>
-      <p class="lead">Book an assessment and find out what is actually going on — then get a plan to fix it.</p>
+      <p class="lead">One 60-minute assessment tells you which structures are involved, what caused it, and a realistic timescale to get back. Treatment is included the same day.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>
@@ -6188,7 +6202,7 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
       <h2 style="margin-top:1rem">Ready when you are.</h2>
       <p class="lead">Book online in under a minute, or call the clinic during opening hours.</p>
       <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="#/book" data-cta="band">Book an appointment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#/book?treatment=injury-assessment" data-cta="band">Book your assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
         <a class="btn btn-ghost btn-lg" href="tel:+447460937648"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg> +44 7460 937648</a>
       </div>
       <p class="cta-band-note">Mon–Thu, 9am–8pm · Hidden Strength, Gosforth · No referral needed</p>

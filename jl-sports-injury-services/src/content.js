@@ -147,19 +147,19 @@ const treatments = [
     icon: 'clipboard',
     featured: true,
     intro:
-      'Every new client starts with an initial assessment. It is the difference between chasing symptoms and fixing the problem — and it means the treatment you get is built around your injury rather than a standard routine.',
+      'Every new client starts here. Sixty minutes of history, physical testing and functional movement analysis to identify the injured structures and the mechanism that loaded them — because the site of pain and the source of the problem are frequently not the same thing. Treatment is delivered in the same appointment.',
     body: [
       {
         h: 'What happens in the appointment',
-        p: 'We begin by gathering your personal details, training history and a full picture of the problem: when it started, what aggravates it, what you have already tried and what you need to get back to. That conversation usually tells us more than any single test.',
+        p: 'A structured history comes first: onset, mechanism of injury, aggravating and easing factors, previous episodes, training load, and the demands you need to return to. In neuromusculoskeletal practice the history typically narrows the diagnosis further than any individual test does — the testing then confirms or rules out what it suggested.',
       },
       {
         h: 'Physical testing',
-        p: 'A thorough injury assessment is then carried out using a series of physical tests — range of movement, strength, joint stability, muscle length and functional movement — to identify the injured structures and, just as importantly, the movement patterns that led to the injury in the first place.',
+        p: 'Objective testing follows: active and passive range of motion, resisted strength testing, joint stability, muscle length, palpation and — where symptoms travel — neurological screening. Functional movement is then assessed through the whole kinetic chain, because a knee, shoulder or lower back is very often paying for what the segment above or below it is not doing.',
       },
       {
         h: 'Diagnosis and a plan',
-        p: 'You will leave knowing what is wrong, how long it is likely to take, and exactly what happens next. Where treatment is appropriate it is delivered in the same session, and you go home with a rehabilitation plan you can actually follow.',
+        p: 'You leave with a working diagnosis explained in plain terms, the baseline measurements taken on the day, a realistic timescale based on the tissue involved and its healing rates, and a rehabilitation plan you can actually execute. Those baselines are what every subsequent appointment is re-tested against.',
       },
       {
         h: 'Referral when it is needed',
@@ -192,11 +192,11 @@ const treatments = [
     icon: 'hands',
     featured: true,
     intro:
-      'Sports massage is used to target specific muscle groups with the aim of aiding healing of the surrounding tissues, reducing muscle tension, improving muscle performance and accelerating recovery time after exercise.',
+      'Targeted soft tissue therapy applied to specific muscle groups to reduce tone and myofascial restriction, improve tissue extensibility and accelerate recovery between training sessions. Depth and technique are selected for the tissue and the stage it is at, not applied as a fixed routine.',
     body: [
       {
         h: 'What it helps with',
-        p: 'Sports massage is highly effective for muscular discomfort arising from delayed onset muscle soreness (DOMS), trigger points, muscle tightness and muscle imbalances. If you finish a session or a match feeling locked up, this is the treatment that unlocks it.',
+        p: 'Effective for delayed onset muscle soreness (DOMS), myofascial trigger points, restricted tissue extensibility and the tonal imbalances that develop between agonist and antagonist groups under repetitive load. If you finish a session or a match feeling locked up, this is the treatment that releases it.',
       },
       {
         h: 'Recovery between sessions',
@@ -272,7 +272,7 @@ const treatments = [
     icon: 'pulse',
     featured: true,
     intro:
-      'Once your injury has been assessed, follow-up appointments are where the recovery actually happens. Each session combines the treatment your injury needs on the day with progressive rehabilitation you can keep building on.',
+      'Once a diagnosis is established, follow-up appointments are where the recovery is actually delivered. Each session re-tests your baseline measures, applies the treatment indicated by that day\'s findings, and progresses your loading — the combination that changes tissue capacity rather than just symptoms.',
     body: [
       {
         h: 'Treatment options',
@@ -280,7 +280,7 @@ const treatments = [
       },
       {
         h: 'Gym-based rehabilitation',
-        p: 'This is the part most clinics skip. Using Hidden Strength Gosforth\'s gym floor and equipment, your rehab is loaded, coached and progressed properly — so you rebuild strength in the movements you actually need rather than working through a printed sheet at home.',
+        p: 'This is the part most clinics skip. Tissue adapts to mechanical load, and no amount of hands-on work substitutes for it. Using Hidden Strength Gosforth\'s gym floor, rehabilitation is loaded, coached and progressed under supervision — graded exposure back into the ranges and movements you actually need, rather than a printed sheet worked through at home.'
       },
       {
         h: 'Progress you can measure',
@@ -499,29 +499,30 @@ const offer = {
 const steps = [
   {
     n: '01',
-    h: 'Book in two minutes',
-    p: 'Pick a treatment and a time that works. Instant confirmation, no waiting for a callback, no deposit.',
+    h: 'Book in under two minutes',
+    p: 'Choose a treatment and a time online, day or night. Written confirmation straight away, no deposit, no waiting on a callback and no referral needed.',
   },
   {
     n: '02',
-    h: 'Get assessed properly',
-    p: 'A full hands-on assessment finds the cause, not just the sore bit. You get a clear diagnosis and a realistic timescale.',
+    h: 'Get a diagnosis, not a guess',
+    p: 'A 60-minute assessment: history, physical testing and functional movement, to identify the injured structures and the mechanism behind them. You leave knowing what is wrong and why it happened.',
   },
   {
     n: '03',
-    h: 'Treat and rehabilitate',
-    p: 'Hands-on treatment plus loaded, coached rehab on the gym floor — so the fix holds when you go back to training.',
+    h: 'Treated in the same appointment',
+    p: 'Hands-on treatment is delivered the same day — soft tissue work, joint mobilisation, medical acupuncture or electrotherapy, selected for your findings rather than run as a routine.',
   },
   {
     n: '04',
-    h: 'Back to full training',
-    p: 'We re-test as you go and discharge you when you are ready. The aim is to get you out the door, not to keep you coming back.',
+    h: 'Rebuilt and re-tested',
+    p: 'Progressive loading on the gym floor, re-tested each visit against the measures taken at your assessment, so progress is a number rather than a feeling — and so it holds when you go back to training.',
   },
 ];
 
+// Scrolling credential strip — the shorthand that establishes authority fast.
 const credentials = [
-  'Castleford Tigers R.L.F.C.',
   'Leicester Tigers',
+  'Castleford Tigers R.L.F.C.',
   'Elite Rugby Union',
   'Neuromusculoskeletal Specialism',
   'Medical Acupuncture',
@@ -529,65 +530,66 @@ const credentials = [
   'Practising Since 2015',
 ];
 
+// Objections, answered. Every one of these is a reason someone does not book.
 const faqs = [
   {
     q: 'Do I need a referral to be seen?',
-    a: 'No. You can book directly online and be seen without a GP referral or any paperwork. If your problem turns out to need onward referral, you will be told at your assessment and pointed in the right direction.',
+    a: 'No. You can book directly online and be seen without a GP referral, a diagnosis or any paperwork. If your assessment suggests something that needs onward referral or imaging, you will be told plainly and pointed in the right direction.',
   },
   {
     q: 'Do I have to play sport to come here?',
-    a: 'Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are treated in exactly the same way — the assessment and the rehab simply reflect what your day actually involves.',
+    a: 'Not at all. Most clients are not athletes. Desk-related neck and back pain, gardening injuries, running niggles and general stiffness are assessed and treated in exactly the same way — the rehabilitation simply reflects the demands of your day rather than a pitch.',
   },
   {
     q: 'Should I book an assessment or a sports massage?',
-    a: 'If you are in pain, have an injury or something keeps returning, book the initial assessment — it includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.',
+    a: 'If you are in pain, have an injury, or something keeps returning, book the initial assessment — it identifies the structures involved and includes treatment in the same appointment. If you are not injured and want maintenance work or recovery after training, book a sports massage.',
   },
   {
     q: 'What should I wear?',
-    a: 'Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders and back. There is space to change at the clinic.',
+    a: 'Comfortable sports clothing you can move and be assessed in. Shorts are ideal for lower limb problems, and a vest or t-shirt for shoulders, neck and back. There is space to change at the clinic.',
   },
   {
     q: 'How many sessions will I need?',
-    a: 'That depends entirely on the injury, how long you have had it and what you need to get back to. You will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.',
+    a: 'That depends on the tissue involved, how long you have had it and what you need to return to. Soft tissue injuries and tendon problems have different healing rates, and you will be given a realistic estimate at the end of your assessment rather than an open-ended commitment.',
   },
   {
     q: 'Will the treatment hurt?',
-    a: 'Some techniques are intense, but nothing happens without your say-so. Pressure is matched to you and adjusted throughout, and you are told what is coming and why before it happens.',
+    a: 'Some techniques are intense, and a few assessment tests are designed to reproduce your symptoms because that is how the involved structures are identified. Nothing happens without your say-so — pressure is set by you, you are told what is coming and why, and saying stop stops it.',
   },
   {
     q: 'Where exactly are you and is there parking?',
-    a: `The clinic is inside Hidden Strength on ${site.address.street}, ${site.address.locality} — a short walk from Gosforth High Street, with parking available on site and on the surrounding streets.`,
+    a: `The clinic is inside Hidden Strength on ${site.address.street}, ${site.address.locality} — a short walk from Gosforth High Street and Regent Centre Metro, with parking on site and on the surrounding streets.`,
   },
   {
     q: 'What is your cancellation policy?',
-    a: 'Please give as much notice as you can if you need to move or cancel an appointment so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.',
+    a: 'Please give as much notice as you can if you need to move or cancel so the slot can be offered to someone else. Appointments can be rescheduled through the confirmation email you receive when you book.',
   },
 ];
 
 const trustPoints = [
   {
-    h: 'Elite sport experience',
-    p: 'Over a decade in practice, including time in elite Rugby Union and Rugby League with Leicester Tigers and Castleford Tigers R.L.F.C.',
+    h: 'Assessment before treatment, every time',
+    p: 'Most soft tissue clinics start treating within two minutes of you lying down. Here, nothing is treated until it has been tested — range of motion, strength, joint stability and functional movement — because treating the painful area rarely addresses what caused it.',
+    icon: 'clipboard',
+  },
+  {
+    h: 'Trained in elite sport',
+    p: 'Over a decade in neuromusculoskeletal practice, including time in professional Rugby Union and Rugby League with Leicester Tigers and Castleford Tigers R.L.F.C. The clinical standard is the one used on players whose living depends on the outcome.',
     icon: 'shield',
   },
   {
-    h: 'A proper gym, not a treatment room',
-    p: 'Based inside Hidden Strength Gosforth, so your rehabilitation is loaded and coached on real equipment rather than prescribed on paper.',
+    h: 'Loaded rehabilitation, not an exercise sheet',
+    p: 'Tissue adapts to load, not to advice. Rehabilitation is coached and progressed on a full gym floor with real equipment, so the strength you rebuild is measurable and holds when you return to sport.',
     icon: 'dumbbell',
   },
   {
-    h: 'Elite treatment, affordable price',
-    p: 'The standard of care found in professional sport, priced for the general public. That has been the point of the clinic since 2018.',
-    icon: 'tag',
-  },
-  {
-    h: 'Rated 5.0 from over 30 reviews',
-    p: 'A five star record across Google, Fresha and Facebook from clients across Newcastle and North Tyneside.',
-    icon: 'star',
+    h: 'Discharged, not retained',
+    p: 'You get a realistic timescale at your assessment and you are told when you no longer need to come in. No block packages to commit to, no open-ended course of appointments, and an honest referral onward if the problem is not one for this clinic.',
+    icon: 'check',
   },
 ];
 
-// How the review count reads on the page, e.g. "over 30 reviews".
+// How the review count reads on the page, e.g. "27 reviews" or "over 25 reviews".
 const reviewCount = site.reviews.countLabel
   ? `${site.reviews.countLabel} reviews`
   : `${site.reviews.count} reviews`;
