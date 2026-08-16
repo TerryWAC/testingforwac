@@ -1284,7 +1284,7 @@ function book() {
                 <div class="col-2">
                   <label class="checkbox">
                     <input type="checkbox" name="consent" required>
-                    <span>I am happy to be contacted about this appointment, and I have read the <a href="privacy-policy.html" style="color:var(--green)">privacy policy</a>.</span>
+                    <span>I am happy to be contacted about this appointment, and I have read the <a href="privacy-policy.html" style="color:var(--green-ink)">privacy policy</a>.</span>
                   </label>
                 </div>
               </div>
@@ -1439,7 +1439,7 @@ function contact() {
             <div class="col-2">
               <label class="checkbox">
                 <input type="checkbox" name="consent" required>
-                <span>I am happy to be contacted about this enquiry, and I have read the <a href="privacy-policy.html" style="color:var(--green)">privacy policy</a>.</span>
+                <span>I am happy to be contacted about this enquiry, and I have read the <a href="privacy-policy.html" style="color:var(--green-ink)">privacy policy</a>.</span>
               </label>
             </div>
           </div>

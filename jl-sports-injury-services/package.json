@@ -10,7 +10,7 @@
     "verify": "node src/build.js && node src/verify.js",
     "audit": "node src/build.js && node src/audit.js",
     "demo": "node src/build-demo.js && node src/verify-demo.js",
-    "check": "node src/build.js && node src/verify.js && node src/audit.js"
+    "check": "node src/build.js && node src/verify.js && node src/audit.js && THEME=light node src/audit.js"
   },
   "engines": {
     "node": ">=18"

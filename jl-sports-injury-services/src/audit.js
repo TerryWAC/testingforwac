@@ -10,6 +10,7 @@
 const { chromium } = require('playwright');
 
 const BASE = process.env.BASE || 'http://127.0.0.1:8899';
+const THEME = process.env.THEME || '';
 const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const PAGES = [
@@ -31,6 +32,9 @@ const WIDTHS = [360, 390, 768, 1024, 1280, 1440, 1920];
 // ---------------------------------------------------------------------------
 
 const AUDIT = () => {
+  // Whatever <body> actually paints is the ground everything composites onto.
+  const bodyBg = getComputedStyle(document.body).backgroundColor.match(/\d+/g);
+  window.__auditGround = bodyBg ? bodyBg.slice(0, 3).map(Number) : [6, 16, 12];
   const out = [];
 
   // --- colour contrast ----------------------------------------------------
@@ -78,7 +82,7 @@ const AUDIT = () => {
       }
       node = node.parentElement;
     }
-    let base = [6, 16, 12]; // the page ground
+    let base = window.__auditGround || [6, 16, 12]; // the page ground
     for (let i = stack.length - 1; i >= 0; i--) base = over(stack[i].rgb, base, stack[i].a);
     return base;
   };
@@ -170,6 +174,30 @@ const AUDIT = () => {
   return out;
 };
 
+
+/**
+ * Apply a theme and block until it has actually landed.
+ *
+ * Two traps here, both of which silently produce a wrong answer rather than an
+ * error. addInitScript runs before <html> exists, so setting the attribute
+ * there does nothing at all. And most elements carry a colour transition, so
+ * measuring straight after the switch samples a half-faded value — which reads
+ * as hundreds of contrast failures that do not exist. Kill motion first, then
+ * switch, then wait for the tokens to confirm.
+ */
+async function applyTheme(page) {
+  if (!THEME) return;
+  await page.addStyleTag({
+    content: '*, *::before, *::after { transition: none !important; animation: none !important; }',
+  });
+  await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), THEME);
+  await page.waitForFunction(
+    (t) => document.documentElement.getAttribute('data-theme') === t,
+    THEME,
+    { timeout: 5000 }
+  );
+}
+
 // ---------------------------------------------------------------------------
 
 (async () => {
@@ -194,6 +222,7 @@ const AUDIT = () => {
     page.on('response', onResponse);
 
     await page.goto(`${BASE}/${p}`, { waitUntil: 'networkidle' });
+    await applyTheme(page);
     const found = await page.evaluate(AUDIT);
     found.forEach((f) => problems.push(`${p} :: ${f}`));
 
@@ -206,9 +235,11 @@ const AUDIT = () => {
   const mctx = await browser.newContext({
     viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true,
   });
+
   const mp = await mctx.newPage();
   for (const p of ['index.html', 'book.html', 'contact.html', 'services.html']) {
     await mp.goto(`${BASE}/${p}`, { waitUntil: 'networkidle' });
+    await applyTheme(mp);
     const small = await mp.evaluate(() => {
       const bad = [];
       document.querySelectorAll('a[href], button, input[type="radio"] + *').forEach((el) => {
@@ -232,6 +263,7 @@ const AUDIT = () => {
   // --- layout across widths -------------------------------------------------
   for (const w of WIDTHS) {
     const c = await browser.newContext({ viewport: { width: w, height: 900 } });
+
     const pg = await c.newPage();
     for (const p of PAGES) {
       await pg.goto(`${BASE}/${p}`, { waitUntil: 'domcontentloaded' });
@@ -283,7 +315,7 @@ const AUDIT = () => {
   const heaviest = weights.reduce((a, b) => (b.kb > a.kb ? b : a));
   console.log(`  heaviest: ${heaviest.page} at ${heaviest.kb} kB`);
 
-  console.log('\n=== AUDIT ===');
+  console.log(`\n=== AUDIT${THEME ? ' — ' + THEME + ' theme' : ''} ===`);
   const unique = [...new Set(problems)];
   if (!unique.length) console.log('No accessibility, layout or weight problems found.');
   else {

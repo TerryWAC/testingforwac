@@ -183,6 +183,39 @@ Good photography is the single biggest visual upgrade left on this site.
 
 ---
 
+## Two design directions
+
+The site ships with two complete visual treatments, switchable from the picker
+at the bottom of the demo so Jack can see the same pages both ways rather than
+compare two static mockups.
+
+**Clinical Dark** — the default. Charcoal-green ground, the brand green as a
+signal colour, glass panels and a lit feel. Reads as elite sport and stands
+apart from every other massage clinic in Newcastle.
+
+**Clinic Light** — white and near-white, the same green used sparingly. Closer
+in feel to his current site and to how most healthcare sites present, which
+some clients simply prefer. Not an inversion: the greens, tints, scrims and
+shadows are all defined separately for it.
+
+The whole thing is driven by tokens on `:root` and `[data-theme="light"]`, so
+picking one is a one-line change — set `data-theme="light"` on `<html>` in
+`src/layout.js`, or delete the light block to ship dark only. Both are audited
+independently:
+
+```bash
+npm run audit              # dark
+THEME=light npm run audit  # light
+npm run check              # verify + both audits
+```
+
+One detail worth knowing: the bright brand green is used as a *fill* in both
+themes, because that is the logo colour and it carries 13:1 against the dark
+text on it. As *text* it only manages 1.4:1 on white, so `--green-ink` darkens
+to #00753f in the light theme. Same brand, readable either way.
+
+---
+
 ## SEO
 
 - Unique title and meta description per page, all within Google's display limits.
