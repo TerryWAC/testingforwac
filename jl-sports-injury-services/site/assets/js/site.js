@@ -269,6 +269,40 @@
   });
 
   // -------------------------------------------------------------------------
+  // Light / dark
+  //
+  // The initial resolution happens inline in <head> to avoid a flash; this only
+  // handles the toggle and remembering the choice.
+  // -------------------------------------------------------------------------
+
+  (function () {
+    var toggles = $$('[data-theme-toggle]');
+    if (!toggles.length) return;
+
+    var sync = function () {
+      var light = document.documentElement.getAttribute('data-theme') === 'light';
+      var label = light ? 'Switch to dark mode' : 'Switch to light mode';
+      toggles.forEach(function (b) {
+        b.setAttribute('aria-label', label);
+        b.setAttribute('title', label);
+        b.setAttribute('aria-pressed', String(light));
+      });
+    };
+
+    toggles.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var light = document.documentElement.getAttribute('data-theme') === 'light';
+        if (light) document.documentElement.removeAttribute('data-theme');
+        else document.documentElement.setAttribute('data-theme', 'light');
+        try { localStorage.setItem('jl-theme', light ? 'dark' : 'light'); } catch (e) {}
+        sync();
+      });
+    });
+
+    sync();
+  })();
+
+  // -------------------------------------------------------------------------
   // Photo rail
   // -------------------------------------------------------------------------
 
@@ -414,6 +448,91 @@
       frame.addEventListener('pointerleave', function () { card.style.transform = ''; });
     });
   }
+
+  // -------------------------------------------------------------------------
+  // Body map — "where does it hurt?"
+  //
+  // Hovering a region heats it; choosing one opens the matching condition
+  // panel. The chip buttons below the figure are the accessible control and do
+  // exactly the same thing, so keyboard and screen reader users lose nothing.
+  // -------------------------------------------------------------------------
+
+  // Scoped per instance — the single-file demo inlines every page into one
+  // document, so more than one map can share it.
+  $$('.bodymap').forEach(function (bodyMap) {
+    var stage = $('.bm-stage', bodyMap);
+    var figure = $('.bm-figure', bodyMap);
+    var regions = $$('.bm-region', bodyMap);
+    var picks = $$('.bm-pick', bodyMap);
+    var panels = $$('.bm-panel', bodyMap);
+    var hint = $('[data-bm-hint]', bodyMap);
+    var chosen = null;
+
+    // Pre-set aria-pressed so the buttons announce as toggles from the start.
+    picks.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+
+    // Warm the glow only once the map is interactive, so it never appears
+    // on a page where the script failed to run.
+    bodyMap.classList.add('is-live');
+
+    function heat(condition, on) {
+      regions.forEach(function (r) {
+        if (r.dataset.condition === condition) r.classList.toggle('is-hot', on && r.dataset.condition !== chosen);
+      });
+    }
+
+    function choose(condition) {
+      chosen = condition;
+      regions.forEach(function (r) {
+        var mine = r.dataset.condition === condition;
+        r.classList.toggle('is-on', mine);
+        if (mine) r.classList.remove('is-hot');
+      });
+      picks.forEach(function (b) {
+        b.setAttribute('aria-pressed', b.dataset.condition === condition ? 'true' : 'false');
+      });
+      panels.forEach(function (p) { p.hidden = p.dataset.panel !== condition; });
+      if (hint) hint.hidden = true;
+    }
+
+    regions.forEach(function (r) {
+      var condition = r.dataset.condition;
+      r.addEventListener('mouseenter', function () { heat(condition, true); });
+      r.addEventListener('mouseleave', function () { heat(condition, false); });
+      r.addEventListener('click', function () { choose(condition); });
+    });
+
+    picks.forEach(function (b) {
+      var condition = b.dataset.condition;
+      b.addEventListener('mouseenter', function () { heat(condition, true); });
+      b.addEventListener('mouseleave', function () { heat(condition, false); });
+      b.addEventListener('focus', function () { heat(condition, true); });
+      b.addEventListener('blur', function () { heat(condition, false); });
+      b.addEventListener('click', function () { choose(condition); });
+    });
+
+    // Pointer tilt. Small on purpose — enough to give the figure some depth as
+    // you move across it, not enough to make anything harder to hit. The CSS
+    // derives the tilt, the contour parallax and the follow light from this one
+    // pair of numbers, so there is nothing to keep in sync here.
+    if (stage && figure && !reduced && window.matchMedia('(pointer: fine)').matches) {
+      stage.addEventListener('pointermove', function (e) {
+        var box = stage.getBoundingClientRect();
+        var x = (e.clientX - box.left) / box.width;
+        var y = (e.clientY - box.top) / box.height;
+        stage.classList.add('is-tracking');
+        stage.style.setProperty('--bm-x', (x - 0.5).toFixed(3));
+        stage.style.setProperty('--bm-y', (y - 0.5).toFixed(3));
+        stage.style.setProperty('--bm-mx', (x * 100).toFixed(1) + '%');
+        stage.style.setProperty('--bm-my', (y * 100).toFixed(1) + '%');
+      });
+      stage.addEventListener('pointerleave', function () {
+        stage.classList.remove('is-tracking');
+        stage.style.setProperty('--bm-x', '0');
+        stage.style.setProperty('--bm-y', '0');
+      });
+    }
+  });
 
   // -------------------------------------------------------------------------
   // Contact form (progressive enhancement)

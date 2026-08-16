@@ -40,6 +40,8 @@ const paths = {
   calendar:
     '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/>',
   user: '<circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/>',
+  sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2"/><path d="M12 19.4v2.2"/><path d="M2.4 12h2.2"/><path d="M19.4 12h2.2"/><path d="m5.2 5.2 1.6 1.6"/><path d="m17.2 17.2 1.6 1.6"/><path d="m18.8 5.2-1.6 1.6"/><path d="m6.8 17.2-1.6 1.6"/>',
+  moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/>',
   sparkle:
     '<path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/>',
 };

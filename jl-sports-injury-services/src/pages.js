@@ -7,6 +7,7 @@ const {
 } = require('./content');
 const { icon, stars } = require('./icons');
 const { esc, breadcrumbSchema, addressOneLine } = require('./layout');
+const { bodyMap } = require('./bodymap');
 
 const addr = site.address;
 
@@ -444,11 +445,13 @@ ${marquee()}
   </div>
 </section>
 
-<section class="section" id="conditions">
+${bodyMap(icon, esc)}
+
+<section class="section" id="conditions" style="padding-top:0">
   <div class="shell">
     <div class="section-head" data-reveal>
       <span class="eyebrow">Conditions we treat</span>
-      <h2>Find out which tissue is actually involved.</h2>
+      <h2>Or read the full list.</h2>
       <p class="lead">
         Muscular, joint, tendon or nerve — the three are treated very differently, and guessing wrong
         is why an injury drags on for months. Most people arrive with one of these.
@@ -2231,11 +2234,13 @@ function conditionsIndex() {
   </div>
 </section>
 
-<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+${bodyMap(icon, esc, { id: 'pain-map', style: 'padding-top:clamp(1.5rem,3vw,2.5rem)' })}
+
+<section class="section" style="padding-top:0">
   <div class="shell">
     <div class="offer-head" data-reveal>
-      <h2>Pick what sounds like yours</h2>
-      <a class="btn-link" href="services.html">Or see the treatments ${icon('arrow')}</a>
+      <h2>Or pick what sounds like yours</h2>
+      <a class="btn-link" href="services.html">See the treatments ${icon('arrow')}</a>
     </div>
     <div class="grid grid-3" data-stagger="70">
       ${conditions

@@ -40,6 +40,18 @@
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/site.css">
 
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem('jl-theme');
+    var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    if (saved === 'light' || (!saved && prefersLight)) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  } catch (e) {}
+})();
+</script>
+
 <script type="application/ld+json">{"@context":"https://schema.org","@type":["MedicalBusiness","HealthAndBeautyBusiness","SportsActivityLocation"],"@id":"https://www.jlsportsinjuryservices.com/#clinic","name":"J.L. Sports Injury Services","alternateName":"JL Sports Injury Services","description":"Sports injury clinic in Gosforth, Newcastle upon Tyne offering injury assessment, sports massage, deep tissue massage, medical acupuncture, electrotherapy, ultrasound therapy and gym-based rehabilitation.","url":"https://www.jlsportsinjuryservices.com","telephone":"+44 7460 937648","email":"info@jlsportsinjuryservices.com","foundingDate":"2018","priceRange":"££","currenciesAccepted":"GBP","paymentAccepted":"Cash, Credit Card, Debit Card","logo":"https://www.jlsportsinjuryservices.com/assets/img/logo-mark.svg","image":"https://www.jlsportsinjuryservices.com/assets/img/og-image.png","address":{"@type":"PostalAddress","name":"Hidden Strength","streetAddress":"Hidden Strength, Lansdowne Court","addressLocality":"Gosforth","addressRegion":"Newcastle upon Tyne","postalCode":"NE3 1HR","addressCountry":"GB"},"geo":{"@type":"GeoCoordinates","latitude":55.0006,"longitude":-1.6222},"hasMap":"https://www.google.com/maps/dir/?api=1&destination=Hidden+Strength%2C+Lansdowne+Court%2C+Gosforth%2C+Newcastle+upon+Tyne+NE3+1HR","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":"https://schema.org/Monday","opens":"09:00","closes":"20:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"https://schema.org/Tuesday","opens":"09:00","closes":"20:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"https://schema.org/Wednesday","opens":"09:00","closes":"20:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"https://schema.org/Thursday","opens":"09:00","closes":"20:00"}],"areaServed":[{"@type":"Place","name":"Gosforth"},{"@type":"Place","name":"Jesmond"},{"@type":"Place","name":"Newcastle city centre"},{"@type":"Place","name":"Heaton"},{"@type":"Place","name":"Kingston Park"},{"@type":"Place","name":"Ponteland"},{"@type":"Place","name":"Wideopen"},{"@type":"Place","name":"Killingworth"},{"@type":"Place","name":"North Tyneside"}],"sameAs":["https://www.google.com/maps/search/?api=1&query=J.L.+Sports+Injury+Services+Gosforth+Newcastle","https://www.facebook.com/JLSportsInjuryServices/","https://www.instagram.com/jlsportsinjuryservices/","https://www.fresha.com/a/j-l-sports-injury-services-newcastle-upon-tyne-hidden-strength-lansdowne-court-gosforth-olaass6e"],"founder":{"@type":"Person","name":"Jack Laurie","jobTitle":"Sports Injury Therapist"},"potentialAction":{"@type":"ReserveAction","name":"Book an appointment","target":{"@type":"EntryPoint","urlTemplate":"https://www.fresha.com/a/j-l-sports-injury-services-newcastle-upon-tyne-hidden-strength-lansdowne-court-gosforth-olaass6e","inLanguage":"en-GB","actionPlatform":["https://schema.org/DesktopWebPlatform","https://schema.org/MobileWebPlatform"]},"result":{"@type":"Reservation","name":"Appointment"}},"makesOffer":[{"@type":"Offer","name":"Initial Assessment","description":"A thorough, hands-on assessment that finds the actual cause of your pain — then treats it in the same appointment.","price":"55","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/injury-assessment.html"},{"@type":"Offer","name":"Sports Massage","description":"Targeted soft tissue work that releases tight muscle, eases post-training soreness and gets you moving properly again.","price":"50","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/sports-massage.html"},{"@type":"Offer","name":"Full Body Massage","description":"The same techniques as sports massage, delivered across the whole body rather than one area.","price":"80","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/deep-tissue-massage.html"},{"@type":"Offer","name":"Injury Treatment","description":"Follow-up appointments that combine hands-on treatment with gym-based rehabilitation until you are properly back.","price":"55","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/follow-up-treatment.html"},{"@type":"Offer","name":"Medical Acupuncture","description":"An evidence-based approach to needling for pain and muscular tension, always following a proper assessment.","price":"55","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/medical-acupuncture.html"},{"@type":"Offer","name":"Electrotherapy","description":"EMS and TENS used to re-activate weak muscle, reduce swelling and manage pain during recovery.","price":"55","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/electrotherapy.html"},{"@type":"Offer","name":"Ultrasound Therapy","description":"Therapeutic sound waves used to accelerate soft tissue repair and remodel scar tissue.","price":"55","priceCurrency":"GBP","availability":"https://schema.org/InStock","url":"https://www.jlsportsinjuryservices.com/ultrasound-therapy.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.jlsportsinjuryservices.com/"},{"@type":"ListItem","position":2,"name":"Conditions","item":"https://www.jlsportsinjuryservices.com/conditions.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Conditions treated","itemListElement":[{"@type":"ListItem","position":1,"name":"Knee pain","url":"https://www.jlsportsinjuryservices.com/knee-pain.html"},{"@type":"ListItem","position":2,"name":"Back pain","url":"https://www.jlsportsinjuryservices.com/back-pain.html"},{"@type":"ListItem","position":3,"name":"Neck pain","url":"https://www.jlsportsinjuryservices.com/neck-pain.html"},{"@type":"ListItem","position":4,"name":"Sciatica & nerve pain","url":"https://www.jlsportsinjuryservices.com/sciatica-nerve-pain.html"},{"@type":"ListItem","position":5,"name":"Muscle strains & tightness","url":"https://www.jlsportsinjuryservices.com/muscle-strains.html"},{"@type":"ListItem","position":6,"name":"Shoulder pain","url":"https://www.jlsportsinjuryservices.com/shoulder-pain.html"},{"@type":"ListItem","position":7,"name":"Wrist & elbow pain","url":"https://www.jlsportsinjuryservices.com/wrist-elbow-pain.html"}]}</script>
@@ -138,6 +150,11 @@
       <a class="btn btn-ghost btn-call" href="tel:+447460937648">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z"/></svg><span>+44 7460 937648</span>
       </a>
+      <button class="theme-toggle" type="button" data-theme-toggle
+        aria-label="Switch to light mode" title="Switch to light mode">
+        <span class="theme-toggle-icon theme-sun"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2"/><path d="M12 19.4v2.2"/><path d="M2.4 12h2.2"/><path d="M19.4 12h2.2"/><path d="m5.2 5.2 1.6 1.6"/><path d="m17.2 17.2 1.6 1.6"/><path d="m18.8 5.2-1.6 1.6"/><path d="m6.8 17.2-1.6 1.6"/></svg></span>
+        <span class="theme-toggle-icon theme-moon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg></span>
+      </button>
       <a class="btn btn-primary btn-hdr" href="book.html" data-cta="header">Book now</a>
       <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
         <span class="nav-toggle-bars"><i></i><i></i><i></i></span>
@@ -197,11 +214,178 @@
   </div>
 </section>
 
-<section class="section" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+<section class="section bodymap-section" id="pain-map" style="padding-top:clamp(1.5rem,3vw,2.5rem)">
+  <div class="shell">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/></svg> Where does it hurt?</span>
+      <h2>Point at it.</h2>
+      <p class="lead">
+        Choose the area that is giving you trouble and you will get straight to what causes it,
+        how it is assessed and what treatment actually changes it.
+      </p>
+    </div>
+
+    <div class="bodymap" data-reveal>
+      <div class="bm-stage">
+        <svg class="bm-figure" viewBox="0 0 300 520" role="img"
+    aria-label="Diagram of the body. Use the list of areas below to choose where it hurts.">
+    <g class="bm-body">
+      <path class="bm-part" d="M150 16a30 30 0 1 1 0 60 30 30 0 0 1 0-60Z"/>
+      <path class="bm-part bm-region" data-region="neck" data-condition="neck-pain"
+        d="M138 70h24v26c-6-4-18-4-24 0Z"><title>Neck</title></path>
+      <path class="bm-part" d="M150 86c18 0 32 4 36 10l4 56h-80l4-56c4-6 18-10 36-10Z"/>
+      <path class="bm-part bm-region" data-region="back" data-condition="back-pain"
+        d="M110 152h80l-2 54h-76Z"><title>Lower back</title></path>
+      <path class="bm-part bm-region" data-region="hip" data-condition="sciatica-nerve-pain"
+        d="M112 206h76l-2 48c-16 8-56 8-72 0Z"><title>Hip and glute</title></path>
+      <path class="bm-part bm-region" data-region="shoulder-l" data-condition="shoulder-pain"
+        d="M116 94c-20 2-32 16-33 44l26 6c1-24 3-40 7-50Z"><title>Left shoulder</title></path>
+      <path class="bm-part" d="M83 138l26 6-6 68H78Z"/>
+      <path class="bm-part bm-region" data-region="elbow-l" data-condition="wrist-elbow-pain"
+        d="M78 212h25l-4 36H76Z"><title>Left elbow</title></path>
+      <path class="bm-part" d="M76 248h23l-6 52H72Z"/>
+      <path class="bm-part bm-region" data-region="wrist-l" data-condition="wrist-elbow-pain"
+        d="M72 300h21l-4 32H70Z"><title>Left wrist</title></path>
+      <path class="bm-part" d="M70 332h19c1 20-5 32-11 32-7 0-10-14-8-32Z"/>
+      <path class="bm-part bm-region" data-region="shoulder-r" data-condition="shoulder-pain"
+        d="M184 94c20 2 32 16 33 44l-26 6c-1-24-3-40-7-50Z"><title>Right shoulder</title></path>
+      <path class="bm-part" d="M217 138l-26 6 6 68h25Z"/>
+      <path class="bm-part bm-region" data-region="elbow-r" data-condition="wrist-elbow-pain"
+        d="M222 212h-25l4 36h23Z"><title>Right elbow</title></path>
+      <path class="bm-part" d="M224 248h-23l6 52h21Z"/>
+      <path class="bm-part bm-region" data-region="wrist-r" data-condition="wrist-elbow-pain"
+        d="M228 300h-21l4 32h19Z"><title>Right wrist</title></path>
+      <path class="bm-part" d="M230 332h-19c-1 20 5 32 11 32 7 0 10-14 8-32Z"/>
+      <path class="bm-part bm-region" data-region="thigh-l" data-condition="muscle-strains"
+        d="M116 250h32l-2 86h-28Z"><title>Left thigh</title></path>
+      <path class="bm-part bm-region" data-region="knee-l" data-condition="knee-pain"
+        d="M118 336h28l-1 38h-26Z"><title>Left knee</title></path>
+      <path class="bm-part bm-region" data-region="calf-l" data-condition="muscle-strains"
+        d="M119 374h26l-3 78h-20Z"><title>Left calf</title></path>
+      <path class="bm-part" d="M122 452h20l-1 34h-21Z"/>
+      <path class="bm-part" d="M120 486h21l2 14c-6 4-20 4-26 0Z"/>
+      <path class="bm-part bm-region" data-region="thigh-r" data-condition="muscle-strains"
+        d="M184 250h-32l2 86h28Z"><title>Right thigh</title></path>
+      <path class="bm-part bm-region" data-region="knee-r" data-condition="knee-pain"
+        d="M182 336h-28l1 38h26Z"><title>Right knee</title></path>
+      <path class="bm-part bm-region" data-region="calf-r" data-condition="muscle-strains"
+        d="M181 374h-26l3 78h20Z"><title>Right calf</title></path>
+      <path class="bm-part" d="M178 452h-20l1 34h21Z"/>
+      <path class="bm-part" d="M180 486h-21l-2 14c6 4 20 4 26 0Z"/>
+    </g>
+  </svg>
+      </div>
+
+      <div class="bm-side">
+        <!-- Fixed height so opening a panel never shunts the buttons around. -->
+        <div class="bm-reveal">
+          <p class="bm-hint" data-bm-hint>Pick an area — on the figure or from the list.</p>
+          <div class="bm-panel" data-panel="knee-pain" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 12h4l2.5-7 4 14L15 12h7"/></svg> Knee pain</span>
+      <p>Runner's knee, patellar tendinopathy, ligament and cartilage injuries, and knees that ache after loading.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="knee-pain.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div><div class="bm-panel" data-panel="back-pain" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.5 4.5 5.5v6c0 4.5 3 8.5 7.5 10 4.5-1.5 7.5-5.5 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg> Back pain</span>
+      <p>Lower back pain from lifting, sitting or sport — assessed properly so you know whether it is muscular, joint or nerve related.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="back-pain.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div><div class="bm-panel" data-panel="neck-pain" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 8c2.5-3 5-3 7.5 0S15 11 17.5 8"/><path d="M2 13c2.5-3 5-3 7.5 0s5.5 3 8-.5"/><path d="M2 18c2.5-3 5-3 7.5 0s5.5 3 8-.5"/></svg> Neck pain</span>
+      <p>Stiffness and referred pain from desk posture, training or sleeping awkwardly — including headaches that start in the neck.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="neck-pain.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div><div class="bm-panel" data-panel="sciatica-nerve-pain" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2Z"/></svg> Sciatica &amp; nerve pain</span>
+      <p>Sciatica, nerve irritation and the pins, numbness or burning that travels down an arm or leg.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="sciatica-nerve-pain.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div><div class="bm-panel" data-panel="muscle-strains" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 12V4.5a1.5 1.5 0 0 1 3 0V12"/><path d="M14 12V6.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-3a1.5 1.5 0 0 1 3 0"/></svg> Muscle strains &amp; tightness</span>
+      <p>Strains, tears, chronic tightness and trigger points through the hamstrings, calves, quads, back and shoulders.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="muscle-strains.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div><div class="bm-panel" data-panel="shoulder-pain" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 8v8"/><path d="M17.5 8v8"/><path d="M3.5 10v4"/><path d="M20.5 10v4"/><path d="M6.5 12h11"/></svg> Shoulder pain</span>
+      <p>Rotator cuff irritation, impingement, pressing pain and shoulders that have lost range from overhead work or desk posture.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="shoulder-pain.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div><div class="bm-panel" data-panel="wrist-elbow-pain" hidden>
+      <span class="bm-panel-tag"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m20 4-9 9"/><path d="m14.5 6.5 3 3"/><path d="M11 13 5.5 18.5a2.5 2.5 0 0 1-3.5 0"/><path d="m8.5 15.5 2 2"/></svg> Wrist &amp; elbow pain</span>
+      <p>Tennis and golfer's elbow, tendon irritation, repetitive strain and grip pain from lifting, racket sport, climbing or keyboard work.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-sm" href="wrist-elbow-pain.html">
+          What to do about it <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-sm" href="book.html?treatment=injury-assessment">Book an assessment</a>
+      </div>
+    </div>
+        </div>
+        <div class="bm-picks" role="group" aria-label="Areas of the body">
+          <button class="bm-pick" type="button" data-region="neck"
+      data-condition="neck-pain">
+      Neck
+    </button><button class="bm-pick" type="button" data-region="shoulder-r"
+      data-condition="shoulder-pain">
+      Shoulder
+    </button><button class="bm-pick" type="button" data-region="elbow-r"
+      data-condition="wrist-elbow-pain">
+      Elbow &amp; wrist
+    </button><button class="bm-pick" type="button" data-region="back"
+      data-condition="back-pain">
+      Lower back
+    </button><button class="bm-pick" type="button" data-region="hip"
+      data-condition="sciatica-nerve-pain">
+      Hip, glute &amp; sciatica
+    </button><button class="bm-pick" type="button" data-region="thigh-r"
+      data-condition="muscle-strains">
+      Hamstring &amp; quad
+    </button><button class="bm-pick" type="button" data-region="knee-r"
+      data-condition="knee-pain">
+      Knee
+    </button><button class="bm-pick" type="button" data-region="calf-r"
+      data-condition="muscle-strains">
+      Calf
+    </button>
+        </div>
+        <p class="bm-foot">
+          Not sure which it is? That is exactly what the assessment is for —
+          <a class="btn-link" href="book.html?treatment=injury-assessment">book an initial assessment <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
   <div class="shell">
     <div class="offer-head" data-reveal>
-      <h2>Pick what sounds like yours</h2>
-      <a class="btn-link" href="services.html">Or see the treatments <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      <h2>Or pick what sounds like yours</h2>
+      <a class="btn-link" href="services.html">See the treatments <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
     </div>
     <div class="grid grid-3" data-stagger="70">
       <article class="card t-card card-stretch" data-reveal>

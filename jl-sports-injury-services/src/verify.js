@@ -182,7 +182,83 @@ const PAGES = [
   const faqOpen = await page.locator('.faq-item:first-child.is-open').count();
   if (!faqOpen) problems.push('[faq] accordion did not open');
 
+  // -- body map ------------------------------------------------------------
+  //
+  // Both routes in have to work: the figure for pointer users, the chips for
+  // everyone else. They drive the same state, so check they agree.
+  await page.locator('#where-does-it-hurt').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+
+  const hintFirst = await page.locator('[data-bm-hint]').isVisible();
+  if (!hintFirst) problems.push('[bodymap] hint not shown before a choice is made');
+
+  // force: the figure tilts towards the pointer by design, so Playwright's
+  // "element is stable" check can never settle on a region under the cursor.
+  await page.locator('.bm-region[data-region="knee-r"]').click({ force: true });
+  await page.waitForTimeout(400);
+
+  // Both knees light, and only the knees.
+  const lit = await page.$$eval('.bm-region.is-on', (els) =>
+    els.map((e) => e.getAttribute('data-region')).sort()
+  );
+  if (lit.join(',') !== 'knee-l,knee-r') {
+    problems.push(`[bodymap] clicking a knee lit "${lit.join(',')}"`);
+  }
+  const panelOpen = await page.locator('.bm-panel[data-panel="knee-pain"]').isVisible();
+  if (!panelOpen) problems.push('[bodymap] knee panel did not open');
+  if (await page.locator('[data-bm-hint]').isVisible()) {
+    problems.push('[bodymap] hint still showing after a choice');
+  }
+  const pressed = await page.$$eval('.bm-pick[aria-pressed="true"]', (els) => els.length);
+  if (pressed !== 1) problems.push(`[bodymap] ${pressed} chips marked pressed, expected 1`);
+
+  // Switching via the keyboard-accessible chips must move the heat with it.
+  await page.click('.bm-pick[data-condition="back-pain"]');
+  await page.waitForTimeout(400);
+  const lit2 = await page.$$eval('.bm-region.is-on', (els) =>
+    els.map((e) => e.getAttribute('data-region'))
+  );
+  if (lit2.join(',') !== 'back') problems.push(`[bodymap] chip lit "${lit2.join(',')}"`);
+  if (!(await page.locator('.bm-panel[data-panel="back-pain"]').isVisible())) {
+    problems.push('[bodymap] chip did not open the matching panel');
+  }
+  const stillOpen = await page.$$eval('.bm-panel:not([hidden])', (els) => els.length);
+  if (stillOpen !== 1) problems.push(`[bodymap] ${stillOpen} panels open at once`);
+
+  await page.locator('#where-does-it-hurt').screenshot({
+    path: path.join(SHOTS, 'bodymap.png'),
+  });
+
+  // Every panel must point at a condition page that exists.
+  const panelHrefs = await page.$$eval('.bm-panel a[href$=".html"]', (as) =>
+    as.map((a) => a.getAttribute('href').split('?')[0])
+  );
+  const siteFiles = new Set(fs.readdirSync(path.join(__dirname, '..', 'site')));
+  [...new Set(panelHrefs)].forEach((h) => {
+    if (!siteFiles.has(h)) problems.push(`[bodymap] panel links to missing ${h}`);
+  });
+
+  // -- theme toggle --------------------------------------------------------
+  await page.goto(`${BASE}/index.html`, { waitUntil: 'networkidle' });
+  const themeBefore = await page.getAttribute('html', 'data-theme');
+  await page.click('[data-theme-toggle]');
+  await page.waitForTimeout(200);
+  const themeAfter = await page.getAttribute('html', 'data-theme');
+  if (themeBefore === themeAfter) problems.push('[theme] toggle did not change the theme');
+
+  // The choice has to survive a navigation, or it reads as broken.
+  await page.goto(`${BASE}/about-us.html`, { waitUntil: 'networkidle' });
+  if ((await page.getAttribute('html', 'data-theme')) !== themeAfter) {
+    problems.push('[theme] choice did not persist across pages');
+  }
+  await page.click('[data-theme-toggle]');
+  await page.waitForTimeout(200);
+  if ((await page.getAttribute('html', 'data-theme')) !== themeBefore) {
+    problems.push('[theme] toggle did not switch back');
+  }
+
   // -- internal links ------------------------------------------------------
+  await page.goto(`${BASE}/index.html`, { waitUntil: 'networkidle' });
   const hrefs = await page.$$eval('a[href]', (as) =>
     as.map((a) => a.getAttribute('href')).filter((h) => h && !/^(https?:|mailto:|tel:|sms:|#)/.test(h))
   );

@@ -15,6 +15,26 @@ const addr = site.address;
 const addressOneLine = `${addr.venue}, ${addr.street}, ${addr.locality}, ${addr.region} ${addr.postcode}`;
 
 // ---------------------------------------------------------------------------
+// Theme boot
+//
+// Runs inline, immediately after the stylesheet and before anything paints — a
+// flash of the wrong theme on every load looks broken. Exported so the demo
+// build can inline the same thing rather than keep a second copy of it.
+// ---------------------------------------------------------------------------
+
+const themeBoot = `
+(function () {
+  try {
+    var saved = localStorage.getItem('jl-theme');
+    var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    if (saved === 'light' || (!saved && prefersLight)) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  } catch (e) {}
+})();
+`;
+
+// ---------------------------------------------------------------------------
 // Logo
 // ---------------------------------------------------------------------------
 
@@ -194,6 +214,11 @@ function header(current) {
       <a class="btn btn-ghost btn-call" href="tel:${site.phoneHref}">
         ${icon('phone')}<span>${esc(site.phone)}</span>
       </a>
+      <button class="theme-toggle" type="button" data-theme-toggle
+        aria-label="Switch to light mode" title="Switch to light mode">
+        <span class="theme-toggle-icon theme-sun">${icon('sun')}</span>
+        <span class="theme-toggle-icon theme-moon">${icon('moon')}</span>
+      </button>
       <a class="btn btn-primary btn-hdr" href="book.html" data-cta="header">Book now</a>
       <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
         <span class="nav-toggle-bars"><i></i><i></i><i></i></span>
@@ -472,6 +497,8 @@ ${
 <link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/site.css">
 
+<script>${themeBoot}</script>
+
 ${schemas
   .map((s) => `<script type="application/ld+json">${JSON.stringify(s)}</script>`)
   .join('\n')}
@@ -498,4 +525,5 @@ module.exports = {
   footer,
   breadcrumbSchema,
   addressOneLine,
+  themeBoot,
 };

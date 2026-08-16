@@ -92,6 +92,40 @@ spun out of a list get ignored by readers and penalised in search. Copy lives in
 `/sports-massage` with a 301 when you switch over so the existing ranking carries across.
 Same for any other old URL that changes.
 
+### The body map
+
+On the home page and the conditions index, "Where does it hurt?" lets someone
+point at the part of the body that is bothering them. Hovering a region heats it
+red; choosing one opens that condition with a line about it, a link to the full
+page and a direct route into booking.
+
+The reason it is there: nobody arrives thinking "I need soft tissue therapy".
+They arrive thinking "my knee hurts". This turns the way they actually think
+into the shortest path to a booking, and it is the one thing on the site no
+other clinic in Newcastle has.
+
+How it is built, and why it is not a gimmick:
+
+- The figure is drawn **as** its regions (`src/bodymap.js`), not as a silhouette
+  with hit boxes on top. Heating the thigh fills the whole thigh, so it reads as
+  a body rather than a red rectangle stuck onto a picture of one.
+- Segments with no condition page behind them — forearms, feet — are not
+  clickable. Nothing lights up that cannot take you somewhere.
+- The chip buttons underneath are not a fallback added afterwards. The SVG is
+  `role="img"`, so its insides are invisible to screen readers by design and the
+  buttons are the real control: same states, same `aria-pressed`, full keyboard
+  access, and seven more internal links into the condition pages for search.
+- The tilt is deliberately small (11°/7°). The figure is a click target, and a
+  target that swings towards your cursor is a target you miss. It is disabled
+  outright under `prefers-reduced-motion` and on touch, where the colour change
+  still happens because that is the information, not the decoration.
+- Panel height is reserved on desktop so choosing an area never shunts the
+  buttons out from under the cursor that just clicked them.
+
+Region-to-page mapping lives in `REGIONS` at the top of `src/bodymap.js`. Several
+regions share a page on purpose — a hamstring and a calf are the same
+conversation.
+
 ---
 
 ## The booking flow
@@ -185,9 +219,9 @@ Good photography is the single biggest visual upgrade left on this site.
 
 ## Two design directions
 
-The site ships with two complete visual treatments, switchable from the picker
-at the bottom of the demo so Jack can see the same pages both ways rather than
-compare two static mockups.
+The site ships with two complete visual treatments, switchable from the sun/moon
+button in the header so Jack can see the same pages both ways rather than compare
+two static mockups.
 
 **Clinical Dark** — the default. Charcoal-green ground, the brand green as a
 signal colour, glass panels and a lit feel. Reads as elite sport and stands
@@ -198,8 +232,15 @@ in feel to his current site and to how most healthcare sites present, which
 some clients simply prefer. Not an inversion: the greens, tints, scrims and
 shadows are all defined separately for it.
 
+It is a real feature, not a demo toggle. On a first visit the site follows the
+visitor's own system setting; after that their choice is remembered in
+`localStorage` under `jl-theme`, and a small inline script in `<head>`
+(`themeBoot` in `src/layout.js`) applies it before anything paints, so there is
+no flash of the wrong theme. The same script is inlined into the single-file
+demo, so both behave identically.
+
 The whole thing is driven by tokens on `:root` and `[data-theme="light"]`, so
-picking one is a one-line change — set `data-theme="light"` on `<html>` in
+committing to one is a one-line change — set `data-theme="light"` on `<html>` in
 `src/layout.js`, or delete the light block to ship dark only. Both are audited
 independently:
 
@@ -296,11 +337,15 @@ click on the real site to confirm it renders.
 
 ```
 src/content.js     all copy, prices, hours, contact details  ← edit this
+src/conditions.js  the seven condition pages
+src/bodymap.js     the "where does it hurt?" figure and region mapping
 src/pages.js       page templates
 src/layout.js      <head>, header, footer, structured data
 src/icons.js       inline SVG icon set
 src/build.js       writes site/, sitemap, robots, manifest
+src/build-demo.js  packs the whole site into one demo.html
 src/verify.js      browser test suite
+src/audit.js       accessibility, responsive and weight pass
 src/make-images.js generates the share image and app icon
 site/              the built website — this is what you deploy
 ```
@@ -324,8 +369,9 @@ page-weight pass; it checks every page for:
 - horizontal overflow at 360, 390, 768, 1024, 1280, 1440 and 1920px
 - page weight, request count and DOM size per page
 
-Current state: no problems, and the heaviest page is 255 kB over 7 requests — most of
-which is the two fonts, cached for every page after the first.
+Current state: no problems. The heaviest page is the home page at 345 kB over 7 requests;
+every other page is around 260 kB. Most of that is the two self-hosted fonts, which are
+cached for every page after the first.
 
 `npm run verify` drives a real browser and checks:
 
@@ -333,6 +379,10 @@ which is the two fonts, cached for every page after the first.
 - exactly one `<h1>`, and title/description lengths within limits, per page
 - no horizontal overflow at 1440px or 390px
 - the mobile menu and FAQ accordion open
+- the body map: clicking a knee lights both knees and nothing else, opens the matching
+  panel, marks exactly one chip pressed, and the chips move the heat the same way the
+  figure does; every panel links to a page that exists
+- the theme toggle switches, persists across a navigation and switches back
 - the booking flow end to end: only Mon–Thu offered, correct slot count and range for the
   chosen duration, empty-form validation blocks submission, the confirmation summary shows
   the right treatment/price/date, and the email, Fresha and calendar handoffs are all built

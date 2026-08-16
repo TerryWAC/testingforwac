@@ -47,6 +47,12 @@
      theme has to darken it; on the dark ground it is the brand green. */
   --green-ink: #00fa82;
 
+  /* The body map's heat colour. Red is the one place on the site that is not
+     brand green, because "this is the bit that hurts" needs to read instantly. */
+  --heat: #ff4d4d;
+  --heat-deep: #ff2d2d;
+  --heat-glow: rgba(255, 77, 77, 0.45);
+
   /* Decorative wash behind the hero and page heads */
   --wash-1: rgba(0, 250, 130, 0.55);
   --wash-2: rgba(178, 154, 158, 0.45);
@@ -123,6 +129,10 @@
   --text: #0a1a11;
   --text-dim: #46574e;
   --text-faint: #5a6b61;
+
+  --heat: #e02424;
+  --heat-deep: #b91414;
+  --heat-glow: rgba(224, 36, 36, 0.3);
 
   --wash-1: rgba(0, 250, 130, 0.3);
   --wash-2: rgba(178, 154, 158, 0.26);
@@ -548,6 +558,29 @@ main > section:last-child { padding-bottom: 0; }
 /* Header actions */
 .header-actions { display: flex; align-items: center; gap: 0.6rem; flex: none; }
 .btn-call { font-size: 0.9rem; padding: 0.7rem 1.1rem; }
+
+/* Light / dark toggle. The two icons occupy the same cell and cross-fade. */
+.theme-toggle {
+  position: relative; flex: none;
+  display: grid; place-items: center;
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  color: var(--text-dim);
+  transition: color 0.3s, border-color 0.3s, background 0.3s, transform 0.4s var(--ease);
+}
+.theme-toggle:hover {
+  color: var(--green-ink); border-color: var(--green-ink);
+  background: rgba(0, 250, 130, 0.07); transform: rotate(-18deg);
+}
+.theme-toggle-icon {
+  grid-area: 1 / 1; display: grid; place-items: center;
+  transition: opacity 0.35s var(--ease), transform 0.45s var(--ease);
+}
+.theme-toggle .icon { width: 19px; height: 19px; }
+/* Dark is the default, so offer the sun; in light, offer the moon. */
+.theme-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+[data-theme='light'] .theme-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
+[data-theme='light'] .theme-moon { opacity: 1; transform: none; }
 
 .nav-toggle { display: none; width: 44px; height: 44px; place-items: center; border-radius: 12px; }
 .nav-toggle-bars { display: grid; gap: 5px; width: 22px; }
@@ -1096,6 +1129,213 @@ main > section:last-child { padding-bottom: 0; }
 /* Centre the rail's content when it is narrower than the viewport. */
 @media (min-width: 1500px) {
   .gallery-rail { justify-content: center; }
+}
+
+/* --------------------------------------------------------------------------
+   12c. Body map
+
+   The one place on the site that uses red. Everything else is brand green, so
+   heat on the figure reads as "this is the bit that hurts" without a legend.
+
+   The figure is decorative to assistive technology (role="img" makes its
+   children presentational); the chip buttons underneath are the real control,
+   which is why they are laid out as a first-class row rather than tucked away.
+   -------------------------------------------------------------------------- */
+
+.bodymap-section { overflow: hidden; }
+
+.bodymap {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.72fr) 1.28fr;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+/* Stage — holds the perspective for the pointer tilt, the contour parallax and
+   the light that follows the cursor. --bm-x / --bm-y are set by the script and
+   run -1 to 1 across the stage; everything below is derived from them, so the
+   whole effect is one pair of numbers. */
+.bm-stage {
+  --bm-x: 0;
+  --bm-y: 0;
+  position: relative;
+  perspective: 1100px;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(60% 55% at 50% 22%, rgba(0, 250, 130, 0.07), transparent 70%),
+    linear-gradient(165deg, var(--raise-3), var(--raise-1));
+  overflow: hidden;
+}
+/* Faint contour rings, echoing the hero. They drift against the tilt, which is
+   what actually sells the depth — the figure alone just looks skewed. */
+.bm-stage::before {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  background:
+    repeating-radial-gradient(circle at 50% 45%, transparent 0 26px, var(--grid-line) 26px 27px);
+  transform: translate3d(calc(var(--bm-x) * -16px), calc(var(--bm-y) * -12px), 0);
+  transition: transform 0.5s var(--ease);
+  pointer-events: none;
+}
+/* A soft light that follows the cursor across the stage. */
+.bm-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    220px circle at var(--bm-mx, 50%) var(--bm-my, 40%),
+    rgba(0, 250, 130, 0.1),
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+.bm-stage.is-tracking::after { opacity: 1; }
+
+.bm-figure {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  overflow: visible;
+  /* Kept small deliberately: the figure is a click target, and a target that
+     swings towards your cursor is a target you miss. */
+  transform: rotateY(calc(var(--bm-x) * 11deg)) rotateX(calc(var(--bm-y) * -7deg));
+  transition: transform 0.5s var(--ease);
+  will-change: transform;
+}
+/* While the pointer is on the stage, follow it immediately. */
+.bm-stage.is-tracking .bm-figure,
+.bm-stage.is-tracking::before { transition: transform 0.12s linear; }
+
+/* Every segment of the figure. Deliberately low contrast — the heat is the
+   signal, so the body itself has to stay quiet. */
+.bm-part {
+  fill: rgba(255, 255, 255, 0.085);
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+[data-theme='light'] .bm-part { fill: rgba(6, 26, 16, 0.075); }
+
+/* Pickable segments. Same shape as the body part, so heating one fills the
+   whole thigh rather than showing a box pasted over a person. */
+.bm-region {
+  cursor: pointer;
+  transition: fill 0.32s var(--ease), stroke 0.32s var(--ease), stroke-width 0.32s var(--ease);
+}
+.bm-region:hover,
+.bm-region.is-hot {
+  fill: color-mix(in srgb, var(--heat) 48%, transparent);
+  stroke: var(--heat);
+  stroke-width: 1.6;
+}
+.bm-region.is-on {
+  fill: var(--heat);
+  stroke: var(--heat-deep);
+  stroke-width: 2;
+}
+/* The glow sits on the group so overlapping segments do not double up. */
+.bm-body { transition: filter 0.4s var(--ease); }
+.bodymap.is-live .bm-body { filter: drop-shadow(0 0 13px var(--heat-glow)); }
+
+/* Steady pulse on the selected area — slow enough to read as a pulse rather
+   than a flash, and stopped entirely under reduced motion. */
+@keyframes bm-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.62; }
+}
+.bm-region.is-on { animation: bm-pulse 2.4s var(--ease-in-out) infinite; }
+
+/* Side column ------------------------------------------------------------- */
+
+.bm-side { display: grid; gap: 1.25rem; align-content: center; }
+
+/* Reserved space for the panel, so choosing an area does not shunt the
+   buttons out from under the cursor that just clicked them. */
+.bm-reveal {
+  display: grid;
+  align-content: center;
+  min-height: 218px;
+}
+
+.bm-hint {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  margin: 0;
+}
+.bm-foot { margin: 0; font-size: 0.9rem; color: var(--text-faint); }
+.bm-hint::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  margin-right: 0.6rem;
+  border-radius: 50%;
+  background: var(--heat);
+  vertical-align: 1px;
+}
+
+.bm-panel {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, var(--raise-4), var(--raise-1));
+  animation: bm-panel-in 0.45s var(--ease) both;
+}
+.bm-panel[hidden] { display: none; }
+@keyframes bm-panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.bm-panel-tag {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  font-family: var(--display); font-weight: 600; font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.bm-panel-tag .icon { width: 22px; height: 22px; color: var(--green-ink); }
+.bm-panel p { margin: 0; color: var(--text-dim); max-width: 46ch; }
+
+.bm-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.bm-pick {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  background: var(--raise-2);
+  transition: color 0.25s, border-color 0.25s, background 0.25s, transform 0.25s var(--ease);
+}
+.bm-pick:hover { color: var(--text); border-color: var(--heat); transform: translateY(-2px); }
+.bm-pick[aria-pressed='true'] {
+  color: var(--text);
+  border-color: var(--heat);
+  background: color-mix(in srgb, var(--heat) 14%, transparent);
+}
+
+@media (max-width: 860px) {
+  .bodymap { grid-template-columns: 1fr; }
+  /* As large as the column allows: a knee on the figure is a ~26px target at
+     this width, so the chips below carry most of the tapping. */
+  .bm-figure { max-width: 280px; }
+  /* Reserving panel height stops helping once the layout is stacked — the
+     panel is taller than the reserve anyway, so it is just a blank gap. */
+  .bm-reveal { min-height: 0; }
 }
 
 /* --------------------------------------------------------------------------
@@ -1851,6 +2091,10 @@ a.info-item:hover { border-color: rgba(0, 250, 130, 0.4); background: rgba(0, 25
   }
   [data-reveal], .hero [data-hero] { opacity: 1 !important; transform: none !important; }
   .marquee-track { animation: none; }
+  /* The body map keeps its colour change — that is the information — but loses
+     the tilt and the pulse, which are decoration. */
+  .bm-figure { transform: none !important; }
+  .bm-region.is-on { animation: none !important; opacity: 1; }
 }
 
 @media print {

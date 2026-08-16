@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { header, footer } = require('./layout');
+const { header, footer, themeBoot } = require('./layout');
 const { pages } = require('./pages');
 
 const ROOT = path.join(__dirname, '..');
@@ -79,70 +79,6 @@ const chrome = (markup) =>
     return anchor ? `href="${route}" data-scroll="${anchor.slice(1)}"` : `href="${route}"`;
   });
 
-
-// ---------------------------------------------------------------------------
-// Theme picker — demo only
-//
-// Two directions to choose between, switchable live so the client can see the
-// same site both ways rather than compare two static mockups. The production
-// build ships whichever one he picks; nothing here goes into site/.
-// ---------------------------------------------------------------------------
-
-const themePicker = `<div class="demo-themes" role="group" aria-label="Design direction">
-  <span class="demo-themes-label">Design</span>
-  <button type="button" data-set-theme="dark" class="is-on">Clinical Dark</button>
-  <button type="button" data-set-theme="light">Clinic Light</button>
-</div>`;
-
-const themeScript = `
-(function () {
-  var KEY = 'jl-demo-theme';
-  var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
-
-  function apply(name) {
-    if (name === 'light') document.documentElement.setAttribute('data-theme', 'light');
-    else document.documentElement.removeAttribute('data-theme');
-    document.querySelectorAll('[data-set-theme]').forEach(function (b) {
-      b.classList.toggle('is-on', b.getAttribute('data-set-theme') === name);
-    });
-    try { localStorage.setItem(KEY, name); } catch (e) {}
-  }
-
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-set-theme]');
-    if (b) apply(b.getAttribute('data-set-theme'));
-  });
-
-  apply(saved === 'light' ? 'light' : 'dark');
-})();
-`;
-
-const themeCss = `
-.demo-themes {
-  position: fixed; z-index: 130; left: 50%; bottom: 1rem; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 0.3rem;
-  padding: 0.35rem 0.4rem 0.35rem 0.9rem;
-  border: 1px solid var(--line-strong); border-radius: 999px;
-  background: var(--panel); backdrop-filter: blur(18px);
-  box-shadow: var(--shadow); font-family: var(--display); font-size: 0.82rem;
-}
-.demo-themes-label {
-  color: var(--text-faint); letter-spacing: 0.14em; text-transform: uppercase;
-  font-size: 0.68rem; font-weight: 600; margin-right: 0.35rem;
-}
-.demo-themes button {
-  padding: 0.45rem 0.85rem; border-radius: 999px; color: var(--text-dim);
-  font-weight: 600; transition: background 0.25s, color 0.25s;
-}
-.demo-themes button:hover { color: var(--text); }
-.demo-themes button.is-on { background: var(--green); color: var(--on-accent); }
-@media (max-width: 720px) {
-  .demo-themes { bottom: auto; top: calc(var(--header-h) + var(--promo-h) + 0.5rem); font-size: 0.75rem; }
-  .demo-themes button { padding: 0.4rem 0.7rem; }
-  body { padding-bottom: 72px; }
-}
-`;
 
 // ---------------------------------------------------------------------------
 // Router
@@ -235,13 +171,13 @@ const router = `
 // ---------------------------------------------------------------------------
 
 const out = `<title>J.L. Sports Injury Services</title>
+<script>${themeBoot}</script>
 <style>
 ${fonts}
 ${read('assets/css/site.css')}
 
 /* Demo shell: the pages share one document, so only one is ever visible. */
 .demo-page[hidden] { display: none; }
-${themeCss}
 </style>
 
 ${chrome(header('index.html'))}
@@ -249,12 +185,10 @@ ${chrome(header('index.html'))}
 ${bodies}
 </main>
 ${chrome(footer())}
-${themePicker}
 
 <script>${read('assets/js/site.js')}</script>
 <script>${read('assets/js/booking.js')}</script>
 <script>${router}</script>
-<script>${themeScript}</script>
 `;
 
 const file = path.join(ROOT, 'demo.html');
