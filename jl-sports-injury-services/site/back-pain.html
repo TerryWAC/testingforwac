@@ -45,8 +45,12 @@
   try {
     var saved = localStorage.getItem('jl-theme');
     var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    // Set it both ways rather than only adding "light" — some hosts stamp their
+    // own data-theme on <html>, and a saved choice has to beat it.
     if (saved === 'light' || (!saved && prefersLight)) {
       document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
     }
   } catch (e) {}
 })();
