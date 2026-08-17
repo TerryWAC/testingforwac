@@ -278,6 +278,24 @@ const PAGES = [
   );
   if (filledWithNote) problems.push(`[photo] ${filledWithNote} filled slot(s) still show the note`);
 
+  // Every real photograph must decode and fade in. They are lazy, so each one
+  // has to be scrolled to before it is judged — checking without scrolling
+  // reports every below-the-fold image as broken when nothing is wrong.
+  const photoCount = await page.locator('img.photo').count();
+  for (let i = 0; i < photoCount; i++) {
+    const img = page.locator('img.photo').nth(i);
+    await img.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    const state = await img.evaluate((e) => ({
+      ok: e.complete && e.naturalWidth > 0,
+      shown: e.classList.contains('is-loaded'),
+      alt: e.alt,
+    }));
+    if (!state.ok) problems.push(`[photo] "${state.alt}" did not load`);
+    else if (!state.shown) problems.push(`[photo] "${state.alt}" loaded but never faded in`);
+  }
+  if (!photoCount) problems.push('[photo] no photographs on the home page at all');
+
   // -- theme toggle --------------------------------------------------------
   await page.goto(`${BASE}/index.html`, { waitUntil: 'networkidle' });
   const themeBefore = await page.getAttribute('html', 'data-theme');

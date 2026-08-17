@@ -90,10 +90,26 @@ function contourArt(name) {
     fill="none" stroke-linecap="round" aria-hidden="true">${lines.join('')}</svg>`;
 }
 
+/**
+ * Slots that can legitimately share a photograph with another slot.
+ *
+ * Only where the picture genuinely shows what the caption claims — the gym
+ * floor is the gym floor whichever page it appears on, and the first
+ * appointment *is* the initial consultation. Anywhere the match would be a
+ * stretch the slot keeps its "photo to come" note instead, because a caption
+ * describing a room the visitor is not looking at is worse than an honest gap.
+ */
+const PHOTO_ALIASES = {
+  'clinic-gym': 'gym-floor',
+  'first-visit': 'consultation',
+};
+
 /** First existing file for this slot, or null while it is still a placeholder. */
 function findPhoto(name) {
-  for (const ext of ['webp', 'jpg', 'jpeg', 'png', 'avif']) {
-    if (fs.existsSync(path.join(IMG_DIR, `${name}.${ext}`))) return `${name}.${ext}`;
+  for (const candidate of [name, PHOTO_ALIASES[name]].filter(Boolean)) {
+    for (const ext of ['webp', 'jpg', 'jpeg', 'png', 'avif']) {
+      if (fs.existsSync(path.join(IMG_DIR, `${candidate}.${ext}`))) return `${candidate}.${ext}`;
+    }
   }
   return null;
 }
@@ -275,13 +291,15 @@ const mapCard = (id, variant = '') => `<div class="map-card ${variant}${
  * rebuilt as a native scroll-snap rail so it works with a swipe, a trackpad,
  * the arrow buttons or the keyboard, with no carousel library behind it.
  */
+// Ordered so the rail opens on the strongest shot. Slots still waiting on a
+// photograph sit at the end rather than leading.
 const GALLERY = [
-  ['clinic-room', 'The treatment room at the Gosforth clinic'],
-  ['jack-treating', 'Jack Laurie treating a client\'s forearm'],
+  ['jack-treating', 'Jack Laurie treating a client at the Gosforth clinic'],
   ['jack-portrait', 'Jack Laurie, sports injury therapist'],
-  ['waiting-area', 'The waiting area at Hidden Strength, Gosforth'],
-  ['gym-floor', 'The gym floor used for rehabilitation'],
   ['consultation', 'Talking through an injury at the initial assessment'],
+  ['gym-floor', 'The gym floor used for rehabilitation'],
+  ['waiting-area', 'The waiting area at Hidden Strength, Gosforth'],
+  ['clinic-room', 'The treatment room at the Gosforth clinic'],
 ];
 
 const gallery = () => `<section class="section gallery-section" aria-labelledby="gallery-h">
@@ -1989,7 +2007,7 @@ function firstVisit() {
       </div>
       <div class="split-media" data-reveal="right">
         <div class="frame frame-glow">
-          ${photo('first-visit', 'The treatment room where your first appointment takes place')}
+          ${photo('first-visit', 'Talking through an injury at the initial assessment')}
           <div class="frame-caption">
             ${icon('pin')}
             <span><b>${esc(addr.venue)}</b><span>${esc(addr.street)}, ${esc(addr.locality)}</span></span>

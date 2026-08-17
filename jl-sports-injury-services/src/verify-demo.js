@@ -122,6 +122,28 @@ const ROUTES = [
   });
   if (dupes.length) problems.push(`[html] duplicate ids: ${dupes.slice(0, 6).join(', ')}`);
 
+  // Nothing may point at a file on disk. The demo is one file served from
+  // anywhere, so a relative src fetches nothing — and it fails *silently*,
+  // because the branded backdrop behind each photo covers the hole.
+  const external = await page.evaluate(() =>
+    [...document.querySelectorAll('[src], [href]')]
+      .map((e) => e.getAttribute('src') || e.getAttribute('href'))
+      .filter((v) => v && /^assets\//.test(v))
+  );
+  if (external.length) {
+    problems.push(`[assets] ${external.length} un-inlined asset(s): ${external.slice(0, 3).join(', ')}`);
+  }
+
+  // And the photographs that are inlined have to actually decode.
+  const shots = await page.locator('.demo-page:not([hidden]) img.photo').count();
+  for (let i = 0; i < shots; i++) {
+    const img = page.locator('.demo-page:not([hidden]) img.photo').nth(i);
+    await img.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    const state = await img.evaluate((e) => ({ ok: e.complete && e.naturalWidth > 0, alt: e.alt }));
+    if (!state.ok) problems.push(`[photo] inlined "${state.alt}" did not decode`);
+  }
+
   await browser.close();
 
   console.log('\n=== DEMO VERIFY ===');

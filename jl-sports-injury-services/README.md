@@ -173,8 +173,8 @@ it can be swapped in.
 
 ## Photography
 
-The build could not reach the images on the live site (they sit behind a host this build
-environment cannot fetch), so every photo position currently shows a labelled placeholder
+Five photographs are in: Jack's portrait, Jack treating a client, the initial consultation,
+the gym floor and the waiting area. The remaining slots still show a labelled placeholder
 rather than a broken image.
 
 Each one names the shot that belongs in it — a camera mark, "Photo to come", and the
@@ -182,7 +182,30 @@ description. That is deliberate: an empty branded panel reads as an image that f
 load, whereas naming the shot reads as a slot being held open, and doubles as Jack's shot
 list. The label disappears the moment a real file is dropped in.
 
-**Adding the real photos takes one step.** Save each file into `site/assets/img/` using the
+### Adding more
+
+Put the originals — straight off a phone, any size, any format — into a folder, name each
+file after the slot it belongs to, and run:
+
+```bash
+node src/optimise-photos.js <folder>   # resize, re-encode to WebP, write to assets/img
+npm run build
+```
+
+There is no image library in this environment (no sharp, no ImageMagick, no PIL), so the
+optimiser drives the headless Chromium the tests already use: decode, draw to a canvas at
+the target size, re-encode as WebP. Nothing is displayed wider than about 560 CSS pixels,
+so it caps the longest edge at 1200 — enough for a 2× screen, and everything beyond that is
+bytes nobody sees. The five photos went in at 1039 kB and came out at 240 kB.
+
+`WHITE_BALANCE` at the top of that file corrects a colour cast per slot, 0 to 1. Jack's
+portrait was shot under warm light and came out orange, which is invisible on a phone and
+glaring against a cool dark page — on a portrait it reads as an unhealthy skin tone. It is
+set to 0.5: grey-world balance assumes the average of a scene is neutral, which is wrong
+when a face fills the frame, so going all the way drains the skin. Half removes the cast
+and keeps him looking like a person. Leave it unset for photos that are already fine.
+
+**Or do it by hand.** Save each file into `site/assets/img/` using the
 slot name below — `.webp`, `.jpg`, `.png` and `.avif` all work — then run `npm run build`.
 The build finds the file, swaps it in over the placeholder and fades it in. There is no
 markup to edit, and while a slot is still empty nothing is requested, so there are no
@@ -351,6 +374,7 @@ src/build.js       writes site/, sitemap, robots, manifest
 src/build-demo.js  packs the whole site into one demo.html
 src/verify.js      browser test suite
 src/audit.js       accessibility, responsive and weight pass
+src/optimise-photos.js resizes and re-encodes photographs for the web
 src/make-images.js generates the share image and app icon
 site/              the built website — this is what you deploy
 ```

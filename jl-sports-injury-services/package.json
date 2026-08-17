@@ -2,7 +2,7 @@
   "name": "jl-sports-injury-services",
   "version": "1.0.0",
   "private": true,
-  "description": "Website for J.L. Sports Injury Services — sports injury clinic, Gosforth, Newcastle upon Tyne.",
+  "description": "Website for J.L. Sports Injury Services \u2014 sports injury clinic, Gosforth, Newcastle upon Tyne.",
   "scripts": {
     "build": "node src/build.js",
     "serve": "npx http-server site -p 8899 -c-1",
@@ -10,7 +10,8 @@
     "verify": "node src/build.js && node src/verify.js",
     "audit": "node src/build.js && node src/audit.js",
     "demo": "node src/build-demo.js && node src/verify-demo.js",
-    "check": "node src/build.js && node src/verify.js && node src/audit.js && THEME=light node src/audit.js"
+    "check": "node src/build.js && node src/verify.js && node src/audit.js && THEME=light node src/audit.js",
+    "photos": "node src/optimise-photos.js"
   },
   "engines": {
     "node": ">=18"

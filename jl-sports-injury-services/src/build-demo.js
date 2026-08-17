@@ -37,6 +37,42 @@ const fonts =
   fontFace('Inter', 'inter-latin.woff2', '300 700');
 
 // ---------------------------------------------------------------------------
+// Photographs → data URIs
+//
+// Same reason as the fonts: the demo is one file with no server behind it and
+// a host that blocks every external request, so a relative src fetches
+// nothing. Without this the photographs are simply absent from the demo — and
+// silently, because the branded backdrop behind each one covers the gap.
+//
+// Only images actually referenced get inlined, so the Open Graph share images
+// (~120 kB each, and meaningless in a single-file demo) stay out of it.
+// ---------------------------------------------------------------------------
+
+const IMG_MIME = {
+  '.webp': 'image/webp',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.avif': 'image/avif',
+  '.svg': 'image/svg+xml',
+};
+
+const inlinedImages = new Map();
+
+function inlineImages(markup) {
+  return markup.replace(/(src|href)="assets\/img\/([^"]+)"/g, (whole, attr, file) => {
+    const abs = path.join(SITE, 'assets/img', file);
+    if (!fs.existsSync(abs)) return whole;
+    const mime = IMG_MIME[path.extname(file).toLowerCase()];
+    if (!mime) return whole;
+    if (!inlinedImages.has(file)) {
+      inlinedImages.set(file, fs.readFileSync(abs).toString('base64'));
+    }
+    return `${attr}="data:${mime};base64,${inlinedImages.get(file)}"`;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Page bodies
 // ---------------------------------------------------------------------------
 
@@ -67,17 +103,19 @@ function prepare(p) {
       : `href="${route}"`;
   });
 
-  return `<div class="demo-page" data-route="${key}" hidden>${html}</div>`;
+  return `<div class="demo-page" data-route="${key}" hidden>${inlineImages(html)}</div>`;
 }
 
 const bodies = all.map(prepare).join('\n');
 
 // The shared chrome, with the same link rewriting applied.
 const chrome = (markup) =>
-  markup.replace(/href="([a-z0-9-]+)\.html(\?[^"]*)?(#[^"]*)?"/g, (m, file, query, anchor) => {
-    const route = `#/${slugOf(file + '.html')}${query || ''}`;
-    return anchor ? `href="${route}" data-scroll="${anchor.slice(1)}"` : `href="${route}"`;
-  });
+  inlineImages(
+    markup.replace(/href="([a-z0-9-]+)\.html(\?[^"]*)?(#[^"]*)?"/g, (m, file, query, anchor) => {
+      const route = `#/${slugOf(file + '.html')}${query || ''}`;
+      return anchor ? `href="${route}" data-scroll="${anchor.slice(1)}"` : `href="${route}"`;
+    })
+  );
 
 
 // ---------------------------------------------------------------------------
