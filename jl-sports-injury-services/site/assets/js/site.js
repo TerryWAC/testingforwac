@@ -475,13 +475,22 @@
     // on a page where the script failed to run.
     bodyMap.classList.add('is-live');
 
+    // The attention pulse and the "tap a body part" cue exist to get someone
+    // started. The moment they engage at all — hover, focus or tap — they have
+    // understood it, and a cue that keeps going after that is just noise.
+    function used() {
+      bodyMap.classList.add('is-used');
+    }
+
     function heat(condition, on) {
+      if (on) used();
       regions.forEach(function (r) {
         if (r.dataset.condition === condition) r.classList.toggle('is-hot', on && r.dataset.condition !== chosen);
       });
     }
 
     function choose(condition) {
+      used();
       chosen = condition;
       regions.forEach(function (r) {
         var mine = r.dataset.condition === condition;

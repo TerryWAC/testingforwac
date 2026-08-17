@@ -1076,11 +1076,47 @@ main > section:last-child { padding-bottom: 0; }
   color: var(--contour-ink);
   mask-image: radial-gradient(120% 100% at 50% 40%, #000 35%, transparent 88%);
 }
-.photo-slot .logo-mark {
+/* The note that names the shot belonging in this slot. An empty frame with a
+   watermark in it reads as a failed image; saying what goes here reads as a
+   plan, and gives Jack his shot list. Container queries size it to the slot,
+   so the same markup works in a hero and in a 200px gallery circle. */
+.photo-slot { container-type: inline-size; }
+
+.photo-slot-note {
   position: relative;
-  width: 26%; max-width: 118px; height: auto; aspect-ratio: 1;
-  color: var(--green-ink); opacity: 0.34;
-  filter: drop-shadow(0 0 30px rgba(0, 250, 130, 0.3));
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  max-width: 24ch;
+  text-align: center;
+  color: var(--text-faint);
+}
+.photo-slot-icon {
+  display: grid; place-items: center;
+  width: 46px; height: 46px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 50%;
+  color: var(--green-ink);
+}
+.photo-slot-icon .icon { width: 22px; height: 22px; }
+.photo-slot-label {
+  font-family: var(--display);
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--green-ink);
+}
+.photo-slot-alt { font-size: 0.82rem; line-height: 1.45; }
+
+/* Small slots drop the description. In the photo rail that is not just about
+   room — the figcaption underneath already says the same sentence, and running
+   it twice is noise. */
+@container (max-width: 340px) {
+  .photo-slot-alt { display: none; }
+  .photo-slot-icon { width: 38px; height: 38px; }
+}
+@container (max-width: 150px) {
+  .photo-slot-label { display: none; }
 }
 
 /* --------------------------------------------------------------------------
@@ -1227,11 +1263,25 @@ main > section:last-child { padding-bottom: 0; }
 [data-theme='light'] .bm-part { fill: rgba(6, 26, 16, 0.075); }
 
 /* Pickable segments. Same shape as the body part, so heating one fills the
-   whole thigh rather than showing a box pasted over a person. */
+   whole thigh rather than showing a box pasted over a person.
+
+   At rest they carry a faint heat tint and a dashed outline. That is the whole
+   affordance: without it the figure is a flat grey diagram and nobody knows
+   the parts are buttons. The dash is what separates "clickable" from "drawn". */
 .bm-region {
   cursor: pointer;
-  transition: fill 0.32s var(--ease), stroke 0.32s var(--ease), stroke-width 0.32s var(--ease);
+  fill: color-mix(in srgb, var(--heat) 8%, transparent);
+  stroke: color-mix(in srgb, var(--heat) 60%, transparent);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+  transition: fill 0.32s var(--ease), stroke 0.32s var(--ease), stroke-width 0.32s var(--ease),
+    stroke-dasharray 0.32s var(--ease);
 }
+/* Solid outline the moment it is live, so hover reads as "selected", not
+   "still deciding". */
+.bm-region:hover,
+.bm-region.is-hot,
+.bm-region.is-on { stroke-dasharray: none; }
 .bm-region:hover,
 .bm-region.is-hot {
   fill: color-mix(in srgb, var(--heat) 48%, transparent);
@@ -1255,6 +1305,38 @@ main > section:last-child { padding-bottom: 0; }
 }
 .bm-region.is-on { animation: bm-pulse 2.4s var(--ease-in-out) infinite; }
 
+/* Attention pulse over the whole figure before anyone has touched it. It stops
+   for good on the first interaction — a cue that keeps pulsing after you have
+   understood it is just noise. */
+@keyframes bm-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.bodymap.is-live:not(.is-used) .bm-region { animation: bm-breathe 2.8s var(--ease-in-out) infinite; }
+
+/* The instruction sitting on the stage. */
+.bm-cue {
+  position: absolute;
+  top: 0.9rem; left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--scrim);
+  backdrop-filter: blur(10px);
+  font-family: var(--display);
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.bm-cue .icon { width: 15px; height: 15px; color: var(--heat); }
+/* Its job is done once they have picked something. */
+.bodymap.is-used .bm-cue { opacity: 0; transform: translateX(-50%) translateY(-6px); pointer-events: none; }
+
 /* Side column ------------------------------------------------------------- */
 
 .bm-side { display: grid; gap: 1.25rem; align-content: center; }
@@ -1267,21 +1349,47 @@ main > section:last-child { padding-bottom: 0; }
   min-height: 218px;
 }
 
+/* The resting state matches the panel's footprint and border treatment, so the
+   swap reads as one surface changing its contents rather than a box being
+   replaced by a differently shaped box. The dashed border marks it as the
+   "nothing chosen yet" state. */
 .bm-hint {
-  color: var(--text-dim);
-  font-size: 0.95rem;
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, var(--raise-2), transparent);
+}
+/* An author `display` beats the UA rule for [hidden], so this has to be said
+   explicitly or the hint never goes away when a panel opens. */
+.bm-hint[hidden] { display: none; }
+.bm-steps {
+  display: grid;
+  gap: 0.55rem;
   margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: bm;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+}
+.bm-steps li {
+  counter-increment: bm;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: baseline;
+}
+.bm-steps li::before {
+  content: counter(bm);
+  font-family: var(--display);
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--green-ink);
+  font-variant-numeric: tabular-nums;
 }
 .bm-foot { margin: 0; font-size: 0.9rem; color: var(--text-faint); }
-.bm-hint::before {
-  content: '';
-  display: inline-block;
-  width: 8px; height: 8px;
-  margin-right: 0.6rem;
-  border-radius: 50%;
-  background: var(--heat);
-  vertical-align: 1px;
-}
 
 .bm-panel {
   display: grid;

@@ -174,8 +174,13 @@ it can be swapped in.
 ## Photography
 
 The build could not reach the images on the live site (they sit behind a host this build
-environment cannot fetch), so every photo position currently shows a branded placeholder
-rather than a broken image. They look deliberate, but they are placeholders.
+environment cannot fetch), so every photo position currently shows a labelled placeholder
+rather than a broken image.
+
+Each one names the shot that belongs in it — a camera mark, "Photo to come", and the
+description. That is deliberate: an empty branded panel reads as an image that failed to
+load, whereas naming the shot reads as a slot being held open, and doubles as Jack's shot
+list. The label disappears the moment a real file is dropped in.
 
 **Adding the real photos takes one step.** Save each file into `site/assets/img/` using the
 slot name below — `.webp`, `.jpg`, `.png` and `.avif` all work — then run `npm run build`.
@@ -382,6 +387,8 @@ cached for every page after the first.
 - the body map: clicking a knee lights both knees and nothing else, opens the matching
   panel, marks exactly one chip pressed, and the chips move the heat the same way the
   figure does; every panel links to a page that exists
+- every empty photo slot renders its "photo to come" note, and no filled slot renders
+  the note over the top of the photograph
 - the theme toggle switches, persists across a navigation and switches back
 - the booking flow end to end: only Mon–Thu offered, correct slot count and range for the
   chosen duration, empty-form validation blocks submission, the confirmation summary shows

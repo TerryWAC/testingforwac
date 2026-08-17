@@ -238,6 +238,28 @@ const PAGES = [
     if (!siteFiles.has(h)) problems.push(`[bodymap] panel links to missing ${h}`);
   });
 
+  // -- photo slots ---------------------------------------------------------
+  //
+  // An empty slot must say it is waiting for a photo. Silently rendering a
+  // blank branded panel is what made them read as broken.
+  const slots = await page.$$eval('.photo-slot:not(.is-filled)', (els) =>
+    els.map((e) => ({
+      name: e.dataset.photo,
+      note: !!e.querySelector('.photo-slot-note'),
+      label: (e.querySelector('.photo-slot-label')?.textContent || '').trim(),
+    }))
+  );
+  slots.forEach((s) => {
+    if (!s.note) problems.push(`[photo] empty slot "${s.name}" has no "photo to come" note`);
+    if (!s.label) problems.push(`[photo] empty slot "${s.name}" has no label`);
+  });
+  // A filled slot must NOT show the note over the top of the photograph.
+  const filledWithNote = await page.$$eval(
+    '.photo-slot.is-filled .photo-slot-note',
+    (els) => els.length
+  );
+  if (filledWithNote) problems.push(`[photo] ${filledWithNote} filled slot(s) still show the note`);
+
   // -- theme toggle --------------------------------------------------------
   await page.goto(`${BASE}/index.html`, { waitUntil: 'networkidle' });
   const themeBefore = await page.getAttribute('html', 'data-theme');

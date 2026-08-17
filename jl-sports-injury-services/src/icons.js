@@ -44,6 +44,10 @@ const paths = {
   moon: '<path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/>',
   sparkle:
     '<path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m6 6 2.5 2.5"/><path d="M15.5 15.5 18 18"/><path d="m18 6-2.5 2.5"/><path d="M8.5 15.5 6 18"/>',
+  camera:
+    '<path d="M3 8.5A2 2 0 0 1 5 6.5h1.8l1.3-2h7.8l1.3 2H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.6"/>',
+  // A fingertip on a target — used to say "this diagram is interactive".
+  tap: '<path d="M9 11.5V6a2 2 0 0 1 4 0v6.5"/><path d="M13 10.5a1.8 1.8 0 0 1 3.5.5v1"/><path d="M16.5 11.5a1.8 1.8 0 0 1 3.5.5v3a6 6 0 0 1-6 6h-1.6a5 5 0 0 1-3.8-1.8L5 14.6a1.9 1.9 0 0 1 2.8-2.5L9 13.4"/>',
 };
 
 const brand = {

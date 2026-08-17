@@ -112,20 +112,24 @@ const photo = (name, alt) => {
   // The mask id must be unique per instance, not per slot: the portrait
   // appears both in the therapist section and in the photo rail.
   const uid = `${name}-${++photoUid}`;
+
+  // An empty slot has to look *reserved*, not broken. A watermarked panel with
+  // nothing in it reads as a failed image; naming the shot that belongs here
+  // reads as a plan — and doubles as Jack's shot list when he sends photos.
   const placeholder = `<div class="photo-slot" data-photo="${name}">
   ${contourArt(name)}
-  <svg class="logo-mark" viewBox="0 0 200 200" aria-hidden="true">
-    <mask id="ph-${uid}"><circle cx="100" cy="100" r="96" fill="#fff"/>
-      <path d="M62 30 H88 V116 C88 141 69 156 46 156 C32 156 21 151 13 143 L27 122 C32 128 38 131 45 131 C55 131 62 125 62 113 Z" fill="#000"/>
-      <path d="M106 30 H132 V126 H192 V152 H106 Z" fill="#000"/>
-    </mask>
-    <circle cx="100" cy="100" r="96" fill="var(--green)" mask="url(#ph-${uid})"/>
-  </svg>
+  <div class="photo-slot-note">
+    <span class="photo-slot-icon">${icon('camera')}</span>
+    <span class="photo-slot-label">Photo to come</span>
+    <span class="photo-slot-alt">${esc(alt)}</span>
+  </div>
 </div>`;
 
   if (!file) return `${placeholder}\n<!-- photo slot: add site/assets/img/${name}.jpg and rebuild -->`;
 
-  return `${placeholder}
+  // Real photo present: the placeholder stays as the backdrop behind it (it
+  // covers the load gap and any transparency) but the note is gone.
+  return `<div class="photo-slot is-filled" data-photo="${name}">${contourArt(name)}</div>
 <img class="photo" src="assets/img/${file}" alt="${esc(alt)}" loading="lazy" decoding="async">`;
 };
 

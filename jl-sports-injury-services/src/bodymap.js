@@ -157,13 +157,24 @@ function bodyMap(icon, esc, opts = {}) {
 
     <div class="bodymap" data-reveal>
       <div class="bm-stage">
+        <span class="bm-cue" aria-hidden="true">${icon('tap')} Tap a body part</span>
         ${figure()}
       </div>
 
       <div class="bm-side">
         <!-- Fixed height so opening a panel never shunts the buttons around. -->
         <div class="bm-reveal">
-          <p class="bm-hint" data-bm-hint>Pick an area — on the figure or from the list.</p>
+          <!-- The resting state. It occupies exactly the space a panel will,
+               so nothing jumps, and it earns that space by explaining what
+               happens next rather than sitting there as a blank gap. -->
+          <div class="bm-hint" data-bm-hint>
+            <span class="bm-panel-tag">${icon('tap')} Where does it hurt?</span>
+            <ol class="bm-steps">
+              <li>Choose the area that is giving you trouble.</li>
+              <li>See what actually causes it and how it is assessed.</li>
+              <li>Book the treatment that fixes it — no referral needed.</li>
+            </ol>
+          </div>
           ${panels}
         </div>
         <div class="bm-picks" role="group" aria-label="Areas of the body">
