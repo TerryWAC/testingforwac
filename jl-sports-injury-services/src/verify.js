@@ -238,6 +238,24 @@ const PAGES = [
     if (!siteFiles.has(h)) problems.push(`[bodymap] panel links to missing ${h}`);
   });
 
+  // -- promised step count matches the wizard ------------------------------
+  //
+  // The booking page's lead claimed "four quick steps" while the stepper showed
+  // five. Nobody abandons over it, but a client spots it instantly.
+  await page.goto(`${BASE}/book.html`, { waitUntil: 'networkidle' });
+  const dots = await page.$$eval('.progress-step', (els) => els.length);
+  const lead = (await page.textContent('.page-head .lead')) || '';
+  const WORDS = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7 };
+  const claimed = lead.match(/\b(two|three|four|five|six|seven)\s+quick\s+steps?\b/i);
+  if (!claimed) {
+    problems.push('[booking] page lead no longer states the step count');
+  } else if (WORDS[claimed[1].toLowerCase()] !== dots) {
+    problems.push(
+      `[booking] lead promises ${claimed[1]} steps but the wizard shows ${dots}`
+    );
+  }
+  await page.goto(`${BASE}/index.html`, { waitUntil: 'networkidle' });
+
   // -- photo slots ---------------------------------------------------------
   //
   // An empty slot must say it is waiting for a photo. Silently rendering a

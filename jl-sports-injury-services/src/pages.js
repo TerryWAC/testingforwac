@@ -335,9 +335,9 @@ function home() {
         </h1>
         <p class="lead" data-hero style="--d:170ms">
           Assessment, diagnosis and hands-on treatment of neuromusculoskeletal injury — sports massage,
-          medical acupuncture, electrotherapy and gym-based rehabilitation, from a therapist who spent a
-          decade in professional rugby. <strong>You leave your first appointment knowing what is wrong,
-          what caused it, and how long it takes to fix.</strong>
+          medical acupuncture, electrotherapy and gym-based rehabilitation, from a therapist with a
+          decade in practice, including professional rugby. <strong>You leave your first appointment
+          knowing what is wrong, what caused it, and how long it takes to fix.</strong>
         </p>
         <div class="btn-row" data-hero style="--d:250ms">
           <a class="btn btn-primary btn-lg" href="book.html?treatment=injury-assessment" data-cta="hero">
@@ -663,7 +663,7 @@ function about() {
     <div class="page-head-grid">
       <div>
         <span class="eyebrow" data-hero>About us</span>
-        <h1 data-hero style="--d:80ms">A decade in professional sport, brought home to Gosforth.</h1>
+        <h1 data-hero style="--d:80ms">A decade in practice, standards set in professional sport.</h1>
         <p class="lead" data-hero style="--d:160ms">
           J.L. Sports Injury Services was founded in ${site.founded} by ${site.practitioner} and can be
           found in the heart of Gosforth, Newcastle upon Tyne.
@@ -1166,8 +1166,8 @@ function book() {
         <span class="eyebrow" data-hero>${icon('calendar')} Book online</span>
         <h1 data-hero style="--d:80ms">Book your appointment.</h1>
         <p class="lead" data-hero style="--d:160ms">
-          Four quick steps. Pick your treatment, choose a time that suits you, and you are done —
-          no deposit, no waiting for a callback.
+          Five quick steps, about a minute. Pick your treatment, choose a time that suits you, and
+          you are done — no deposit, no waiting for a callback.
         </p>
       </div>
       <div class="fact-strip" data-hero style="--d:260ms">
