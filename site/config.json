@@ -1,0 +1,19 @@
+{
+  "_comment": "Fill these in, then run ./fill-placeholders.sh. Values are substituted across index.html, privacy.html, 404.html, robots.txt and sitemap.xml. Re-runnable: it always works from the pristine copies in .templates/. YOUR-DOMAIN must include the TLD, e.g. mortgagefixer.co.uk (no https://, no trailing slash).",
+  "SURNAME": "",
+  "FIRM LEGAL NAME": "",
+  "NETWORK NAME": "",
+  "FRN": "",
+  "PHONE NUMBER": "",
+  "PHONE-E164": "",
+  "EMAIL ADDRESS": "",
+  "YOUR-DOMAIN": "",
+  "STREET": "",
+  "TOWN": "",
+  "REGION": "",
+  "POSTCODE": "",
+  "ADDRESS": "",
+  "POSTAL ADDRESS": "",
+  "NUMBER": "",
+  "DATE": ""
+}

@@ -5,13 +5,17 @@ page. No frameworks, no build step, no external requests — three files and it 
 
 ```
 site/
-├── index.html          the page
-├── privacy.html        UK GDPR privacy notice
+├── index.html              the page
+├── privacy.html            UK GDPR privacy notice
+├── 404.html
 ├── robots.txt
 ├── sitemap.xml
+├── config.json             ← your details go here
+├── fill-placeholders.sh    ← then run this
 └── assets/
-    ├── styles.css      design tokens, light + dark
-    └── app.js          calculators, form validation, nav
+    ├── styles.css          design tokens, light + dark
+    ├── rates.js            ← Stamp Duty bands. The file to edit after a Budget.
+    └── app.js              calculators, form validation, nav
 ```
 
 ## Run it
@@ -34,7 +38,25 @@ environment blocks `*.chatgpt.site`. **Every business-specific fact is a `[BRACK
 placeholder.** They are underlined in amber on the rendered page so they are impossible
 to miss.
 
-Find them all with:
+### The quick way: `config.json`
+
+Fill in the values, run the script, done — no hunting through markup:
+
+```bash
+cd site
+$EDITOR config.json
+./fill-placeholders.sh
+```
+
+It snapshots pristine copies into `.templates/` on first run and always
+substitutes from those, so it is safe to re-run as many times as you like.
+It reports which values are still blank and which placeholders remain.
+
+`YOUR-DOMAIN` takes the full domain including the TLD — `mortgagefixer.co.uk`,
+not `mortgagefixer` and not `https://mortgagefixer.co.uk/`.
+
+Some things are prose rather than simple tokens — the compliance wording, fee
+disclosure, reviews and stats. Edit those by hand. To find everything left:
 
 ```bash
 grep -rn "\[[A-Z][A-Z0-9 …/&-]*\]" site/
@@ -97,11 +119,25 @@ privacy notice.
 
 ---
 
+## Stamp Duty rates
+
+`assets/rates.js` holds the SDLT bands as a plain, commented table with an
+`EFFECTIVE_FROM` date that the page displays to visitors. **Re-check it after every
+Budget** — the rates in there reflect the thresholds that took effect 1 April 2025,
+and gov.uk is the source of truth.
+
+The calculator covers **England and Northern Ireland only**. Scotland (LBTT) and
+Wales (LTT) have different bands entirely; the page says so rather than quietly
+giving a wrong number.
+
 ## What's in here beyond the original
 
-- **Two working calculators** — monthly repayment (with repayment/interest-only, an overpayment
-  saving projection and a capital-vs-interest bar) and affordability. The maths is standard
-  amortisation, including the 0% edge case; verified against known values.
+- **Three working calculators** — monthly repayment (repayment/interest-only, overpayment
+  saving projection, capital-vs-interest bar), affordability, and Stamp Duty with a
+  band-by-band breakdown showing how the total is reached. Standard amortisation
+  including the 0% edge case; progressive SDLT banding with first-time buyer relief
+  (including the cliff-edge above £500,000) and the additional-property surcharge.
+  Every output was checked against independently computed values.
 - **SEO** — title, meta description, canonical, Open Graph, and `FinancialService` JSON-LD
   structured data, so the business can appear as a rich result.
 - **Accessibility** — skip link, real focus rings, ARIA tab pattern with arrow-key support,

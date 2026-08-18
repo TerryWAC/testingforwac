@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://[YOUR-DOMAIN].co.uk/sitemap.xml
+Sitemap: https://[YOUR-DOMAIN]/sitemap.xml

@@ -221,6 +221,113 @@
     calcAfford();
   }
 
+  /* ---------------- Stamp Duty calculator ----------------
+     Progressive banding: each rate applies only to the slice of the price
+     falling inside that band. Rates live in assets/rates.js. */
+  function sdltBands(price, firstTimeBuyer, additional) {
+    var R = window.SDLT;
+    if (!R) return null;
+
+    var bands = R.standard;
+    var reliefApplied = false;
+    if (firstTimeBuyer && price <= R.firstTimeBuyerCap) {
+      bands = R.firstTimeBuyer;
+      reliefApplied = true;
+    }
+
+    var surcharge = (additional && price >= R.additionalPropertyThreshold)
+      ? R.additionalPropertySurcharge : 0;
+
+    var rows = [], lower = 0, total = 0;
+    for (var i = 0; i < bands.length && lower < price; i++) {
+      var upper = Math.min(price, bands[i].upTo);
+      var slice = upper - lower;
+      if (slice > 0) {
+        var rate = bands[i].rate + surcharge;
+        var due = slice * rate;
+        total += due;
+        rows.push({ from: lower, to: upper, rate: rate, slice: slice, due: due });
+      }
+      lower = bands[i].upTo;
+    }
+
+    // A capped relief band list can stop short of the price; charge the rest
+    // at the top standard rate plus any surcharge.
+    if (lower < price) {
+      var topRate = bands[bands.length - 1].rate + surcharge;
+      var rest = price - lower;
+      total += rest * topRate;
+      rows.push({ from: lower, to: price, rate: topRate, slice: rest, due: rest * topRate });
+    }
+
+    return { total: total, rows: rows, reliefApplied: reliefApplied, surcharge: surcharge };
+  }
+
+  var sd = $('#calc-stampduty');
+  if (sd && window.SDLT) {
+    var sdPrice = $('#sd-price');
+    var sdFtb   = $('#sd-ftb');
+    var sdAdd   = $('#sd-additional');
+    var sdOut   = $('#sd-out-total');
+    var sdRate  = $('#sd-out-effective');
+    var sdRows  = $('#sd-out-rows');
+    var sdNote  = $('#sd-out-note');
+    var sdWhen  = $('#sd-effective-from');
+
+    if (sdWhen) sdWhen.textContent = window.SDLT.EFFECTIVE_FROM;
+
+    var calcSdlt = function () {
+      var price = num(sdPrice);
+      setError(sdPrice, null);
+      if (!isFinite(price) || price <= 0) {
+        setError(sdPrice, 'Enter a purchase price.');
+        sdOut.textContent = '—'; sdRows.innerHTML = ''; sdRate.textContent = '—';
+        return;
+      }
+
+      // First-time buyer relief and the additional-property surcharge are
+      // mutually exclusive in practice — you cannot be both.
+      if (sdFtb.checked && sdAdd.checked) { sdAdd.checked = false; }
+
+      var res = sdltBands(price, sdFtb.checked, sdAdd.checked);
+      sdOut.textContent = money(res.total);
+      sdRate.textContent = price > 0 ? (res.total / price * 100).toFixed(2) + '%' : '—';
+
+      sdRows.innerHTML = '';
+      res.rows.forEach(function (r) {
+        var li = document.createElement('li');
+        var k = document.createElement('span');
+        k.className = 'k';
+        k.textContent = money(r.from) + '–' + money(r.to) + ' at ' + (r.rate * 100).toFixed(0) + '%';
+        var v = document.createElement('span');
+        v.className = 'v';
+        v.textContent = money(r.due);
+        li.appendChild(k); li.appendChild(v);
+        sdRows.appendChild(li);
+      });
+
+      if (sdNote) {
+        if (sdFtb.checked && price > window.SDLT.firstTimeBuyerCap) {
+          sdNote.textContent = 'Above ' + money(window.SDLT.firstTimeBuyerCap) +
+            ' first-time buyer relief is lost entirely, so standard rates apply.';
+        } else if (res.reliefApplied) {
+          sdNote.textContent = 'First-time buyer relief applied.';
+        } else if (res.surcharge > 0) {
+          sdNote.textContent = 'Includes the ' + (res.surcharge * 100).toFixed(0) +
+            '% additional property surcharge on the whole price.';
+        } else {
+          sdNote.textContent = 'Standard residential rates.';
+        }
+      }
+    };
+
+    $$('input', sd).forEach(function (el) {
+      el.addEventListener('input', calcSdlt);
+      el.addEventListener('change', calcSdlt);
+    });
+    calcSdlt();
+  }
+
   /* ---------------- Calculator tabs ---------------- */
   var tablist = $('#calc-tabs');
   if (tablist) {
@@ -379,6 +486,9 @@
         if (!entry.isIntersecting) return;
         var el = entry.target;
         var target = parseFloat(el.dataset.countTo);
+        // Placeholder values like "[NUMBER]" parse to NaN — leave the markup alone
+        // rather than animating the stat to "NaN".
+        if (!isFinite(target)) { o.unobserve(el); return; }
         var prefix = el.dataset.prefix || '';
         var suffix = el.dataset.suffix || '';
         var start = performance.now();
@@ -395,6 +505,25 @@
     }, { threshold: 0.4 });
     stats.forEach(function (el) { statObs.observe(el); });
   }
+
+  /* ---------------- Describe inputs by their hint + error text ----------------
+     Wired at runtime so the association exists wherever a .field is used,
+     without hand-maintaining ids across the markup. */
+  (function wireDescriptions() {
+    var seq = 0;
+    $$('.field').forEach(function (field) {
+      var control = field.querySelector('input, select, textarea');
+      if (!control) return;
+      var ids = (control.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+      ['.field__hint', '.error-text'].forEach(function (sel) {
+        var node = field.querySelector(sel);
+        if (!node) return;
+        if (!node.id) node.id = 'mf-desc-' + (++seq);
+        if (ids.indexOf(node.id) === -1) ids.push(node.id);
+      });
+      if (ids.length) control.setAttribute('aria-describedby', ids.join(' '));
+    });
+  })();
 
   /* ---------------- Footer year ---------------- */
   var year = $('#year');

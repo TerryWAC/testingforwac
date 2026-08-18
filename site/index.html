@@ -6,7 +6,7 @@
 <title>Mortgage Fixer — Whole-of-market mortgage advice from Sam [SURNAME]</title>
 <meta name="description" content="Independent, whole-of-market mortgage advice for first-time buyers, home movers and remortgages. Free initial consultation, decision in principle in 24 hours. Based in [TOWN], serving [REGION] and the whole of the UK.">
 <meta name="theme-color" content="#0b1524">
-<link rel="canonical" href="https://[YOUR-DOMAIN].co.uk/">
+<link rel="canonical" href="https://[YOUR-DOMAIN]/">
 
 <!-- Open Graph / social -->
 <meta property="og:type" content="website">
@@ -14,8 +14,8 @@
 <meta property="og:site_name" content="Mortgage Fixer">
 <meta property="og:title" content="Mortgage Fixer — Whole-of-market mortgage advice">
 <meta property="og:description" content="Independent mortgage advice for first-time buyers, movers and remortgages. Free initial consultation, decision in principle in 24 hours.">
-<meta property="og:url" content="https://[YOUR-DOMAIN].co.uk/">
-<meta property="og:image" content="https://[YOUR-DOMAIN].co.uk/assets/og-image.jpg">
+<meta property="og:url" content="https://[YOUR-DOMAIN]/">
+<meta property="og:image" content="https://[YOUR-DOMAIN]/assets/og-image.jpg">
 <meta property="og:image:alt" content="Mortgage Fixer — whole-of-market mortgage advice">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -36,7 +36,7 @@
   "@type": "FinancialService",
   "name": "Mortgage Fixer",
   "description": "Whole-of-market mortgage advice for first-time buyers, home movers, remortgages and buy-to-let.",
-  "url": "https://[YOUR-DOMAIN].co.uk/",
+  "url": "https://[YOUR-DOMAIN]/",
   "telephone": "[PHONE NUMBER]",
   "email": "[EMAIL ADDRESS]",
   "priceRange": "Free initial consultation",
@@ -54,6 +54,39 @@
     "opens": "09:00", "closes": "18:00"
   }],
   "employee": { "@type": "Person", "name": "Sam [SURNAME]", "jobTitle": "Mortgage & Protection Adviser" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much deposit do I actually need?",
+      "acceptedAnswer": { "@type": "Answer", "text": "5% is the practical minimum for most residential mortgages. The rate improves at each band \u2014 10%, 15% and again at 25% \u2014 so if you are close to a threshold it is often worth waiting a few months. Buy-to-let is different: expect to need at least 25%." }
+    },
+    {
+      "@type": "Question",
+      "name": "I'm self-employed. Is that a problem?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No, but it changes which lenders to approach. Some want two or three years of accounts, others will consider one. Some use net profit, others salary plus dividends, and for contractors a few will work from your day rate. The difference between the most and least generous lender on the same accounts can be substantial." }
+    },
+    {
+      "@type": "Question",
+      "name": "My credit isn't perfect. Should I bother?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Usually yes. A missed phone bill three years ago is not the obstacle people fear. Defaults, CCJs and recent arrears are more serious, but specialist lenders price for them rather than refusing outright. Get a copy of your credit file before we speak, and avoid making multiple applications yourself." }
+    },
+    {
+      "@type": "Question",
+      "name": "When should I start looking at a remortgage?",
+      "acceptedAnswer": { "@type": "Answer", "text": "About six months before your current deal ends. Most offers are valid for three to six months, so you can lock in a rate early and still move to a better one if rates fall. Leave it too late and you roll onto the lender's standard variable rate, which is almost always the most expensive option available." }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does the whole thing take?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A decision in principle usually takes 24 hours. From full application to formal offer is typically two to four weeks, depending on the lender and how quickly the valuation happens. Purchases then depend on the conveyancing chain." }
+    }
+  ]
 }
 </script>
 </head>
@@ -219,7 +252,15 @@
       <div class="tabs" id="calc-tabs" role="tablist" aria-label="Calculators">
         <button class="tab" role="tab" id="tab-repayment" aria-controls="calc-repayment" aria-selected="true" tabindex="0" type="button">Monthly repayments</button>
         <button class="tab" role="tab" id="tab-afford" aria-controls="calc-affordability" aria-selected="false" tabindex="-1" type="button">How much can I borrow?</button>
+        <button class="tab" role="tab" id="tab-stampduty" aria-controls="calc-stampduty" aria-selected="false" tabindex="-1" type="button">Stamp Duty</button>
       </div>
+
+      <noscript>
+        <p class="card" style="margin-bottom:var(--sp-5)">
+          The calculators need JavaScript to run. Everything else on this page works without it —
+          and you're welcome to just call and ask; that's usually quicker anyway.
+        </p>
+      </noscript>
 
       <!-- Repayments -->
       <div id="calc-repayment" role="tabpanel" aria-labelledby="tab-repayment" tabindex="0">
@@ -366,6 +407,56 @@
               outgoings, dependants and how your income is structured all move the number.
             </p>
             <a class="btn btn--on-dark btn--block results__cta" href="#contact">Find out what you'd actually get</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stamp Duty -->
+      <div id="calc-stampduty" role="tabpanel" aria-labelledby="tab-stampduty" tabindex="0" hidden>
+        <div class="calc">
+          <div class="calc__panel">
+            <div class="field">
+              <label for="sd-price">Purchase price</label>
+              <div class="input-affix">
+                <span class="input-affix__prefix" aria-hidden="true">£</span>
+                <input type="number" id="sd-price" value="295000" min="0" step="1000" inputmode="numeric">
+              </div>
+              <p class="error-text" hidden></p>
+            </div>
+
+            <div class="field">
+              <label class="consent" style="margin-bottom:var(--sp-4)">
+                <input type="checkbox" id="sd-ftb">
+                <span><strong>I'm a first-time buyer</strong><br>
+                  Relief applies up to £500,000 — and is lost completely above it.</span>
+              </label>
+              <label class="consent">
+                <input type="checkbox" id="sd-additional">
+                <span><strong>This is an additional property</strong><br>
+                  Second home or buy-to-let. Adds a surcharge on the whole price.</span>
+              </label>
+            </div>
+
+            <p class="field__hint" style="margin-bottom:0">
+              England &amp; Northern Ireland only. Scotland charges LBTT and Wales charges LTT,
+              with different bands — ask me and I'll work those out for you.
+            </p>
+          </div>
+
+          <div class="results" aria-live="polite">
+            <p class="results__headline">Stamp Duty payable</p>
+            <p class="results__figure" id="sd-out-total">£4,750</p>
+            <p class="results__sub">an effective rate of <span id="sd-out-effective">1.61%</span> on the price</p>
+
+            <ul class="results__breakdown" id="sd-out-rows"></ul>
+
+            <p class="results__note" id="sd-out-note">Standard residential rates.</p>
+            <p class="results__note">
+              Based on rates effective <span id="sd-effective-from">1 April 2025</span>.
+              Stamp Duty is payable within 14 days of completion and cannot normally be
+              added to your mortgage — budget for it in cash.
+            </p>
+            <a class="btn btn--on-dark btn--block results__cta" href="#contact">Talk through the full costs</a>
           </div>
         </div>
       </div>
@@ -693,6 +784,7 @@
         <ul>
           <li><a href="#calculators">Repayment calculator</a></li>
           <li><a href="#calculators">Affordability calculator</a></li>
+          <li><a href="#calculators">Stamp Duty calculator</a></li>
           <li><a href="#faq">FAQs</a></li>
           <li><a href="#process">How it works</a></li>
         </ul>
@@ -748,6 +840,7 @@
   <a class="btn btn--primary" href="#contact">Book a free chat</a>
 </div>
 
+<script src="assets/rates.js" defer></script>
 <script src="assets/app.js" defer></script>
 </body>
 </html>

@@ -90,6 +90,9 @@
 
 /* ---------- Base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
+/* Must beat component rules that set `display` (e.g. `.results__breakdown li`),
+   otherwise the `hidden` attribute silently does nothing. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -291,9 +294,18 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .calc { display: grid; gap: var(--sp-6); align-items: start; }
 @media (min-width: 900px) { .calc { grid-template-columns: 1fr 1fr; gap: var(--sp-7); } }
 .calc__panel { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--sp-6); box-shadow: var(--shadow-md); }
-.tabs { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-5); border-bottom: 1px solid var(--border); }
+.tabs {
+  display: flex; gap: var(--sp-2); margin-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--border);
+  /* Three tabs no longer fit on the narrowest phones — scroll the strip
+     rather than letting it push the whole page sideways. */
+  overflow-x: auto; scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.tabs::-webkit-scrollbar { height: 3px; }
+.tabs::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 .tab {
-  font: inherit; font-weight: 650; cursor: pointer;
+  font: inherit; font-weight: 650; cursor: pointer; flex: none; white-space: nowrap;
   background: none; border: 0; border-bottom: 3px solid transparent;
   padding: var(--sp-3) var(--sp-4); color: var(--text-muted); margin-bottom: -1px;
 }
@@ -375,7 +387,13 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: var(
 .form-status[data-state="success"] { display: block; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
 :root[data-theme="dark"] .form-status[data-state="error"] { color: #ff9c8d; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .form-status[data-state="error"] { color: #ff9c8d; } }
-.consent { display: flex; gap: var(--sp-3); align-items: flex-start; font-size: var(--step--1); color: var(--text-muted); }
+/* `.field > label` sets display:block and outranks a bare `.consent`, which
+   collapsed the flex row and un-indented wrapped lines. Match its specificity. */
+.consent, .field > label.consent {
+  display: flex; gap: var(--sp-3); align-items: flex-start;
+  font-size: var(--step--1); color: var(--text-muted); font-weight: 400;
+}
+.consent > span { flex: 1; }
 .consent input { width: 20px; height: 20px; flex: none; margin-top: 2px; accent-color: var(--accent); }
 input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"] { border-color: #c0392b; }
 .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
