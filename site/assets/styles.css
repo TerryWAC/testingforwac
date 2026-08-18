@@ -438,3 +438,50 @@ input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="
 
 /* Anchor targets must clear the sticky header. */
 section[id], [id="top"] { scroll-margin-top: 88px; }
+
+/* Confirmation that calculator figures were carried into the enquiry. */
+.handoff-note {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  color: var(--accent);
+  border-radius: var(--radius); padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-5); font-size: var(--step--1); font-weight: 600;
+}
+
+/* ---------- Print ----------
+   Someone printing this is almost certainly taking calculator figures to a
+   meeting, or keeping the privacy notice on file. Drop the furniture, keep
+   the substance, and make links resolvable on paper. */
+@media print {
+  .site-header, .mobile-cta, .nav, .theme-toggle, .nav-toggle,
+  .hero__actions, .cta-band, .results__cta, .btn, .skip-link { display: none !important; }
+
+  html, body { background: #fff !important; color: #000 !important; font-size: 11pt; }
+  body { padding-bottom: 0; }
+  .section { padding-block: 1rem; }
+  .hero { background: none !important; color: #000 !important; padding-block: 0 1rem; }
+  .hero h1, .cta-band h2 { color: #000 !important; }
+  .hero__lede, .results__sub, .results__note, .results__headline { color: #333 !important; }
+
+  /* Result panels are white-on-navy on screen; invert for paper. */
+  .results { background: #fff !important; color: #000 !important; border: 1pt solid #999; }
+  .results__figure, .results__breakdown .v { color: #000 !important; }
+  .results__breakdown { border-top-color: #999; }
+  .results__breakdown .k { color: #333 !important; }
+
+  .card, .calc__panel, .quote { box-shadow: none !important; border: 1pt solid #ccc; }
+  .site-footer { background: none !important; color: #000 !important; margin-top: 1rem; }
+  .site-footer a, .footer__grid h4, .footer__brand .brand__name { color: #000 !important; }
+  .risk-warning { border: 1pt solid #000; color: #000 !important; background: none !important; }
+
+  /* Print every tab panel, not just the selected one. */
+  [role="tabpanel"][hidden] { display: block !important; }
+  .tabs { display: none !important; }
+
+  .faq details { break-inside: avoid; }
+  .faq details > div { display: block !important; }
+
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+  section { break-inside: auto; }
+  h2, h3 { break-after: avoid; }
+}

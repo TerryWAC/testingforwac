@@ -101,7 +101,18 @@
       if (!isFinite(deposit) || deposit < 0) { setError(elDeposit, 'Enter a deposit.'); ok = false; }
       if (ok && deposit >= price) { setError(elDeposit, 'Your deposit covers the full price — no mortgage needed.'); ok = false; }
       if (!isFinite(rate) || rate < 0) { setError(elRate, 'Enter an interest rate.'); ok = false; }
-      if (!ok) { outPayment.textContent = '—'; return; }
+      if (!ok) {
+        // Blank the whole panel. Leaving the previous run's loan/LTV/interest on
+        // screen next to a "—" payment reads as a real result and misleads.
+        [outPayment, outLoan, outLtv, outInterest, outTotal].forEach(function (el) {
+          if (el) el.textContent = '—';
+        });
+        if (subLine) subLine.textContent = 'Check the figures above';
+        if (barCapital) barCapital.style.width = '0%';
+        if (barInterest) barInterest.style.width = '0%';
+        if (outSavingRow) outSavingRow.hidden = true;
+        return;
+      }
 
       var loan = price - deposit;
       var ltv = (loan / price) * 100;
@@ -186,6 +197,7 @@
       if (income <= 0) {
         setError(aIncome, 'Enter your annual income.');
         aBorrow.textContent = '—'; aBudget.textContent = '—'; aLtv.textContent = '—';
+        if (aNote) aNote.textContent = '';
         return;
       }
 
@@ -200,7 +212,10 @@
       aLtv.textContent = ltv.toFixed(1) + '%';
 
       if (aNote) {
-        if (deposit <= 0) {
+        if (effective <= 0) {
+          aNote.textContent = 'Your monthly commitments cancel out your income for lending ' +
+            'purposes. Clearing some of that debt first will move this number a long way.';
+        } else if (deposit <= 0) {
           aNote.textContent = 'Add a deposit to see the property budget it unlocks.';
         } else if (ltv > 95) {
           aNote.textContent = 'That works out above 95% LTV. Most lenders cap here — worth a conversation about the options.';
@@ -476,6 +491,89 @@
       });
     });
   }
+
+  /* ---------------- Calculator -> enquiry handoff ----------------
+     A visitor who has just worked out their numbers should not have to retype
+     them. The CTA inside each result panel carries the figures into the
+     message box and picks a sensible subject. */
+  (function calculatorHandoff() {
+    var message = $('#mf-message');
+    var stage = $('#mf-stage');
+    if (!message) return;
+
+    function txt(sel) { var el = $(sel); return el ? el.textContent.trim() : ''; }
+
+    var summaries = {
+      'calc-repayment': function () {
+        var type = $('#mf-type') && $('#mf-type').value === 'interest-only'
+          ? 'interest only' : 'repayment';
+        return 'From your repayment calculator:\n' +
+          '- Property value: £' + ($('#mf-price') || {}).value + '\n' +
+          '- Deposit: £' + ($('#mf-deposit') || {}).value + '\n' +
+          '- Rate used: ' + ($('#mf-rate') || {}).value + '% over ' +
+            ($('#mf-term') || {}).value + ' years (' + type + ')\n' +
+          '- Monthly payment shown: ' + txt('#mf-out-payment') +
+          ' on a ' + txt('#mf-out-loan') + ' loan at ' + txt('#mf-out-ltv') + ' LTV';
+      },
+      'calc-affordability': function () {
+        return 'From your affordability calculator:\n' +
+          '- Income: £' + ($('#af-income') || {}).value +
+            (parseFloat(($('#af-income2') || {}).value) > 0
+              ? ' plus £' + ($('#af-income2') || {}).value + ' second applicant' : '') + '\n' +
+          '- Monthly commitments: £' + ($('#af-commitments') || {}).value + '\n' +
+          '- Deposit: £' + ($('#af-deposit') || {}).value + '\n' +
+          '- Estimated borrowing: ' + txt('#af-out-borrow') +
+          ', property budget ' + txt('#af-out-budget');
+      },
+      'calc-stampduty': function () {
+        var flags = [];
+        if ($('#sd-ftb') && $('#sd-ftb').checked) flags.push('first-time buyer');
+        if ($('#sd-additional') && $('#sd-additional').checked) flags.push('additional property');
+        return 'From your Stamp Duty calculator:\n' +
+          '- Purchase price: £' + ($('#sd-price') || {}).value +
+            (flags.length ? ' (' + flags.join(', ') + ')' : '') + '\n' +
+          '- Stamp Duty shown: ' + txt('#sd-out-total') +
+          ' (' + txt('#sd-out-effective') + ' effective rate)';
+      }
+    };
+
+    var stageFor = {
+      'calc-affordability': "I'm buying my first home",
+      'calc-stampduty': "I'm buying my first home"
+    };
+
+    $$('.results__cta[href="#contact"]').forEach(function (cta) {
+      cta.addEventListener('click', function () {
+        var panel = cta.closest('[role="tabpanel"]');
+        if (!panel || !summaries[panel.id]) return;
+
+        var summary = summaries[panel.id]();
+        var existing = message.value.trim();
+
+        // Replace a previous auto-summary rather than stacking them up, but
+        // never destroy something the visitor typed themselves.
+        var marker = /^From your [a-zA-Z ]+ calculator:[\s\S]*?(?=\n\n|$)/;
+        if (marker.test(existing)) {
+          message.value = existing.replace(marker, summary);
+        } else {
+          message.value = existing ? summary + '\n\n' + existing : summary;
+        }
+
+        if (stage && stageFor[panel.id]) {
+          var wanted = stageFor[panel.id];
+          for (var i = 0; i < stage.options.length; i++) {
+            if (stage.options[i].text === wanted) { stage.selectedIndex = i; break; }
+          }
+        }
+
+        var note = $('#handoff-note');
+        if (note) {
+          note.hidden = false;
+          note.textContent = 'Your figures have been added to the message below — edit anything you like.';
+        }
+      });
+    });
+  })();
 
   /* ---------------- Animated stats ---------------- */
   var stats = $$('[data-count-to]');

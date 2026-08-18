@@ -1,0 +1,11 @@
+{
+  "name": "mortgage-fixer-tests",
+  "private": true,
+  "description": "Browser tests for the site. Kept out of the site root so static hosts don't try to build the deploy.",
+  "scripts": {
+    "test": "node run.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.40.0"
+  }
+}

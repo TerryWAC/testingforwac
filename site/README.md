@@ -12,10 +12,32 @@ site/
 ├── sitemap.xml
 ├── config.json             ← your details go here
 ├── fill-placeholders.sh    ← then run this
-└── assets/
-    ├── styles.css          design tokens, light + dark
-    ├── rates.js            ← Stamp Duty bands. The file to edit after a Budget.
-    └── app.js              calculators, form validation, nav
+├── assets/
+│   ├── styles.css          design tokens, light + dark, print
+│   ├── rates.js            ← Stamp Duty bands. The file to edit after a Budget.
+│   ├── app.js              calculators, form validation, nav
+│   └── og-image.jpg        social share card (1200×630)
+└── test/
+    └── run.js              browser test suite
+```
+
+## Tests
+
+49 checks covering the calculators, form validation, the enquiry handoff,
+keyboard navigation, layout at seven widths, and the other two pages.
+
+```bash
+cd site/test && npm install && npm test
+```
+
+Financial figures are asserted against values computed independently inside the
+test file, so a bug in the page cannot make its own output look correct. Every
+bug found so far has a test pinning it — run this before deploying.
+
+If Chromium isn't where Playwright expects it:
+
+```bash
+CHROME=/path/to/chrome node test/run.js
 ```
 
 ## Run it
@@ -145,7 +167,16 @@ giving a wrong number.
   respected.
 - **Dark mode** — follows the system setting, with a manual toggle that persists.
 - **Mobile** — sticky call/book bar under 720px, collapsing nav, fluid type throughout.
-- **Performance** — no fonts, frameworks or third-party requests. Two small local assets.
+- **Performance** — no fonts, frameworks or third-party requests.
+- **Enquiry handoff** — the button inside each result panel carries the figures the
+  visitor just worked out into the message box and picks a matching subject, so
+  they never retype them. It replaces its own previous summary rather than
+  stacking duplicates, and never overwrites something the visitor typed.
+- **Print stylesheet** — strips nav, buttons and backgrounds, inverts the dark result
+  panels for paper, expands every calculator tab and FAQ answer, and appends URLs
+  after links.
+- **Social share card** — `assets/og-image.jpg`, 1200×630. Regenerate it after
+  changing the branding; it is a screenshot of an HTML template at that viewport.
 
 ## Suggested next steps
 
