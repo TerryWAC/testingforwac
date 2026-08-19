@@ -87,7 +87,17 @@ Same for any statistic. To add one with an animated count, put
 - **Analytics?** Nothing sets a cookie today, which is why there's no consent
   banner. Adding Google Analytics changes that.
 
-## 6. Useful, not blocking
+## 6. Content he might want to review
+
+Three guides are live at `/guides/` — deposits, remortgage timing, and
+self-employed income. They are general information about how UK mortgages work
+rather than advice, and each says so.
+
+Worth Sam reading them once, because they speak in his voice and carry his name.
+If anything doesn't match how he actually works, the text is all in one file
+(`guides/_content.js`) and takes a minute to change.
+
+## 7. Useful, not blocking
 
 - Social profile links for the footer
 - Sam's own story — the "about" copy is generic, and this is the part clients

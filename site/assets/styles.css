@@ -203,7 +203,9 @@ img, svg { max-width: 100%; height: auto; display: block; }
   :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
 }
 
-@media (max-width: 900px) {
+/* Six nav items plus the CTA stop fitting before 1040px, so collapse there
+   rather than letting the header push the page sideways. */
+@media (max-width: 1040px) {
   .nav-toggle { display: inline-flex; order: 3; }
   .nav {
     order: 4; flex-basis: 100%; margin-left: 0;
@@ -570,4 +572,58 @@ section[id], [id="top"] { scroll-margin-top: 88px; }
   .contact__aside > .lede   { order: 3; margin-bottom: var(--sp-4); }
   .contact > .card          { order: 4; }
   .contact__aside > ul      { order: 5; margin-top: var(--sp-6); }
+}
+
+/* ---------- Guides / long-form ---------- */
+.article { max-width: 720px; margin-inline: auto; }
+.article__meta {
+  display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4);
+  font-size: var(--step--1); color: var(--text-muted);
+  margin-bottom: var(--sp-6); padding-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+.article h2 { font-size: var(--step-2); margin-top: var(--sp-8); }
+.article h3 { font-size: var(--step-1); margin-top: var(--sp-6); }
+.article > p, .article > ul, .article > ol { font-size: 1.06rem; line-height: 1.75; }
+.article ul, .article ol { padding-left: 1.3em; margin-bottom: var(--sp-5); }
+.article li { margin-bottom: var(--sp-3); }
+.article table {
+  width: 100%; border-collapse: collapse; margin-bottom: var(--sp-6);
+  font-size: .96rem;
+}
+.article th, .article td { text-align: left; padding: var(--sp-3); border-bottom: 1px solid var(--border); }
+.article th { font-weight: 700; background: var(--bg-subtle); }
+.article td:last-child, .article th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.table-scroll { overflow-x: auto; margin-bottom: var(--sp-6); }
+.table-scroll table { margin-bottom: 0; }
+
+.callout {
+  border-left: 4px solid var(--accent); background: var(--bg-subtle);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: var(--sp-5); margin: var(--sp-6) 0;
+}
+.callout p:last-child { margin-bottom: 0; }
+.callout strong { color: var(--accent); }
+
+.article__cta {
+  background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
+  color: var(--text-inverse); border-radius: var(--radius-lg);
+  padding: var(--sp-7) var(--sp-6); margin-top: var(--sp-8); text-align: center;
+}
+.article__cta h2 { color: #fff; margin-top: 0; }
+.article__cta p { color: var(--text-inverse-muted); max-width: 48ch; margin-inline: auto; }
+.article__cta .btn { margin-top: var(--sp-4); }
+
+.guide-card { display: block; text-decoration: none; color: inherit; }
+.guide-card h3 { color: var(--text); margin-bottom: var(--sp-2); }
+.guide-card p { color: var(--text-muted); font-size: .96rem; margin-bottom: 0; }
+.guide-card .card__link { margin-top: var(--sp-4); }
+
+.breadcrumb { font-size: var(--step--1); color: var(--text-muted); margin-bottom: var(--sp-4); }
+.breadcrumb a { color: var(--text-muted); }
+.breadcrumb a:hover { color: var(--accent); }
+
+.disclaimer {
+  font-size: var(--step--1); color: var(--text-muted);
+  border-top: 1px solid var(--border); padding-top: var(--sp-5); margin-top: var(--sp-8);
 }

@@ -8,10 +8,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-FILES=(index.html privacy.html 404.html robots.txt sitemap.xml)
+FILES=(index.html privacy.html 404.html robots.txt sitemap.xml
+  guides/index.html guides/how-much-deposit.html guides/when-to-remortgage.html
+  guides/self-employed-mortgages.html)
 
 if [ ! -d .templates ]; then
   mkdir -p .templates
+  mkdir -p .templates/guides
   for f in "${FILES[@]}"; do [ -f "$f" ] && cp "$f" ".templates/$f"; done
   echo "Snapshotted pristine templates into .templates/"
 fi

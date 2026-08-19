@@ -395,7 +395,7 @@
       navToggle.setAttribute('aria-expanded', String(!open));
     });
     nav.addEventListener('click', function (e) {
-      if (e.target.tagName === 'A' && window.innerWidth <= 900) {
+      if (e.target.tagName === 'A' && window.innerWidth <= 1040) {
         nav.setAttribute('data-open', 'false');
         navToggle.setAttribute('aria-expanded', 'false');
       }
@@ -660,6 +660,20 @@
       });
     });
   }
+
+  /* ---------------- Segment deep link ----------------
+     A guide's call to action links back with ?segment=..., so a reader arrives
+     at the form with their situation already chosen. */
+  (function segmentFromUrl() {
+    var wanted = new URLSearchParams(window.location.search).get('segment');
+    if (!wanted) return;
+    var radio = document.querySelector('input[name="stage"][value="' + wanted + '"]');
+    if (!radio) return;
+    radio.checked = true;
+    radio.dispatchEvent(new Event('change', { bubbles: true }));
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'mf_segment_deeplink', segment: wanted });
+  })();
 
   /* ---------------- Segment routing ----------------
      A visitor who clicks "Remortgaging" has already told us what they want.

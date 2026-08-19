@@ -307,6 +307,63 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
     Math.round(offset) + 'px)', offset < 450);
   await mob.close();
 
+  console.log('\nGuides');
+  {
+    const guides = ['index', 'how-much-deposit', 'when-to-remortgage', 'self-employed-mortgages'];
+    for (const g of guides) {
+      const gp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+      const errs = [];
+      gp.on('pageerror', e => errs.push(e.message));
+      gp.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+      await gp.goto('file://' + path.resolve(__dirname, '..', 'guides', g + '.html'),
+        { waitUntil: 'networkidle' });
+      check(`guides/${g} loads cleanly`, errs.length, 0);
+      check(`guides/${g} has exactly one h1`, (await gp.$$('h1')).length, 1);
+      const over = await gp.evaluate(() =>
+        document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      check(`guides/${g} has no horizontal scroll`, over, false);
+      await gp.close();
+    }
+
+    // Internal links must resolve — a broken guide link is invisible until a
+    // reader hits it.
+    const fs = require('fs');
+    const gdir = path.resolve(__dirname, '..', 'guides');
+    let broken = [];
+    for (const g of guides) {
+      const html = fs.readFileSync(path.join(gdir, g + '.html'), 'utf8');
+      for (const m of html.matchAll(/href="([^"#?][^"]*?)(?:[#?][^"]*)?"/g)) {
+        const target = m[1];
+        if (/^(https?:|mailto:|tel:|data:)/.test(target)) continue;
+        if (!fs.existsSync(path.resolve(gdir, target))) broken.push(g + ' -> ' + target);
+      }
+    }
+    check('no broken internal links in guides', broken.join(', ') || 'none', 'none');
+
+    // Every guide CTA must name a segment the form actually offers.
+    const homeHtml = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+    const valid = [...homeHtml.matchAll(/input[^>]*name="stage"[^>]*value="([^"]+)"/g)].map(m => m[1]);
+    let badSeg = [];
+    for (const g of guides.slice(1)) {
+      const html = fs.readFileSync(path.join(gdir, g + '.html'), 'utf8');
+      for (const m of html.matchAll(/\?segment=([a-z-]+)/g)) {
+        if (!valid.includes(m[1])) badSeg.push(g + ' -> ' + m[1]);
+      }
+    }
+    check('guide CTAs target real form segments', badSeg.join(', ') || 'none', 'none');
+  }
+
+  console.log('\nSegment deep link');
+  {
+    const dl = await browser.newPage();
+    await dl.goto(URL + '?segment=remortgage#contact', { waitUntil: 'networkidle' });
+    check('?segment= preselects the form choice',
+      await dl.isChecked('input[name="stage"][value="remortgage"]'), true);
+    check('and tailors step 2', await dl.$eval('#deposit-label', e => e.textContent),
+      'Roughly what do you owe?');
+    await dl.close();
+  }
+
   console.log('\nOther pages');
   for (const f of ['privacy.html', '404.html']) {
     const pg = await browser.newPage();

@@ -12,6 +12,10 @@ site/
 ├── sitemap.xml
 ├── config.json             ← your details go here
 ├── fill-placeholders.sh    ← then run this
+├── guides/
+│   ├── _content.js         ← guide text lives here
+│   ├── _shell.js           `node guides/_shell.js` rebuilds the pages
+│   └── *.html              generated — do not hand-edit
 ├── assets/
 │   ├── styles.css          design tokens, light + dark, print
 │   ├── rates.js            ← Stamp Duty bands. The file to edit after a Budget.
@@ -21,11 +25,35 @@ site/
     └── run.js              browser test suite
 ```
 
+## Guides
+
+Three long-form guides, each aimed at one of the form's lead segments and ending
+with a CTA that deep-links back with `?segment=...` so the reader arrives at the
+enquiry form with their situation already selected.
+
+Edit the text in `guides/_content.js`, then rebuild:
+
+```bash
+node guides/_shell.js
+```
+
+The generated `.html` files are overwritten on every build — put changes in
+`_content.js`, not in the output. The shell holds the header, footer, structured
+data and CTA so the furniture lives in one place.
+
+To add a guide: append an object to `_content.js`, rebuild, then add it to
+`sitemap.xml`, the `FILES` list in `fill-placeholders.sh`, and the `guides`
+array in `test/run.js`.
+
+Content is general information about how UK mortgages work, not advice, and each
+page says so. Keep anything rate- or threshold-specific phrased so it stays true.
+
 ## Tests
 
-79 checks covering the calculators, the multi-step form, segment tailoring and
+106 checks covering the calculators, the multi-step form, segment tailoring and
 routing, lead-context capture, the reminder form, keyboard navigation, the no-JS
-fallback, layout at seven widths, and the other two pages.
+fallback, layout at seven widths, the guides (including broken-link and
+segment-target checks), and the other pages.
 
 ```bash
 cd site/test && npm install && npm test
