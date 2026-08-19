@@ -56,6 +56,9 @@ any normal web host.
 
 ## ⚠️ Before this goes live
 
+**See [HANDOVER.md](HANDOVER.md) for the full list of what to ask Sam for**, ordered
+by what blocks launch. The rest of this section covers the mechanics.
+
 This was built without access to Sam's existing page — the network policy in the build
 environment blocks `*.chatgpt.site`. **Every business-specific fact is a `[BRACKETED]`
 placeholder.** They are underlined in amber on the rendered page so they are impossible

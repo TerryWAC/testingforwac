@@ -59,6 +59,28 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
   await page.goto(URL, { waitUntil: 'networkidle' });
   const text = s => page.textContent(s);
 
+  console.log('\nTemplate tokens');
+  {
+    const fs = require('fs');
+    const rd = f => fs.readFileSync(path.resolve(__dirname, '..', f), 'utf8');
+    const markup = ['index.html', 'privacy.html', '404.html', 'robots.txt', 'sitemap.xml']
+      .map(rd).join('');
+    const cfg = JSON.parse(rd('config.json'));
+    const keys = Object.keys(cfg).filter(k => !k.startsWith('_'));
+
+    const orphans = keys.filter(k => !markup.includes('[' + k + ']'));
+    check('every config key is used in the markup', orphans.join(',') || 'none', 'none');
+
+    // A token used for two different things silently publishes a false claim —
+    // [NUMBER] once filled both the company number and "mortgages arranged".
+    const CLAIMS = ['MORTGAGES ARRANGED', 'LENDING SECURED', 'REVIEW SCORE'];
+    const claimsInConfig = CLAIMS.filter(c => keys.includes(c));
+    check('unverifiable claims are not script-fillable', claimsInConfig.join(',') || 'none', 'none');
+    CLAIMS.forEach(c =>
+      checkTrue('"' + c + '" is still an explicit placeholder', markup.includes('[' + c + ']')));
+    check('company number has its own token', markup.includes('[COMPANY NUMBER]'), true);
+  }
+
   console.log('\nRepayment calculator');
   check('default monthly payment', await text('#mf-out-payment'), gbp2.format(payment(225000, 4.5, 25)));
   check('default loan amount', await text('#mf-out-loan'), gbp0.format(225000));

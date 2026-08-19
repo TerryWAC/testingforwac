@@ -54,6 +54,11 @@ if remaining:
         print("  " + r)
     print("\nNote: reviews, stats and the compliance/fee wording are prose, not")
     print("simple tokens — edit those by hand. See README.md.")
+    claims = [r for r in remaining if r in ('[MORTGAGES ARRANGED]', '[LENDING SECURED]', '[REVIEW SCORE]')]
+    if claims:
+        print("\n*** " + ", ".join(claims) + " are public claims about the business.")
+        print("    They are deliberately not fillable by this script — type real")
+        print("    figures into index.html yourself, or delete the trust bar.")
 else:
     print("\nNo bracketed placeholders remain.")
 PY
