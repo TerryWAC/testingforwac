@@ -54,19 +54,15 @@ any normal web host.
 
 ---
 
-## ⚠️ Before this goes live
+## Before this goes live
 
-**See [HANDOVER.md](HANDOVER.md) for the full list of what to ask Sam for**, ordered
-by what blocks launch. The rest of this section covers the mechanics.
+**Four regulatory details block publication** — registered firm name, network,
+FRN and company number. `./fill-placeholders.sh` will keep telling you which are
+outstanding. See **[HANDOVER.md](HANDOVER.md)** for the full list to ask Sam for.
 
-This was built without access to Sam's existing page — the network policy in the build
-environment blocks `*.chatgpt.site`. **Every business-specific fact is a `[BRACKETED]`
-placeholder.** They are underlined in amber on the rendered page so they are impossible
-to miss.
-
-### The quick way: `config.json`
-
-Fill in the values, run the script, done — no hunting through markup:
+Everything else is optional. Anything left blank in `config.json` is **removed
+from the page** rather than shown as a placeholder, so the site reads as finished
+while details are still outstanding:
 
 ```bash
 cd site
@@ -76,49 +72,24 @@ $EDITOR config.json
 
 It snapshots pristine copies into `.templates/` on first run and always
 substitutes from those, so it is safe to re-run as many times as you like.
-It reports which values are still blank and which placeholders remain.
 
-`YOUR-DOMAIN` takes the full domain including the TLD — `mortgagefixer.co.uk`,
-not `mortgagefixer` and not `https://mortgagefixer.co.uk/`.
+`YOUR-DOMAIN` takes the full host — `mortgagefixer.co.uk`, not `mortgagefixer`
+and not `https://mortgagefixer.co.uk/`. It is currently set to the live
+`chatgpt.site` address so the site works at its present home today.
 
-Some things are prose rather than simple tokens — the compliance wording, fee
-disclosure, reviews and stats. Edit those by hand. To find everything left:
+### Marking something optional
 
-```bash
-grep -rn "\[[A-Z][A-Z0-9 …/&-]*\]" site/
-```
+Put `data-needs="KEY"` on any element. If `KEY` is blank in `config.json`, the
+whole element — including anything nested inside it — is removed at build time.
+That is how the phone row, the sticky Call button and the registered-office
+sentence disappear when those details are unknown.
 
-### Must be filled in — legal and regulatory
+### No invented content
 
-| Placeholder | Where | Notes |
-|---|---|---|
-| `[FIRM LEGAL NAME]` | footer, privacy | The registered name, not the trading name |
-| `[NETWORK NAME]`, `[FRN]` | footer, privacy | Exact wording should come from your network's compliance team |
-| `[FEE WORDING]` | footer, FAQ | FCA requires fees disclosed clearly and up front |
-| `[Registered in England… number]` | footer | Companies Act s.82 requires this on a business website |
-| ICO registration | privacy | Brokers generally must register as a data controller |
-| Retention periods | privacy | Typically 6+ years for mortgage advice — confirm |
-
-The **"Your home may be repossessed…"** risk warning is already in place on both pages and
-should stay there.
-
-### Must be filled in — business details
-
-`[SURNAME]` · `[PHONE NUMBER]` and `[PHONE-E164]` (the `tel:` links, e.g. `tel:+447700900123`) ·
-`[EMAIL ADDRESS]` · `[TOWN]` / `[REGION]` / `[POSTCODE]` / `[STREET]` · `[YOUR-DOMAIN]` ·
-opening hours · `[90+]` lenders.
-
-`[YOUR-DOMAIN]` appears in the canonical tag, Open Graph tags, JSON-LD, `robots.txt` and
-`sitemap.xml` — replace it everywhere or search engines will index the wrong URLs.
-
-### Must be replaced — the stats and reviews
-
-The trust-bar numbers and all three testimonials are placeholders. Under the FCA's Consumer
-Duty and CAP advertising rules, testimonials must be **genuine, verifiable and held on file**.
-Delete the section entirely rather than publish invented ones.
-
-The animated counter reads `data-count-to` — set it to a plain number (`data-count-to="450"`)
-once you have a real figure.
+The site ships with no fabricated statistics and no placeholder reviews. The
+trust bar states only what is true by construction, and the testimonial section
+was replaced with content that stands on its own. When real reviews exist, paste
+the block from `REVIEWS-TEMPLATE.html`.
 
 ---
 

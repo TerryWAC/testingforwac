@@ -59,26 +59,45 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
   await page.goto(URL, { waitUntil: 'networkidle' });
   const text = s => page.textContent(s);
 
-  console.log('\nTemplate tokens');
+  console.log('\nTemplate integrity');
   {
     const fs = require('fs');
-    const rd = f => fs.readFileSync(path.resolve(__dirname, '..', f), 'utf8');
+    const root = path.resolve(__dirname, '..');
+    // Check the source templates when a build has already run, otherwise the
+    // files themselves — token checks are about the template, not the output.
+    const dir = fs.existsSync(path.join(root, '.templates', 'index.html'))
+      ? path.join(root, '.templates') : root;
+    const rd = f => fs.readFileSync(path.join(dir, f), 'utf8');
     const markup = ['index.html', 'privacy.html', '404.html', 'robots.txt', 'sitemap.xml']
       .map(rd).join('');
-    const cfg = JSON.parse(rd('config.json'));
+    const cfg = JSON.parse(fs.readFileSync(path.join(root, 'config.json'), 'utf8'));
     const keys = Object.keys(cfg).filter(k => !k.startsWith('_'));
 
     const orphans = keys.filter(k => !markup.includes('[' + k + ']'));
     check('every config key is used in the markup', orphans.join(',') || 'none', 'none');
 
-    // A token used for two different things silently publishes a false claim —
-    // [NUMBER] once filled both the company number and "mortgages arranged".
-    const CLAIMS = ['MORTGAGES ARRANGED', 'LENDING SECURED', 'REVIEW SCORE'];
-    const claimsInConfig = CLAIMS.filter(c => keys.includes(c));
-    check('unverifiable claims are not script-fillable', claimsInConfig.join(',') || 'none', 'none');
-    CLAIMS.forEach(c =>
-      checkTrue('"' + c + '" is still an explicit placeholder', markup.includes('[' + c + ']')));
-    check('company number has its own token', markup.includes('[COMPANY NUMBER]'), true);
+    // Anything left must be a key someone can actually fill in.
+    const tokens = [...new Set((markup.match(/\[[A-Z][A-Z0-9 _/&-]{2,}\]/g) || []))]
+      .map(t => t.slice(1, -1));
+    const unknown = tokens.filter(t => !keys.includes(t));
+    check('no token without a config entry', unknown.join(',') || 'none', 'none');
+
+    // The site must never ship an invented number or a fake review.
+    checkTrue('no fabricated stat placeholders remain',
+      !/MORTGAGES ARRANGED|LENDING SECURED|REVIEW SCORE/.test(markup));
+    checkTrue('no placeholder reviews remain', !/\[Real client review/.test(markup));
+    checkTrue('no unverifiable lender count', !/\[90\+\]/.test(markup));
+
+    // Regulatory tokens must stay explicit — they cannot be defaulted away.
+    ['FIRM LEGAL NAME', 'NETWORK NAME', 'FRN', 'COMPANY NUMBER'].forEach(k =>
+      checkTrue('"' + k + '" is still required', markup.includes('[' + k + ']')));
+
+    // Every optional block names a key that exists.
+    const needs = [...new Set((markup.match(/data-needs="([^"]+)"/g) || []))]
+      .map(m => m.replace(/data-needs="|"/g, ''));
+    check('data-needs keys all exist in config',
+      needs.filter(n => !keys.includes(n)).join(',') || 'none', 'none');
+    checkTrue('optional blocks are actually used', needs.length >= 3);
   }
 
   console.log('\nRepayment calculator');
@@ -245,8 +264,15 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
   await page.keyboard.press('Home');
   check('Home returns to the first tab', await page.getAttribute('#tab-repayment', 'aria-selected'), 'true');
   check('skip link present', await page.isVisible('.skip-link', { timeout: 500 }).catch(() => true), true);
-  const stat = await text('[data-count-to]');
-  checkTrue('placeholder stat not animated to NaN', !stat.includes('NaN'));
+  // The trust bar carries no numeric claims now, so there may be nothing to
+  // animate. If a real figure is added later, it must never render as NaN.
+  const counters = await page.$$('[data-count-to]');
+  if (counters.length) {
+    const stat = await counters[0].textContent();
+    checkTrue('animated stat never renders NaN', !stat.includes('NaN'));
+  } else {
+    check('no numeric claims in the trust bar', true, true);
+  }
 
   console.log('\nLayout');
   for (const w of [320, 360, 390, 768, 1024, 1280, 1600]) {

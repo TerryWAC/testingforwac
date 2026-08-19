@@ -183,9 +183,11 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .brand__name span { display: block; font-size: .72rem; font-weight: 600; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; }
 .nav { margin-left: auto; }
 .nav__list { display: flex; align-items: center; gap: var(--sp-5); list-style: none; margin: 0; padding: 0; }
-.nav__list a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: .96rem; }
+.nav__list a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: .96rem; white-space: nowrap; }
 .nav__list a:hover, .nav__list a[aria-current="true"] { color: var(--accent); }
 .header__actions { display: flex; align-items: center; gap: var(--sp-3); }
+.header__actions .btn { white-space: nowrap; }
+.nav { margin-left: auto; }
 .nav-toggle, .theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
   width: 42px; height: 42px; border-radius: var(--radius-sm);
@@ -244,7 +246,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .trustbar { background: var(--bg-subtle); border-bottom: 1px solid var(--border); padding-block: var(--sp-5); }
 .trustbar__grid {
   display: grid; gap: var(--sp-5);
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   text-align: center;
 }
 .stat__num { font-size: var(--step-2); font-weight: 800; color: var(--accent); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
@@ -252,8 +254,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
 
 /* ---------- Cards ---------- */
 .grid { display: grid; gap: var(--sp-5); }
-.grid--3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-.grid--2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
 .card {
   background: var(--bg-raised); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: var(--sp-6);
@@ -329,7 +331,7 @@ input[type="month"], input[type="date"], select, textarea {
 .input-affix input:focus-visible, .input-affix select:focus-visible { outline: none; }
 textarea { resize: vertical; min-height: 120px; }
 input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: var(--sp-2); }
-.field-row { display: grid; gap: var(--sp-4); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.field-row { display: grid; gap: var(--sp-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
 
 .results { background: var(--bg-inverse); color: var(--text-inverse); border-radius: var(--radius-lg); padding: var(--sp-6); }
 .results__headline { font-size: var(--step--1); text-transform: uppercase; letter-spacing: .08em; color: var(--text-inverse-muted); margin-bottom: var(--sp-2); }
@@ -409,7 +411,7 @@ input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="
 .site-footer { background: var(--bg-inverse); color: var(--text-inverse-muted); padding-block: var(--sp-8) var(--sp-6); margin-top: var(--sp-9); }
 .site-footer a { color: var(--text-inverse); text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
-.footer__grid { display: grid; gap: var(--sp-6); grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.footer__grid { display: grid; gap: var(--sp-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
 .footer__grid h4 { color: #fff; font-size: var(--step--1); text-transform: uppercase; letter-spacing: .08em; margin-bottom: var(--sp-4); }
 .footer__grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-3); font-size: .95rem; }
 .footer__brand .brand__name { color: #fff; }
@@ -506,7 +508,7 @@ section[id], [id="top"] { scroll-margin-top: 88px; }
 .stepper__label { font-size: var(--step--1); color: var(--text-muted); margin: var(--sp-2) 0 0; font-weight: 600; }
 
 /* Segment picker — the first thing a visitor answers. Big targets, no typing. */
-.choices { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.choices { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 .choice { position: relative; display: block; cursor: pointer; }
 /* Clip rather than zero-size: keeps the control focusable and reliably exposed
    to assistive tech, which width:0/height:0 does not guarantee. */

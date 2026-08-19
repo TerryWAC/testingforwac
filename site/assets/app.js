@@ -803,7 +803,10 @@
     });
   })();
 
-  /* ---------------- Animated stats ---------------- */
+  /* ---------------- Animated stats ----------------
+     Nothing uses this by default — the trust bar deliberately carries no
+     numeric claims. Add data-count-to="450" (plus optional data-prefix /
+     data-suffix) to any element once there is a real, evidenced figure. */
   var stats = $$('[data-count-to]');
   if (stats.length && 'IntersectionObserver' in window &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
