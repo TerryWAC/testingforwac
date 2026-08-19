@@ -124,28 +124,95 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
   const msg = await page.inputValue('#mf-message');
   checkTrue('figures carried into the message', msg.includes('295000') && msg.includes('Stamp Duty'));
   checkTrue('confirmation shown', await page.isVisible('#handoff-note'));
-  await page.fill('#mf-message', 'I also have a question about porting.');
+  // The message box lives on step 2, so type there rather than through the
+  // hidden field — this is exactly how a visitor would reach it.
+  await page.click('#step-next');
+  await page.fill('#mf-message', (await page.inputValue('#mf-message')) +
+    '\n\nI also have a question about porting.');
   await page.click('#calc-stampduty .results__cta');
   const msg2 = await page.inputValue('#mf-message');
   checkTrue("visitor's own text preserved", msg2.includes('porting'));
   await page.click('#calc-stampduty .results__cta');
-  check('summary not duplicated on second click',
+  check('summary not duplicated on repeat clicks',
     (await page.inputValue('#mf-message')).split('From your').length - 1, 1);
 
-  console.log('\nEnquiry form');
-  await page.fill('#mf-message', '');
-  await page.click('#enquiry-form button[type=submit]');
+  console.log('\nMulti-step enquiry form');
+  await page.reload({ waitUntil: 'networkidle' });
+  check('starts on step 1', await page.isVisible('.fstep[data-step="1"]'), true);
+  check('later steps hidden', await page.isVisible('.fstep[data-step="3"]'), false);
+  check('progress shown', (await text('#stepper-label')).startsWith('Step 1 of 3'), true);
+  check('back hidden on first step', await page.isVisible('#step-back'), false);
+  check('submit hidden until last step', await page.isVisible('#step-submit'), false);
+
+  await page.click('#step-next');
+  check('advances to step 2', await page.isVisible('.fstep[data-step="2"]'), true);
+  check('back now available', await page.isVisible('#step-back'), true);
+  await page.click('#step-next');
+  check('reaches step 3', await page.isVisible('.fstep[data-step="3"]'), true);
+  check('submit shown on last step', await page.isVisible('#step-submit'), true);
+  await page.click('#step-back');
+  check('back returns to step 2', await page.isVisible('.fstep[data-step="2"]'), true);
+  await page.click('#step-next');
+
+  console.log('\nValidation');
+  await page.click('#step-submit');
   const invalid = await page.$$eval('[aria-invalid="true"]', els => els.map(e => e.id).sort());
   check('required fields flagged', invalid.join(','), 'mf-consent,mf-email,mf-name,mf-phone');
   await page.fill('#mf-email', 'not-an-email');
-  await page.click('#enquiry-form button[type=submit]');
+  await page.click('#step-submit');
   check('bad email rejected', await page.getAttribute('#mf-email', 'aria-invalid'), 'true');
   await page.fill('#mf-name', 'Jo Smith');
   await page.fill('#mf-phone', '07700900123');
   await page.fill('#mf-email', 'jo@example.com');
   await page.check('#mf-consent');
-  await page.click('#enquiry-form button[type=submit]');
+  await page.click('#step-submit');
   check('valid submit accepted', await page.getAttribute('#form-status', 'data-state'), 'success');
+
+  console.log('\nSegment tailoring');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('.choice:has(input[value="remortgage"])');
+  await page.click('#step-next');
+  check('remortgage reveals the rate-end question', await page.isVisible('#field-rate-end'), true);
+  check('deposit label adapts', await text('#deposit-label'), 'Roughly what do you owe?');
+  check('legend adapts', await text('#step2-legend'), 'About your current mortgage');
+  await page.click('#step-back');
+  await page.click('.choice:has(input[value="first-time-buyer"])');
+  await page.click('#step-next');
+  check('first-time buyer hides rate-end', await page.isVisible('#field-rate-end'), false);
+  check('deposit label reverts', await text('#deposit-label'), 'Deposit saved so far');
+
+  console.log('\nSegment routing from service cards');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('.card a[data-segment="buy-to-let"]');
+  check('card click preselects the segment',
+    await page.isChecked('input[name="stage"][value="buy-to-let"]'), true);
+  check('segment radios stay keyboard focusable',
+    await page.$eval('input[name="stage"]', el => { el.focus(); return document.activeElement === el; }), true);
+
+  console.log('\nLead context');
+  const ctxPage = await browser.newPage();
+  await ctxPage.goto(URL + '?utm_source=facebook&utm_medium=cpc&utm_campaign=ftb-spring',
+    { waitUntil: 'networkidle' });
+  check('utm_source captured', await ctxPage.inputValue('#lead-utm-source'), 'facebook');
+  check('utm_medium captured', await ctxPage.inputValue('#lead-utm-medium'), 'cpc');
+  check('utm_campaign captured', await ctxPage.inputValue('#lead-utm-campaign'), 'ftb-spring');
+  await ctxPage.click('#tab-stampduty');
+  await ctxPage.click('#calc-stampduty .results__cta');
+  check('calculator recorded on the lead', await ctxPage.inputValue('#lead-calc'), 'stampduty');
+  checkTrue('figures recorded on the lead',
+    (await ctxPage.inputValue('#lead-figures')).includes('Stamp Duty'));
+  const events = await ctxPage.evaluate(() => (window.dataLayer || []).map(e => e.event));
+  checkTrue('analytics events emitted', events.includes('mf_form_step'));
+  await ctxPage.close();
+
+  console.log('\nRate-expiry reminder');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.click('#reminder-form button[type=submit]');
+  check('reminder rejects an empty email', await page.getAttribute('#rm-email', 'aria-invalid'), 'true');
+  await page.fill('#rm-email', 'jo@example.com');
+  await page.fill('#rm-when', '2027-03');
+  await page.click('#reminder-form button[type=submit]');
+  check('reminder accepts valid input', await page.getAttribute('#reminder-status', 'data-state'), 'success');
 
   console.log('\nAccessibility');
   checkTrue('inputs describedby their hint/error',
@@ -168,6 +235,29 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
     check(`no horizontal scroll at ${w}px`, over, false);
     await pg.close();
   }
+
+  console.log('\nProgressive enhancement');
+  const noJs = await browser.newContext({ javaScriptEnabled: false });
+  const njPage = await noJs.newPage();
+  await njPage.goto(URL, { waitUntil: 'domcontentloaded' });
+  check('without JS every step is visible', await njPage.isVisible('.fstep[data-step="3"]'), true);
+  check('without JS the submit button shows', await njPage.isVisible('#step-submit'), true);
+  check('without JS the stepper is hidden', await njPage.isVisible('#stepper'), false);
+  check('without JS a noscript notice explains the calculators',
+    (await njPage.content()).includes('need JavaScript'), true);
+  await noJs.close();
+
+  console.log('\nMobile priority');
+  const mob = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await mob.goto(URL, { waitUntil: 'networkidle' });
+  const offset = await mob.evaluate(() => {
+    const c = document.getElementById('contact').getBoundingClientRect().top + window.scrollY;
+    const f = document.getElementById('enquiry-form').getBoundingClientRect().top + window.scrollY;
+    return f - c;
+  });
+  checkTrue('form is not buried under the contact details on mobile (' +
+    Math.round(offset) + 'px)', offset < 450);
+  await mob.close();
 
   console.log('\nOther pages');
   for (const f of ['privacy.html', '404.html']) {

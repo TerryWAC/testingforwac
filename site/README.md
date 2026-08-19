@@ -23,8 +23,9 @@ site/
 
 ## Tests
 
-49 checks covering the calculators, form validation, the enquiry handoff,
-keyboard navigation, layout at seven widths, and the other two pages.
+79 checks covering the calculators, the multi-step form, segment tailoring and
+routing, lead-context capture, the reminder form, keyboard navigation, the no-JS
+fallback, layout at seven widths, and the other two pages.
 
 ```bash
 cd site/test && npm install && npm test
@@ -118,6 +119,53 @@ once you have a real figure.
 
 ---
 
+## The lead system
+
+The page is built to collect enquiries from the specific groups it targets,
+rather than offering one generic "contact us" box.
+
+**Three ways in, aimed at different levels of readiness:**
+
+| Route | Who it catches | Friction |
+|---|---|---|
+| 3-step enquiry form | People ready to talk | Contact details asked last |
+| Rate-expiry reminder | People whose deal ends later — the biggest group, and the one most brokers lose | Email + month |
+| Calculator handoff | People who came to run numbers, not to enquire | None — figures carry over |
+
+**The form asks in the right order.** Step 1 is the cheapest possible question:
+what are you trying to do, and when. No name, no phone, nothing personal until
+step 3, once the visitor has already invested a little effort. The progress bar
+sets the expectation ("about 40 seconds").
+
+**It adapts to who answered.** Choosing *Remortgage* changes the step-2 heading,
+relabels the deposit field to "Roughly what do you owe?", and reveals a question
+about when the current deal ends. A first-time buyer never sees that question.
+Edit the `SEGMENTS` map in `assets/app.js` to change the wording.
+
+**Every service card routes into it.** Clicking "Remortgaging" jumps to the form
+with that segment already chosen — the visitor never answers the same question twice.
+
+**Each enquiry carries context you did not have to ask for:** which calculator
+they used and the figures they entered, the campaign tags on the link that
+brought them (`utm_source`, `utm_medium`, `utm_campaign`), the referring site,
+and the landing page. First touch wins, so an internal click later does not
+overwrite the advert that actually worked.
+
+**Qualifying fields chosen for what actually changes a case:** how they are paid
+(self-employed and contractors need different lenders), credit history, timeline,
+and best time to call. That is the difference between an enquiry and a lead you
+can act on.
+
+### Measuring it
+
+Events are pushed to `window.dataLayer` and are inert unless you add an analytics
+tool: `mf_form_step`, `mf_segment_selected`, `mf_segment_route`, `mf_lead_submit`,
+`mf_reminder_signup`. The step events show exactly where people drop out.
+
+Adding an analytics tool that sets cookies means you will need a consent banner
+under PECR, and the privacy notice will need updating. Nothing here sets a cookie
+today.
+
 ## Connecting the enquiry form
 
 The form validates fully client-side but has no `action`, so it currently tells the visitor it
@@ -131,9 +179,16 @@ isn't connected. Pick one:
 
 (For Netlify, add `data-netlify="true"` instead of an action.)
 
-**Your own handler** — point `action` at it. The form posts `name`, `phone`, `email`, `stage`,
-`message`, `consent`, plus a honeypot field called `website` — if `website` is non-empty, it's a
-bot; discard it silently.
+**Your own handler** — point `action` at it. The enquiry posts `name`, `phone`, `email`,
+`stage`, `timeline`, `employment`, `income`, `deposit`, `rate_end`, `credit`, `best_time`,
+`message`, `consent`, plus `calculator_used`, `calculator_figures`, `utm_source`,
+`utm_medium`, `utm_campaign`, `referrer` and `landing_page`. There is also a honeypot
+field called `website` — if it is non-empty, it's a bot; discard silently.
+
+**There are two forms.** The rate-expiry reminder (`#reminder-form`) needs its own
+`action`, and posts `email`, `rate_end` and `lead_type=rate-expiry-reminder`. Point it
+at the same handler or a separate list — a reminder signup is a different kind of lead
+from an enquiry, and worth keeping apart.
 
 Whichever you choose, remember the enquiry contains personal data: use HTTPS, don't log it
 anywhere public, and make sure the destination inbox is covered by the retention policy in your

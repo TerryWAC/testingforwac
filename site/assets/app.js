@@ -440,10 +440,61 @@
     });
   }
 
+  /* ---------------- Lead context ----------------
+     Where the visitor came from, captured once and carried with the enquiry.
+     First touch wins, so a later internal navigation does not overwrite the
+     campaign that actually brought them in. */
+  function captureLeadContext() {
+    var STORE = 'mf-lead-context';
+    var ctx;
+    try { ctx = JSON.parse(sessionStorage.getItem(STORE) || 'null'); } catch (e) { ctx = null; }
+
+    if (!ctx) {
+      var params = new URLSearchParams(window.location.search);
+      ctx = {
+        utm_source: params.get('utm_source') || params.get('source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        referrer: document.referrer || '',
+        landing: window.location.pathname + window.location.search
+      };
+      try { sessionStorage.setItem(STORE, JSON.stringify(ctx)); } catch (e) { /* private mode */ }
+    }
+
+    var map = {
+      'lead-utm-source': ctx.utm_source, 'lead-utm-medium': ctx.utm_medium,
+      'lead-utm-campaign': ctx.utm_campaign, 'lead-referrer': ctx.referrer,
+      'lead-landing': ctx.landing
+    };
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.value = map[id] || '';
+    });
+    return ctx;
+  }
+
+  /* Analytics hook. Pushes to a dataLayer if the site owner has added one;
+     completely inert otherwise, and sets no cookies of its own. */
+  function track(event, detail) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(Object.assign({ event: 'mf_' + event }, detail || {}));
+  }
+
   /* ---------------- Enquiry form ---------------- */
   var form = $('#enquiry-form');
   if (form) {
+    captureLeadContext();
+
     var status = $('#form-status');
+    var steps = $$('.fstep', form);
+    var stepper = $('#stepper');
+    var fill = $('#stepper-fill');
+    var label = $('#stepper-label');
+    var btnBack = $('#step-back');
+    var btnNext = $('#step-next');
+    var btnSubmit = $('#step-submit');
+    var current = 0;
+    var reached = 0;
 
     var showStatus = function (state, msg) {
       if (!status) return;
@@ -452,33 +503,151 @@
       status.focus();
     };
 
-    form.addEventListener('submit', function (e) {
-      // Honeypot: bots fill hidden fields, humans never see them.
-      var trap = $('#mf-website', form);
-      if (trap && trap.value) { e.preventDefault(); return; }
+    /* --- Segment-specific tailoring --------------------------------------
+       The labels a first-time buyer needs are not the ones a remortgage
+       client needs. Same form, different questions. */
+    var SEGMENTS = {
+      'first-time-buyer': {
+        legend: 'A little about your situation',
+        income: 'Annual income (before tax)',
+        deposit: 'Deposit saved so far',
+        rateEnd: false
+      },
+      'remortgage': {
+        legend: 'About your current mortgage',
+        income: 'Annual income (before tax)',
+        deposit: 'Roughly what do you owe?',
+        rateEnd: true
+      },
+      'home-mover': {
+        legend: 'About your move',
+        income: 'Annual income (before tax)',
+        deposit: 'Equity you expect to carry over',
+        rateEnd: true
+      },
+      'buy-to-let': {
+        legend: 'About the property',
+        income: 'Annual income (before tax)',
+        deposit: 'Deposit available',
+        rateEnd: false
+      },
+      'protection': {
+        legend: 'About your cover',
+        income: 'Annual income (before tax)',
+        deposit: 'Mortgage outstanding (if any)',
+        rateEnd: false
+      },
+      'other': {
+        legend: 'A little about your situation',
+        income: 'Annual income (before tax)',
+        deposit: 'Savings or deposit available',
+        rateEnd: false
+      }
+    };
 
-      var required = $$('[required]', form);
+    function currentSegment() {
+      var picked = form.querySelector('input[name="stage"]:checked');
+      return picked ? picked.value : 'other';
+    }
+
+    function applySegment() {
+      var seg = SEGMENTS[currentSegment()] || SEGMENTS.other;
+      var l2 = $('#step2-legend'), li = $('#income-label'), ld = $('#deposit-label');
+      if (l2) l2.textContent = seg.legend;
+      if (li) li.textContent = seg.income;
+      if (ld) ld.textContent = seg.deposit;
+      var rateField = $('#field-rate-end');
+      if (rateField) rateField.hidden = !seg.rateEnd;
+    }
+
+    $$('input[name="stage"]', form).forEach(function (r) {
+      r.addEventListener('change', function () {
+        applySegment();
+        track('segment_selected', { segment: currentSegment() });
+      });
+    });
+    applySegment();
+
+    /* --- Validation ------------------------------------------------------ */
+    function validate(scope) {
+      var required = $$('[required]', scope);
       var firstBad = null;
-
       required.forEach(function (el) {
+        if (el.closest('[hidden]')) return;
         var bad = false;
         if (el.type === 'checkbox') bad = !el.checked;
         else if (!el.value.trim()) bad = true;
         else if (el.type === 'email') bad = !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value.trim());
         else if (el.type === 'tel') bad = el.value.replace(/\D/g, '').length < 10;
-
         setError(el, bad ? (el.dataset.error || 'This field is required.') : null);
         if (bad && !firstBad) firstBad = el;
       });
+      return firstBad;
+    }
 
-      if (firstBad) {
-        e.preventDefault();
-        showStatus('error', 'Please check the highlighted fields and try again.');
-        firstBad.focus();
-        return;
+    /* --- Stepping -------------------------------------------------------- */
+    function render() {
+      steps.forEach(function (fs, i) { fs.hidden = i !== current; });
+      if (fill) fill.style.width = Math.round(((current + 1) / steps.length) * 100) + '%';
+      if (label) label.textContent = 'Step ' + (current + 1) + ' of ' + steps.length +
+        (current === 0 ? ' — about 40 seconds' : '');
+      if (btnBack) btnBack.hidden = current === 0;
+      var last = current === steps.length - 1;
+      if (btnNext) btnNext.hidden = last;
+      if (btnSubmit) btnSubmit.hidden = !last;
+    }
+
+    function goTo(i) {
+      current = Math.max(0, Math.min(steps.length - 1, i));
+      render();
+      if (current > reached) {
+        reached = current;
+        track('form_step', { step: current + 1, segment: currentSegment() });
+      }
+      var head = form.querySelector('.fstep:not([hidden]) legend');
+      if (head) head.scrollIntoView({ block: 'nearest' });
+    }
+
+    if (steps.length > 1 && btnNext) {
+      form.setAttribute('data-enhanced', 'true');
+      if (stepper) stepper.hidden = false;
+      render();
+      track('form_step', { step: 1, segment: currentSegment() });
+
+      btnNext.addEventListener('click', function () {
+        var bad = validate(steps[current]);
+        if (bad) { showStatus('error', 'Please check the highlighted fields.'); bad.focus(); return; }
+        if (status) { status.textContent = ''; status.removeAttribute('data-state'); }
+        goTo(current + 1);
+      });
+      btnBack.addEventListener('click', function () { goTo(current - 1); });
+    }
+
+    /* --- Submit ---------------------------------------------------------- */
+    form.addEventListener('submit', function (e) {
+      var trap = $('#mf-website', form);
+      if (trap && trap.value) { e.preventDefault(); return; }
+
+      // Jump to the first step holding an invalid field, so nothing is
+      // rejected on a screen the visitor cannot see.
+      for (var i = 0; i < steps.length; i++) {
+        var bad = validate(steps[i]);
+        if (bad) {
+          e.preventDefault();
+          if (form.getAttribute('data-enhanced')) goTo(i);
+          showStatus('error', 'Please check the highlighted fields and try again.');
+          bad.focus();
+          return;
+        }
       }
 
-      // No endpoint configured yet — see site/README.md for wiring this up.
+      track('lead_submit', {
+        segment: currentSegment(),
+        timeline: ($('#mf-timeline') || {}).value,
+        employment: ($('#mf-employment') || {}).value,
+        calculator: ($('#lead-calc') || {}).value || 'none'
+      });
+
       if (!form.getAttribute('action')) {
         e.preventDefault();
         showStatus('success', 'Thanks — your details are ready to send. The form still needs an endpoint connected before it will deliver. See site/README.md.');
@@ -492,13 +661,64 @@
     });
   }
 
+  /* ---------------- Segment routing ----------------
+     A visitor who clicks "Remortgaging" has already told us what they want.
+     Carry that into the form instead of asking again. */
+  $$('[data-segment]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      var seg = link.getAttribute('data-segment');
+      var radio = document.querySelector('input[name="stage"][value="' + seg + '"]');
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: 'mf_segment_route', segment: seg });
+    });
+  });
+
+  /* ---------------- Rate-expiry reminder ----------------
+     A separate, near-frictionless capture for the largest group of all: people
+     whose deal ends later and who will not fill in a full enquiry today. */
+  var reminder = $('#reminder-form');
+  if (reminder) {
+    reminder.addEventListener('submit', function (e) {
+      var email = $('#rm-email');
+      var when = $('#rm-when');
+      var st = $('#reminder-status');
+
+      var bad = null;
+      if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) {
+        setError(email, 'Please enter a valid email address.'); bad = bad || email;
+      } else setError(email, null);
+      if (!when.value) { setError(when, 'Roughly when does it end?'); bad = bad || when; }
+      else setError(when, null);
+
+      if (bad) {
+        e.preventDefault();
+        if (st) { st.setAttribute('data-state', 'error'); st.textContent = 'Please check the highlighted fields.'; }
+        bad.focus();
+        return;
+      }
+
+      track('reminder_signup', { rate_end: when.value });
+
+      if (!reminder.getAttribute('action')) {
+        e.preventDefault();
+        if (st) {
+          st.setAttribute('data-state', 'success');
+          st.textContent = 'Noted. Once an endpoint is connected this will reach Sam — see site/README.md.';
+        }
+      }
+    });
+  }
+
   /* ---------------- Calculator -> enquiry handoff ----------------
      A visitor who has just worked out their numbers should not have to retype
      them. The CTA inside each result panel carries the figures into the
      message box and picks a sensible subject. */
   (function calculatorHandoff() {
     var message = $('#mf-message');
-    var stage = $('#mf-stage');
     if (!message) return;
 
     function txt(sel) { var el = $(sel); return el ? el.textContent.trim() : ''; }
@@ -538,8 +758,9 @@
     };
 
     var stageFor = {
-      'calc-affordability': "I'm buying my first home",
-      'calc-stampduty': "I'm buying my first home"
+      'calc-affordability': 'first-time-buyer',
+      'calc-stampduty': 'first-time-buyer',
+      'calc-repayment': null
     };
 
     $$('.results__cta[href="#contact"]').forEach(function (cta) {
@@ -559,17 +780,24 @@
           message.value = existing ? summary + '\n\n' + existing : summary;
         }
 
-        if (stage && stageFor[panel.id]) {
-          var wanted = stageFor[panel.id];
-          for (var i = 0; i < stage.options.length; i++) {
-            if (stage.options[i].text === wanted) { stage.selectedIndex = i; break; }
+        if (stageFor[panel.id]) {
+          var radio = document.querySelector('input[name="stage"][value="' + stageFor[panel.id] + '"]');
+          if (radio && !radio.checked) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
           }
         }
+
+        // Record the source for the lead payload.
+        var calcField = $('#lead-calc'), figField = $('#lead-figures');
+        if (calcField) calcField.value = panel.id.replace('calc-', '');
+        if (figField) figField.value = summary.replace(/\n/g, ' | ');
 
         var note = $('#handoff-note');
         if (note) {
           note.hidden = false;
-          note.textContent = 'Your figures have been added to the message below — edit anything you like.';
+          note.textContent = 'Your figures are attached to this enquiry — you can review and edit ' +
+            'them on the next step.';
         }
       });
     });

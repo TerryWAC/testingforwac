@@ -319,7 +319,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
   padding: 0 var(--sp-3); color: var(--text-muted); font-weight: 650; flex: none;
   background: var(--bg-subtle); align-self: stretch; display: grid; place-items: center;
 }
-input[type="number"], input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+input[type="number"], input[type="text"], input[type="email"], input[type="tel"],
+input[type="month"], input[type="date"], select, textarea {
   font: inherit; color: var(--text); background: var(--bg);
   border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   padding: var(--sp-3); width: 100%; min-width: 0;
@@ -484,4 +485,87 @@ section[id], [id="top"] { scroll-margin-top: 88px; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
   section { break-inside: auto; }
   h2, h3 { break-after: avoid; }
+}
+
+/* ---------- Multi-step enquiry form ---------- */
+#enquiry-form fieldset { border: 0; margin: 0; padding: 0; }
+#enquiry-form legend {
+  font-size: var(--step-1); font-weight: 700; letter-spacing: -.02em;
+  color: var(--text); margin-bottom: var(--sp-5); padding: 0;
+}
+/* Without JS every step shows as one long form — still fully usable. */
+.fstep + .fstep { margin-top: var(--sp-7); padding-top: var(--sp-6); border-top: 1px solid var(--border); }
+#enquiry-form[data-enhanced="true"] .fstep + .fstep { margin-top: 0; padding-top: 0; border-top: 0; }
+
+.stepper { margin-bottom: var(--sp-6); }
+.stepper__bar { height: 6px; border-radius: var(--radius-pill); background: var(--bg-subtle); overflow: hidden; }
+.stepper__fill {
+  display: block; height: 100%; width: 33%; border-radius: var(--radius-pill);
+  background: var(--accent); transition: width .3s ease;
+}
+.stepper__label { font-size: var(--step--1); color: var(--text-muted); margin: var(--sp-2) 0 0; font-weight: 600; }
+
+/* Segment picker — the first thing a visitor answers. Big targets, no typing. */
+.choices { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.choice { position: relative; display: block; cursor: pointer; }
+/* Clip rather than zero-size: keeps the control focusable and reliably exposed
+   to assistive tech, which width:0/height:0 does not guarantee. */
+.choice input {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.choice > span {
+  display: block; padding: var(--sp-4);
+  border: 2px solid var(--border); border-radius: var(--radius);
+  background: var(--bg); transition: border-color .15s, background-color .15s, transform .12s;
+  height: 100%;
+}
+.choice > span strong { display: block; font-size: 1rem; color: var(--text); }
+.choice > span small { display: block; font-size: var(--step--1); color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+.choice:hover > span { border-color: var(--border-strong); transform: translateY(-1px); }
+.choice input:checked + span {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.choice input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.form-actions { display: flex; gap: var(--sp-3); margin-top: var(--sp-6); }
+.form-actions .btn { flex: 1; }
+#step-back { flex: 0 0 auto; }
+
+/* ---------- Rate-expiry reminder capture ---------- */
+.reminder {
+  background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
+  color: var(--text-inverse); border-radius: var(--radius-lg);
+  padding: var(--sp-7) var(--sp-6);
+}
+.reminder h2 { color: #fff; margin-bottom: var(--sp-3); }
+.reminder p { color: var(--text-inverse-muted); max-width: 54ch; }
+.reminder__form { display: grid; gap: var(--sp-4); margin-top: var(--sp-5); }
+@media (min-width: 720px) { .reminder__form { grid-template-columns: 1.2fr 1fr auto; } }
+/* Labels wrap to different heights, so align the controls rather than the
+   boxes — otherwise the inputs sit at different baselines. */
+.reminder__form > div { display: flex; flex-direction: column; justify-content: flex-end; }
+.reminder__form > div > label { min-height: 2.4em; display: flex; align-items: flex-end; }
+.reminder__form .btn { width: 100%; }
+@media (max-width: 719px) { .reminder__form > div > label { min-height: 0; } }
+.reminder__form label { display: block; font-size: var(--step--1); font-weight: 650; color: #fff; margin-bottom: var(--sp-2); }
+.reminder__form input { background: rgba(255,255,255,.96); border-color: transparent; color: #14213a; }
+.reminder__note { font-size: var(--step--1); color: var(--text-inverse-muted); margin: var(--sp-4) 0 0; }
+.reminder .form-status { margin: var(--sp-4) 0 0; }
+
+/* On mobile the phone/email/hours list pushed the form a full screen down.
+   `display: contents` promotes the aside's children to grid items so the form
+   can sit directly under the heading, with the contact details after it. */
+@media (max-width: 899px) {
+  /* The 3rem section gap now falls between every promoted child, so tighten it
+     and let each element carry its own spacing. */
+  .contact { gap: var(--sp-2); }
+  .contact__aside { display: contents; }
+  .contact__aside > .eyebrow { order: 1; margin-bottom: 0; }
+  .contact__aside > h2      { order: 2; margin-bottom: var(--sp-2); }
+  .contact__aside > .lede   { order: 3; margin-bottom: var(--sp-4); }
+  .contact > .card          { order: 4; }
+  .contact__aside > ul      { order: 5; margin-top: var(--sp-6); }
 }
