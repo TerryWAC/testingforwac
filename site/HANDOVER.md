@@ -61,7 +61,7 @@ on its own.
 
 If and when there are genuine reviews:
 
-- Paste the block from `REVIEWS-TEMPLATE.html` into the `#reviews` section
+- Paste the block from `REVIEWS-TEMPLATE.txt` into the `#reviews` section
 - First name and initial, town, month — and hold the originals on file
 - Two real ones beat three invented ones
 

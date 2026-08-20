@@ -190,7 +190,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .nav { margin-left: auto; }
 .nav-toggle, .theme-toggle {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 42px; height: 42px; border-radius: var(--radius-sm);
+  /* 44px is the WCAG touch-target minimum; these were 42. */
+  width: 44px; height: 44px; border-radius: var(--radius-sm);
   background: transparent; border: 1px solid var(--border); color: var(--text); cursor: pointer;
 }
 .nav-toggle:hover, .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
@@ -626,4 +627,14 @@ section[id], [id="top"] { scroll-margin-top: 88px; }
 .disclaimer {
   font-size: var(--step--1); color: var(--text-muted);
   border-top: 1px solid var(--border); padding-top: var(--sp-5); margin-top: var(--sp-8);
+}
+
+
+/* Touch targets. WCAG 2.5.8 (AA) wants 24x24 minimum; short footer links like
+   "FAQs" fall well under that on their own. Applied unconditionally rather than
+   behind pointer:coarse, which is not reliably reported. */
+.site-footer .footer__grid a,
+.contact__aside a { display: inline-block; padding-block: 5px; min-height: 24px; }
+@media (pointer: coarse) {
+  .faq summary { padding-block: var(--sp-5); }
 }

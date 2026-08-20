@@ -50,10 +50,12 @@ page says so. Keep anything rate- or threshold-specific phrased so it stays true
 
 ## Tests
 
-106 checks covering the calculators, the multi-step form, segment tailoring and
+133 checks covering the calculators, the multi-step form, segment tailoring and
 routing, lead-context capture, the reminder form, keyboard navigation, the no-JS
-fallback, layout at seven widths, the guides (including broken-link and
-segment-target checks), and the other pages.
+fallback, layout at seven widths, the guides, a
+whole-site link crawl (broken links, orphan pages, stray templates), per-page
+navigation and risk-warning checks, sitemap coverage, and every page at 320px
+including touch-target sizing.
 
 ```bash
 cd site/test && npm install && npm test
@@ -117,7 +119,7 @@ sentence disappear when those details are unknown.
 The site ships with no fabricated statistics and no placeholder reviews. The
 trust bar states only what is true by construction, and the testimonial section
 was replaced with content that stands on its own. When real reviews exist, paste
-the block from `REVIEWS-TEMPLATE.html`.
+the block from `REVIEWS-TEMPLATE.txt`.
 
 ---
 

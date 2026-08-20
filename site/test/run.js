@@ -364,6 +364,109 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
     await dl.close();
   }
 
+  console.log('\nSite structure');
+  {
+    const fs = require('fs');
+    const root = path.resolve(__dirname, '..');
+
+    // Every publishable page on disk.
+    const onDisk = [];
+    (function walk(d) {
+      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        if (e.name.startsWith('.') || e.name === 'test' || e.name === 'node_modules') continue;
+        const f = path.join(d, e.name);
+        if (e.isDirectory()) walk(f);
+        else if (e.name.endsWith('.html') && !e.name.startsWith('_'))
+          onDisk.push(path.relative(root, f));
+      }
+    })(root);
+
+    // Crawl outward from the homepage.
+    const seen = new Set(), broken = [], queue = ['index.html'];
+    while (queue.length) {
+      const rel = queue.shift();
+      if (seen.has(rel)) continue;
+      seen.add(rel);
+      const abs = path.join(root, rel);
+      if (!fs.existsSync(abs)) continue;
+      const html = fs.readFileSync(abs, 'utf8');
+      for (const m of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
+        const t = m[1];
+        if (/^(https?:|mailto:|tel:|data:|#)/.test(t)) continue;
+        const clean = t.split('#')[0].split('?')[0];
+        if (!clean) continue;
+        const target = path.resolve(path.dirname(abs), clean);
+        if (!fs.existsSync(target)) { broken.push(rel + ' -> ' + t); continue; }
+        const r = path.relative(root, target);
+        if (r.endsWith('.html')) queue.push(r);
+      }
+    }
+
+    check('no broken links anywhere on the site', broken.join(', ') || 'none', 'none');
+
+    // 404 is served by the host, not linked to — everything else must be reachable.
+    const orphans = onDisk.filter(p => !seen.has(p) && p !== '404.html');
+    check('no orphan pages', orphans.join(', ') || 'none', 'none');
+
+    // No stray templates or snippets sitting in the deploy root as servable pages.
+    const strays = onDisk.filter(p => /template|snippet|example|draft/i.test(p));
+    check('no template files servable as pages', strays.join(', ') || 'none', 'none');
+
+    // Every page needs the nav, a way home, and the regulatory risk warning.
+    let missing = [];
+    for (const rel of onDisk) {
+      const html = fs.readFileSync(path.join(root, rel), 'utf8');
+      if (!/class="nav__list"/.test(html)) missing.push(rel + ':nav');
+      if (!/may be repossessed/.test(html)) missing.push(rel + ':risk-warning');
+      if (!/site-footer/.test(html)) missing.push(rel + ':footer');
+      if (rel !== 'index.html' && !/href="(\.\.\/)?index\.html"/.test(html))
+        missing.push(rel + ':home-link');
+    }
+    check('every page has nav, footer, home link and risk warning',
+      missing.join(', ') || 'none', 'none');
+
+    // Sitemap must list every indexable page.
+    const sm = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+    const notListed = onDisk.filter(p => p !== '404.html').filter(p => {
+      const url = p === 'index.html' ? '/' : (p === 'guides/index.html' ? '/guides/' : '/' + p);
+      return !sm.includes(url + '<');
+    });
+    check('sitemap lists every indexable page', notListed.join(', ') || 'none', 'none');
+    checkTrue('404 is excluded from the sitemap', !sm.includes('404.html'));
+  }
+
+  console.log('\nMobile');
+  {
+    const PAGES = ['index.html', 'privacy.html', '404.html', 'guides/index.html',
+      'guides/how-much-deposit.html', 'guides/when-to-remortgage.html',
+      'guides/self-employed-mortgages.html'];
+    for (const rel of PAGES) {
+      const mp = await browser.newPage({ viewport: { width: 320, height: 844 }, isMobile: true });
+      await mp.goto('file://' + path.resolve(__dirname, '..', rel), { waitUntil: 'networkidle' });
+      const over = await mp.evaluate(() =>
+        document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      check(`${rel} fits a 320px phone`, over, false);
+      check(`${rel} shows the mobile nav toggle`, await mp.isVisible('#nav-toggle'), true);
+
+      // WCAG 2.5.8 (AA) wants 24x24, with an explicit exemption for links
+      // sitting inside a sentence.
+      const tiny = await mp.evaluate(() => {
+        const out = [];
+        document.querySelectorAll('a, button, select, input[type=checkbox]').forEach(el => {
+          const r = el.getBoundingClientRect();
+          if (!r.width || !r.height) return;
+          if (el.closest('[hidden]') || el.closest('.hp-field')) return;
+          const inline = el.closest('p, li, figcaption, blockquote, .legal, .disclaimer');
+          if (inline) return;                       // exempt: inline in text
+          if (r.height < 24 || r.width < 24) out.push(el.className || el.tagName);
+        });
+        return out;
+      });
+      check(`${rel} tap targets meet 24px`, tiny.join(',') || 'none', 'none');
+      await mp.close();
+    }
+  }
+
   console.log('\nOther pages');
   for (const f of ['privacy.html', '404.html']) {
     const pg = await browser.newPage();
