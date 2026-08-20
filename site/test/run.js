@@ -373,7 +373,7 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
     const onDisk = [];
     (function walk(d) {
       for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-        if (e.name.startsWith('.') || e.name === 'test' || e.name === 'node_modules') continue;
+        if (e.name.startsWith('.') || e.name === 'test' || e.name === 'dist' || e.name === 'node_modules') continue;
         const f = path.join(d, e.name);
         if (e.isDirectory()) walk(f);
         else if (e.name.endsWith('.html') && !e.name.startsWith('_'))
@@ -559,6 +559,67 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
     // Colour system: no hex or rgb literals in the markup.
     const inlineColour = [...new Set((all.match(/style="[^"]*(?:#[0-9a-fA-F]{3,6}|rgba?\()[^"]*"/g) || []))];
     check('no hardcoded colours in markup', inlineColour.join(' | ') || 'none', 'none');
+  }
+
+  console.log('\nElementor widgets');
+  {
+    const fs = require('fs');
+    const { execFileSync } = require('child_process');
+    const root = path.resolve(__dirname, '..');
+    execFileSync('node', [path.join(root, 'build-elementor.js')], { cwd: root });
+
+    const files = ['elementor-calculators.html', 'elementor-enquiry-form.html',
+      'elementor-rate-reminder.html', 'elementor-everything.html'];
+    for (const f of files) {
+      const html = fs.readFileSync(path.join(root, 'dist', f), 'utf8');
+      checkTrue(`${f} has no page-level tags`,
+        !/<(?:html|head|body)\b/i.test(html));
+      const css = (html.match(/<style>\n([\s\S]*?)\n<\/style>/) || [])[1] || '';
+      const unscoped = css.split('\n').filter(l =>
+        /^[a-zA-Z\[:*][^{]*\{/.test(l.trim()) &&
+        !l.trim().startsWith('.mfw') && !l.trim().startsWith('@'));
+      check(`${f} CSS is fully scoped`, unscoped.length, 0);
+      checkTrue(`${f} puts the tokens on the wrapper`, /\.mfw \{[^}]*--bg-raised/.test(css));
+    }
+
+    // The widget must survive a theme that fights it, and must not leak out.
+    const hostile = `<!doctype html><html><head><meta charset="utf-8"><style>
+      body{font-family:Georgia,serif;background:#fdf6e3;color:#5b4636}
+      *{box-sizing:content-box}
+      h1,h2,h3{font-family:"Times New Roman",serif;color:#8b0000;text-transform:uppercase}
+      button,input,select,textarea{font-family:cursive !important;border:4px dashed #8b0000}
+      a{color:#8b0000 !important}
+      .btn{all:unset}.card{background:hotpink !important}
+    </style></head><body>
+      <h1 id="theme-h">Theme heading</h1>
+      <input id="mf-price" value="999999" style="display:none">
+      ` + fs.readFileSync(path.join(root, 'dist', 'elementor-calculators.html'), 'utf8') +
+      `</body></html>`;
+    fs.writeFileSync('/tmp/mf-hostile.html', hostile);
+
+    const hp = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+    const hErrs = [];
+    hp.on('pageerror', e => hErrs.push(e.message));
+    await hp.goto('file:///tmp/mf-hostile.html', { waitUntil: 'domcontentloaded' });
+    await hp.waitForTimeout(400);
+
+    check('widget calculates inside a hostile theme',
+      await hp.textContent('.mfw #mf-out-payment'), gbp2.format(payment(225000, 4.5, 25)));
+    await hp.fill('.mfw #mf-price', '400000');
+    await hp.fill('.mfw #mf-deposit', '80000');
+    await hp.waitForTimeout(80);
+    check('widget reacts to input inside a hostile theme',
+      await hp.textContent('.mfw #mf-out-payment'), gbp2.format(payment(320000, 4.5, 25)));
+    check("theme's colliding #mf-price is untouched",
+      await hp.$eval('body > input#mf-price', e => e.value), '999999');
+    check('theme heading keeps its own styling',
+      await hp.$eval('#theme-h', e => getComputedStyle(e).textTransform), 'uppercase');
+    check('widget heading is not hijacked by the theme',
+      await hp.$eval('.mfw h2', e => getComputedStyle(e).textTransform), 'none');
+    check('widget form controls keep their font',
+      await hp.$eval('.mfw #mf-price', e => getComputedStyle(e).fontFamily.split(',')[0]), 'Poppins');
+    check('no widget script errors in a hostile theme', hErrs.length, 0);
+    await hp.close();
   }
 
   console.log('\nOther pages');

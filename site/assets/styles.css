@@ -1,3 +1,20 @@
+/* Poppins, self-hosted.
+   Served from our own origin rather than Google Fonts: it removes a
+   third-party request (the visitor's IP never reaches Google, which matters
+   for a firm publishing a privacy notice), drops a render-blocking
+   cross-origin round trip, and keeps the site working offline.
+   Latin subset only — 38 KB for all five weights. */
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/poppins-400.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("fonts/poppins-500.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("fonts/poppins-600.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("fonts/poppins-700.woff2") format("woff2"); }
+@font-face { font-family: "Poppins"; font-style: normal; font-weight: 800; font-display: swap;
+  src: url("fonts/poppins-800.woff2") format("woff2"); }
+
 /* Mortgage Fixer — design system
    Tokens first, then layout, then components. Light + dark, no external deps. */
 
@@ -47,7 +64,7 @@
 
   --radius-sm: 6px; --radius: 12px; --radius-lg: 20px; --radius-pill: 999px;
   --wrap: 1140px;
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  --font: "Poppins", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
   --font-num: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 }
@@ -108,13 +125,13 @@ body {
   margin: 0;
   font-family: var(--font);
   font-size: var(--step-0);
-  line-height: 1.65;
+  line-height: 1.7;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, h4 { line-height: 1.15; margin: 0 0 var(--sp-4); letter-spacing: -.02em; font-weight: 700; }
-h1 { font-size: var(--step-4); letter-spacing: -.03em; }
+h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 var(--sp-4); letter-spacing: -.015em; font-weight: 700; }
+h1 { font-size: var(--step-4); letter-spacing: -.025em; }
 h2 { font-size: var(--step-3); }
 h3 { font-size: var(--step-1); }
 p  { margin: 0 0 var(--sp-4); }
@@ -153,7 +170,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
-  font: inherit; font-weight: 650; line-height: 1.2;
+  font: inherit; font-weight: 600; line-height: 1.2;
   padding: .85em 1.6em; border-radius: var(--radius-pill);
   border: 2px solid transparent; cursor: pointer; text-decoration: none;
   transition: transform .12s ease, box-shadow .18s ease, background-color .18s ease;
@@ -275,7 +292,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   display: grid; place-items: center;
   background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);
 }
-.card__link { display: inline-flex; align-items: center; gap: var(--sp-2); font-weight: 650; text-decoration: none; margin-top: var(--sp-3); }
+.card__link { display: inline-flex; align-items: center; gap: var(--sp-2); font-weight: 600; text-decoration: none; margin-top: var(--sp-3); }
 .card__link:hover { gap: var(--sp-3); }
 
 /* ---------- Steps ---------- */
@@ -313,18 +330,18 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .tabs::-webkit-scrollbar { height: 3px; }
 .tabs::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 .tab {
-  font: inherit; font-weight: 650; cursor: pointer; flex: none; white-space: nowrap;
+  font: inherit; font-weight: 600; cursor: pointer; flex: none; white-space: nowrap;
   background: none; border: 0; border-bottom: 3px solid transparent;
   padding: var(--sp-3) var(--sp-4); color: var(--text-muted); margin-bottom: -1px;
 }
 .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .field { margin-bottom: var(--sp-5); }
-.field > label, .field > .field__label { display: block; font-weight: 650; margin-bottom: var(--sp-2); font-size: .95rem; }
+.field > label, .field > .field__label { display: block; font-weight: 600; margin-bottom: var(--sp-2); font-size: .95rem; }
 .field__hint { font-size: var(--step--1); color: var(--text-muted); margin-top: var(--sp-2); }
 .input-affix { display: flex; align-items: center; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg); overflow: hidden; }
 .input-affix:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--accent); }
 .input-affix__prefix, .input-affix__suffix {
-  padding: 0 var(--sp-3); color: var(--text-muted); font-weight: 650; flex: none;
+  padding: 0 var(--sp-3); color: var(--text-muted); font-weight: 600; flex: none;
   background: var(--bg-subtle); align-self: stretch; display: grid; place-items: center;
 }
 input[type="number"], input[type="text"], input[type="email"], input[type="tel"],
@@ -371,7 +388,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: var(
 .faq details { border-bottom: 1px solid var(--border); }
 .faq summary {
   cursor: pointer; list-style: none; padding: var(--sp-5) var(--sp-6) var(--sp-5) 0;
-  font-weight: 650; font-size: var(--step-1); position: relative; display: block;
+  font-weight: 600; font-size: var(--step-1); position: relative; display: block;
 }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after {
@@ -390,7 +407,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: var(
 .contact__aside ul { list-style: none; margin: var(--sp-6) 0 0; padding: 0; display: grid; gap: var(--sp-5); }
 .contact__aside li { display: flex; gap: var(--sp-4); align-items: flex-start; }
 .contact__aside .card__icon { margin-bottom: 0; width: 42px; height: 42px; flex: none; }
-.contact__aside a { font-weight: 650; }
+.contact__aside a { font-weight: 600; }
 .form-status { border-radius: var(--radius); padding: var(--sp-4); margin-bottom: var(--sp-5); font-weight: 600; display: none; }
 .form-status[data-state="error"] { display: block; background: color-mix(in srgb, #c0392b 12%, transparent); color: #a5281a; border: 1px solid color-mix(in srgb, #c0392b 40%, transparent); }
 .form-status[data-state="success"] { display: block; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
@@ -558,7 +575,7 @@ section[id], [id="top"] { scroll-margin-top: 88px; }
 .reminder__form > div > label { min-height: 2.4em; display: flex; align-items: flex-end; }
 .reminder__form .btn { width: 100%; }
 @media (max-width: 719px) { .reminder__form > div > label { min-height: 0; } }
-.reminder__form label { display: block; font-size: var(--step--1); font-weight: 650; color: #fff; margin-bottom: var(--sp-2); }
+.reminder__form label { display: block; font-size: var(--step--1); font-weight: 600; color: #fff; margin-bottom: var(--sp-2); }
 .reminder__form input { background: rgba(255,255,255,.96); border-color: transparent; color: #14213a; }
 .reminder__note { font-size: var(--step--1); color: var(--text-inverse-muted); margin: var(--sp-4) 0 0; }
 .reminder .form-status { margin: var(--sp-4) 0 0; }

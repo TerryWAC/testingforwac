@@ -4,3 +4,7 @@
 # The repo root ignores `config.json` (unanchored, for the Deadlock app's
 # runtime config). This one is a committed template, so re-include it.
 !config.json
+
+# Elementor paste-blocks are build output from build-elementor.js.
+# Regenerate with `node build-elementor.js`; do not deploy as site pages.
+dist/

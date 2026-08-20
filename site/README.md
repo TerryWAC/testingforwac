@@ -48,15 +48,65 @@ array in `test/run.js`.
 Content is general information about how UK mortgages work, not advice, and each
 page says so. Keep anything rate- or threshold-specific phrased so it stays true.
 
+## WordPress / Elementor
+
+```bash
+node build-elementor.js
+```
+
+Writes paste-ready blocks to `dist/`. Drop any one into an Elementor **HTML**
+widget — no `<html>`/`<head>`/`<body>`, all CSS and JS inline, nothing loaded
+from this repo.
+
+| File | What it contains |
+|---|---|
+| `elementor-calculators.html` | All three calculators |
+| `elementor-enquiry-form.html` | The 3-step qualifying form |
+| `elementor-rate-reminder.html` | The rate-expiry capture |
+| `elementor-everything.html` | All of the above |
+
+Build the static parts (hero, service cards, FAQ) with Elementor's own widgets —
+these blocks are for the interactive pieces Elementor can't do natively.
+
+**How it survives a theme.** Every CSS selector is prefixed with `.mfw`, and
+`:root` / `html` / `body` are rewritten to `.mfw`, so the design tokens live on
+the wrapper and nothing escapes into the page. The JS runs in a closure where
+`document` is shadowed by a shim rooted at the widget, so an element with the
+same id elsewhere on the page is invisible to it. A defensive reset re-asserts
+font, heading colour, borders and link colour with `!important`, because themes
+routinely force those.
+
+This is tested, not assumed: the suite builds the widgets, checks every selector
+is scoped, then loads one inside a deliberately hostile theme (Georgia serif,
+`content-box`, `all: unset` on buttons, `!important` on fonts and links, and a
+colliding `#mf-price`) and verifies the calculator still computes, the theme's
+own element is untouched, and neither side bleeds into the other.
+
+**Fonts.** The blocks load Poppins from Google Fonts. If your site already loads
+Poppins, delete the three `<link>` tags at the top. To avoid the third-party
+request, upload the woff2 files from `assets/fonts/` to your media library and
+swap in an `@font-face` pointing at them.
+
+`dist/` is build output and is gitignored — regenerate it rather than editing it,
+and don't deploy those files as pages of the site.
+
 ## Tests
 
-142 checks covering the calculators, the multi-step form, segment tailoring and
+161 checks covering the calculators, the multi-step form, segment tailoring and
 routing, lead-context capture, the reminder form, keyboard navigation, the no-JS
 fallback, layout at seven widths, the guides, a
 whole-site link crawl (broken links, orphan pages, stray templates), per-page
 navigation and risk-warning checks, sitemap coverage, and every page at 320px
-including touch-target sizing, and a rendered
-contrast sweep of every page in both themes.
+including touch-target sizing, a rendered
+contrast sweep of every page in both themes, and the Elementor widgets inside a
+hostile theme.
+
+### Typography
+
+Poppins, self-hosted from `assets/fonts/` — latin subset, five weights, 38 KB
+total. Self-hosted rather than loaded from Google Fonts so no visitor IP reaches
+a third party, which matters for a site that publishes a privacy notice, and so
+the font is not a render-blocking cross-origin round trip.
 
 ### Colour
 
