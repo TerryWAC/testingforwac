@@ -89,7 +89,7 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
     checkTrue('no unverifiable lender count', !/\[90\+\]/.test(markup));
 
     // Regulatory tokens must stay explicit — they cannot be defaulted away.
-    ['FIRM LEGAL NAME', 'NETWORK NAME', 'FRN', 'COMPANY NUMBER'].forEach(k =>
+    ['FIRM LEGAL NAME', 'NETWORK NAME', 'FRN', 'COMPANY NUMBER', 'FEE WORDING'].forEach(k =>
       checkTrue('"' + k + '" is still required', markup.includes('[' + k + ']')));
 
     // Every optional block names a key that exists.
@@ -465,6 +465,100 @@ const FTB = [{upTo:300000,rate:0},{upTo:500000,rate:.05}];
       check(`${rel} tap targets meet 24px`, tiny.join(',') || 'none', 'none');
       await mp.close();
     }
+  }
+
+  console.log('\nColour contrast (rendered, both themes)');
+  {
+    const SWEEP = `(() => {
+      function parse(c){const m=c.match(/[\\d.]+/g);if(!m)return null;
+        return {r:+m[0],g:+m[1],b:+m[2],a:m[3]===undefined?1:+m[3]};}
+      function lum({r,g,b}){const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
+        return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b);}
+      function over(fg,bg){const a=fg.a;return {r:fg.r*a+bg.r*(1-a),g:fg.g*a+bg.g*(1-a),b:fg.b*a+bg.b*(1-a),a:1};}
+      function bgsOf(el){
+        let n=el;
+        while(n && n!==document.documentElement){
+          const cs=getComputedStyle(n), img=cs.backgroundImage;
+          if(img && img!=='none' && /gradient/.test(img)){
+            const stops=(img.match(/rgba?\\([^)]*\\)/g)||[]).map(parse).filter(c=>c&&c.a>0.5);
+            if(stops.length) return stops;
+          }
+          const c=parse(cs.backgroundColor);
+          if(c && c.a>0.95) return [c];
+          n=n.parentElement;
+        }
+        return [parse(getComputedStyle(document.body).backgroundColor)||{r:255,g:255,b:255,a:1}];
+      }
+      const out=[];
+      document.querySelectorAll('p,a,li,h1,h2,h3,h4,span,button,label,td,th,summary,blockquote,figcaption,legend,small,strong').forEach(el=>{
+        if(!el.textContent.trim()) return;
+        if(el.children.length && !Array.from(el.childNodes).some(n=>n.nodeType===3&&n.textContent.trim())) return;
+        const r=el.getBoundingClientRect(); if(!r.width||!r.height) return;
+        const cs=getComputedStyle(el);
+        if(cs.visibility==='hidden'||cs.display==='none'||+cs.opacity===0) return;
+        const fg=parse(cs.color); if(!fg) return;
+        let ratio=Infinity;
+        for(const bg of bgsOf(el)){
+          const eff=fg.a<1?over(fg,bg):fg;
+          const l1=lum(eff),l2=lum(bg);
+          ratio=Math.min(ratio,(Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05));
+        }
+        const px=parseFloat(cs.fontSize), bold=+cs.fontWeight>=700;
+        const need=(px>=24||(px>=18.66&&bold))?3:4.5;
+        if(ratio<need) out.push(el.tagName.toLowerCase()+'.'+(el.className||'')+' '+ratio.toFixed(2)+':1 need '+need);
+      });
+      return [...new Set(out)];
+    })()`;
+    const PAGES = ['index.html', 'privacy.html', '404.html', 'guides/index.html',
+      'guides/how-much-deposit.html', 'guides/when-to-remortgage.html',
+      'guides/self-employed-mortgages.html'];
+    for (const theme of ['light', 'dark']) {
+      let fails = [];
+      for (const rel of PAGES) {
+        const cp = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await cp.goto('file://' + path.resolve(__dirname, '..', rel), { waitUntil: 'networkidle' });
+        await cp.evaluate(t => document.documentElement.setAttribute('data-theme', t), theme);
+        await cp.waitForTimeout(80);
+        const bad = await cp.evaluate(SWEEP);
+        bad.forEach(x => fails.push(rel + ': ' + x));
+        await cp.close();
+      }
+      check(`${theme} theme meets WCAG AA everywhere`, fails.join(' | ') || 'none', 'none');
+    }
+  }
+
+  console.log('\nClient-facing polish');
+  {
+    const fs = require('fs');
+    const root = path.resolve(__dirname, '..');
+    const pages = ['index.html', 'privacy.html', '404.html', 'guides/index.html',
+      'guides/how-much-deposit.html', 'guides/when-to-remortgage.html',
+      'guides/self-employed-mortgages.html'];
+    const raw = pages.map(p => fs.readFileSync(path.join(root, p), 'utf8')).join('');
+    // JSON-LD and inline scripts use brackets legitimately; scan the visible
+    // markup only.
+    const all = raw.replace(/<script[\s\S]*?<\/script>/g, '');
+
+    // Nav labels must match the section they land on.
+    const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+    let mismatched = [];
+    for (const m of home.matchAll(/<li><a href="#([a-z-]+)">([^<]+)<\/a><\/li>/g)) {
+      if (!home.includes('id="' + m[1] + '"')) mismatched.push(m[2] + ' -> #' + m[1]);
+    }
+    check('every nav link targets a real section', mismatched.join(', ') || 'none', 'none');
+
+    // Bracketed prose that is not a fillable token would ship as visitor text.
+    const brackets = [...new Set((all.match(/\[[^\]]{3,}\]/g) || []))]
+      .filter(b => !/^\[[A-Z][A-Z0-9 _/&-]*\]$/.test(b));
+    check('no bracketed prose outside real tokens', brackets.join(' | ') || 'none', 'none');
+
+    checkTrue('no lorem ipsum', !/lorem ipsum/i.test(all));
+    checkTrue('no TODO or FIXME in shipped markup', !/TODO|FIXME|XXX:/.test(all));
+    checkTrue('no unresolved template syntax', !/\{\{|\$\{/.test(all));
+
+    // Colour system: no hex or rgb literals in the markup.
+    const inlineColour = [...new Set((all.match(/style="[^"]*(?:#[0-9a-fA-F]{3,6}|rgba?\()[^"]*"/g) || []))];
+    check('no hardcoded colours in markup', inlineColour.join(' | ') || 'none', 'none');
   }
 
   console.log('\nOther pages');

@@ -12,9 +12,9 @@ automatically — see **[Fastest route](#fastest-route)** at the bottom.
 
 ---
 
-## 1. Blocks launch — four regulatory details
+## 1. Blocks launch — five regulatory details
 
-**These four are the only things standing between the site and going live.**
+**These five are the only things standing between the site and going live.**
 They cannot be guessed, and getting them wrong is an FCA problem rather than a typo.
 
 | What | Where it goes |
@@ -23,17 +23,17 @@ They cannot be guessed, and getting them wrong is an FCA problem rather than a t
 | **Network / principal firm** | footer, privacy notice — the firm he's an appointed representative of |
 | **FCA firm reference number (FRN)** | footer, privacy notice — must match the Financial Services Register |
 | **Company number** | footer — required on a business website under the Companies Act |
+| **Fee wording** | footer — the exact position, e.g. "We do not charge a fee for mortgage advice. We are paid a commission by the lender." It must match the FAQ answer |
 
 `./fill-placeholders.sh` refuses to report the site as ready while any of these
 is blank, and names the ones still outstanding.
 
-Two more that aren't tokens, but should be checked before launch:
+One more to check, which isn't a token:
 
-- **The fee wording.** The footer carries a bracketed note where it belongs.
-  Either "no broker fee, paid by lender commission" or "£X payable on offer" —
-  it just has to be accurate and up front.
-- **Whole-of-market or panel?** The site currently says whole of market. If it's
-  a panel, that needs changing, and it must match his Initial Disclosure Document.
+- **Whole-of-market or panel?** The site says whole of market in four places —
+  the hero, the trust bar, the FAQ and the meta description. If the advice is
+  panel-based, all four need changing, and it must match his Initial Disclosure
+  Document.
 
 > Send the footer and privacy notice to his network's compliance team. They will
 > usually supply approved wording, which is faster and safer than drafting it.

@@ -10,6 +10,9 @@
   --accent-600: #0f7b6c;
   --accent-500: #12957f;
   --accent-400: #1fb99c;
+  /* Accent text on the navy gradients. --accent-400 measures 4:1 against the
+     lightest stop, which fails AA; this clears it at 5.4:1. */
+  --accent-on-dark: #35d6b8;
   --amber-500: #d98324;
 
   /* Semantic — light */
@@ -179,7 +182,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .site-header__inner { display: flex; align-items: center; gap: var(--sp-5); min-height: 72px; }
 .brand { display: flex; align-items: center; gap: var(--sp-3); font-weight: 800; color: var(--text); text-decoration: none; letter-spacing: -.02em; }
 .brand__mark { width: 38px; height: 38px; flex: none; border-radius: 10px; }
-.brand__name { font-size: 1.06rem; line-height: 1.1; }
+.brand__name { font-size: 1.06rem; line-height: 1.1; white-space: nowrap; }
 .brand__name span { display: block; font-size: .72rem; font-weight: 600; color: var(--text-muted); letter-spacing: .04em; text-transform: uppercase; }
 .nav { margin-left: auto; }
 .nav__list { display: flex; align-items: center; gap: var(--sp-5); list-style: none; margin: 0; padding: 0; }
@@ -235,7 +238,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .hero__grid { position: relative; z-index: 1; display: grid; gap: var(--sp-8); align-items: center; }
 @media (min-width: 940px) { .hero__grid { grid-template-columns: 1.05fr .95fr; gap: var(--sp-7); } }
 .hero h1 { color: #fff; margin-bottom: var(--sp-5); text-wrap: balance; }
-.hero .eyebrow { color: var(--accent-400); }
+.hero .eyebrow { color: var(--accent-on-dark); }
 .hero__lede { font-size: var(--step-1); color: var(--text-inverse-muted); max-width: 52ch; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-6); }
 .hero__reassure {
@@ -243,7 +246,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   list-style: none; padding: 0; font-size: var(--step--1); color: var(--text-inverse-muted);
 }
 .hero__reassure li { display: flex; align-items: center; gap: var(--sp-2); }
-.hero__reassure svg { color: var(--accent-400); flex: none; }
+.hero__reassure svg { color: var(--accent-on-dark); flex: none; }
 
 /* ---------- Trust bar ---------- */
 .trustbar { background: var(--bg-subtle); border-bottom: 1px solid var(--border); padding-block: var(--sp-5); }

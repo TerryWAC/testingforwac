@@ -1,22 +1,17 @@
 {
-  "_comment": "Fill these in, then run ./fill-placeholders.sh. Blank values are fine — any block marked data-needs simply disappears from the page rather than showing a placeholder, so the site stays publishable while details are outstanding. YOUR-DOMAIN takes the full host, no https:// and no trailing slash.",
-
+  "_comment": "Fill these in, then run ./fill-placeholders.sh. Blank values are fine \u2014 any block marked data-needs simply disappears from the page rather than showing a placeholder, so the site stays publishable while details are outstanding. YOUR-DOMAIN takes the full host, no https:// and no trailing slash.",
   "_prefilled": "YOUR-DOMAIN and DATE are set to the current live address and today's date. Change YOUR-DOMAIN when a proper domain is bought.",
-
   "YOUR-DOMAIN": "mortgage-fixer-sam.terry-blackburn.chatgpt.site",
   "DATE": "19 August 2026",
-
   "_optional": "Blank = the block is removed from the page. Add them whenever Sam sends them.",
-
   "PHONE NUMBER": "",
   "PHONE-E164": "",
   "EMAIL ADDRESS": "",
   "ADDRESS": "",
-
-  "_required": "REGULATORY. The site should not go live until these four are filled — fill-placeholders.sh will keep telling you so.",
-
+  "_required": "REGULATORY. The site should not go live until these four are filled \u2014 fill-placeholders.sh will keep telling you so.",
   "FIRM LEGAL NAME": "",
   "NETWORK NAME": "",
   "FRN": "",
-  "COMPANY NUMBER": ""
+  "COMPANY NUMBER": "",
+  "FEE WORDING": ""
 }

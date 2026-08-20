@@ -50,12 +50,23 @@ page says so. Keep anything rate- or threshold-specific phrased so it stays true
 
 ## Tests
 
-133 checks covering the calculators, the multi-step form, segment tailoring and
+142 checks covering the calculators, the multi-step form, segment tailoring and
 routing, lead-context capture, the reminder form, keyboard navigation, the no-JS
 fallback, layout at seven widths, the guides, a
 whole-site link crawl (broken links, orphan pages, stray templates), per-page
 navigation and risk-warning checks, sitemap coverage, and every page at 320px
-including touch-target sizing.
+including touch-target sizing, and a rendered
+contrast sweep of every page in both themes.
+
+### Colour
+
+Everything comes from tokens in `assets/styles.css` — the markup contains no hex
+or `rgb()` literals, and a test enforces that. Contrast is measured on rendered
+pixels rather than assumed: the sweep walks every text element on every page in
+both themes, resolves the real background (including gradient stops, taking the
+worst one), and fails below WCAG AA. `--accent-on-dark` exists because
+`--accent-400` clears AA against the dark end of the hero gradient but only
+reaches 4:1 against the light end.
 
 ```bash
 cd site/test && npm install && npm test
